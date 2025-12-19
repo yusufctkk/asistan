@@ -1,15 +1,18 @@
+
 {
-  "name": "Elysian Disiplin",
+  "name": "Elysian v5",
   "short_name": "Elysian",
-  "start_url": "/asistan/",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#0a0c10",
   "theme_color": "#0a0c10",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/4345/4345573.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
