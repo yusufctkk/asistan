@@ -1,32 +1,63 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0a0c10">
     <title>Elysian - Disiplin Protokolü</title>
+    <!-- CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0a0c10; color: #e2e8f0; margin: 0; height: 100vh; display: flex; flex-direction: column; }
-        .elysian-glass { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(12px); }
-        .active-pulse { animation: pulse-blue 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse-blue { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        #root { flex: 1; display: flex; flex-direction: column; }
+        :root { --bg: #0a0c10; --card: rgba(255, 255, 255, 0.03); }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: #e2e8f0; 
+            margin: 0; 
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #root { min-height: 100vh; display: flex; flex-direction: column; }
+        .elysian-glass { 
+            background: var(--card); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
+        @keyframes pulse-ring { 0% { transform: scale(.8); opacity: 0.5; } 100% { transform: scale(1.2); opacity: 0; } }
+        .active-ring::before {
+            content: ''; position: absolute; inset: -4px; border: 2px solid #2563eb; 
+            border-radius: inherit; animation: pulse-ring 2s infinite;
+        }
+        /* Mobile scroll fix */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "recharts": "https://esm.sh/recharts@^3.6.0",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
 </head>
 <body>
-    <div id="root">
-        <div style="color: white; text-align: center; margin-top: 50px;">Sistem Yükleniyor... (Eğer bu ekran gitmiyorsa sayfayı yenileyin)</div>
-    </div>
+    <div id="root"></div>
 
     <script type="module">
-        // Sürümleri eşitledim ve stabil CDN'lere çektim
-        import React, { useState, useEffect } from 'https://esm.sh/react@18.2.0';
+        import React, { useState, useEffect, useRef } from 'https://esm.sh/react@18.2.0';
         import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
         import { 
-          Target, Plus, CheckCircle, Edit3, ShieldCheck, Clock, Trash2, X, Flame, User
+          Zap, Brain, Clock, Plus, CheckCircle, Bell, BellOff, 
+          X, Edit3, Trash2, ShieldCheck, Target, Flame, User, LayoutDashboard, ArrowRight
         } from 'https://esm.sh/lucide-react@0.263.1';
 
         const TaskCategory = {
@@ -38,106 +69,154 @@
         };
 
         const App = () => {
+          // --- PERSISTENCE ---
           const [tasks, setTasks] = useState(() => {
-            const saved = localStorage.getItem('elysian_tasks');
-            return saved ? JSON.parse(saved) : [];
+            try {
+              const saved = localStorage.getItem('elysian_v5_tasks');
+              return saved ? JSON.parse(saved) : [];
+            } catch (e) { return []; }
           });
           
           const [isModalOpen, setIsModalOpen] = useState(false);
           const [editTask, setEditTask] = useState(null);
           const [currentTime, setCurrentTime] = useState(new Date());
-          const [notifEnabled, setNotifEnabled] = useState(Notification.permission === 'granted');
-
+          const [notifEnabled, setNotifEnabled] = useState(false);
+          
+          // Form State
           const [formTitle, setFormTitle] = useState('');
           const [formTime, setFormTime] = useState('09:00');
           const [formCat, setFormCat] = useState(TaskCategory.DEEP_WORK);
 
           useEffect(() => {
-            localStorage.setItem('elysian_tasks', JSON.stringify(tasks));
+            localStorage.setItem('elysian_v5_tasks', JSON.stringify(tasks));
           }, [tasks]);
 
+          useEffect(() => {
+            setNotifEnabled(Notification.permission === 'granted');
+          }, []);
+
+          // --- PRAYER TIMES ---
+          const prayerTimes = { İmsak: "05:32", Öğle: "13:14", İkindi: "16:48", Akşam: "19:22", Yatsı: "20:42" };
+
+          // --- NOTIFICATION ENGINE ---
           const triggerNotif = (title, body) => {
             if (Notification.permission === 'granted') {
-              new Notification(title, { body });
+              new Notification(title, { body, icon: 'https://cdn-icons-png.flaticon.com/512/4345/4345573.png' });
             }
           };
 
           const activateDiscipline = async () => {
             const permission = await Notification.requestPermission();
             setNotifEnabled(permission === 'granted');
-            if(permission === 'granted') triggerNotif("PROTOKOL AKTİF", "Sistem nöral ağlarına bağlandı.");
+            if(permission === 'granted') triggerNotif("PROTOKOL AKTİF", "Disiplin sistemi nöral ağlarına bağlandı.");
           };
+
+          // --- TIMERS ---
+          useEffect(() => {
+            const interval = setInterval(() => {
+              const now = new Date();
+              setCurrentTime(now);
+              const timeStr = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+              
+              // 45 Dakikalık Sarsıcı Hatırlatıcı (Pattern Interrupt)
+              if (now.getMinutes() === 0 || now.getMinutes() === 45) {
+                if(now.getSeconds() === 0) triggerNotif("SİSTEM KONTROLÜ", "Zaman akıyor. Şu an hedefin için ne yapıyorsun?");
+              }
+
+              // Görev Hatırlatıcı
+              tasks.forEach(t => {
+                if (t.status === 'todo' && t.startTime === timeStr && t.day === getDayName(now)) {
+                  if(now.getSeconds() === 0) triggerNotif("GÖREV VAKTİ", `${t.title} için harekete geç!`);
+                }
+              });
+            }, 1000);
+            return () => clearInterval(interval);
+          }, [tasks]);
 
           const getDayName = (date) => ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'][date.getDay()];
 
+          // --- ACTIONS ---
           const handleSaveTask = () => {
-            if (!formTitle) return;
+            if (!formTitle.trim()) return;
             if (editTask) {
               setTasks(tasks.map(t => t.id === editTask.id ? { ...t, title: formTitle, startTime: formTime, category: formCat } : t));
             } else {
-              const newTask = {
-                id: Math.random().toString(36).substr(2, 9),
+              setTasks([...tasks, {
+                id: Date.now().toString(),
                 title: formTitle,
                 startTime: formTime,
                 category: formCat,
                 day: getDayName(currentTime),
                 status: 'todo',
                 impactScore: 25
-              };
-              setTasks([...tasks, newTask]);
+              }]);
             }
             closeModal();
           };
 
-          const closeModal = () => { setIsModalOpen(false); setEditTask(null); setFormTitle(''); };
+          const closeModal = () => { setIsModalOpen(false); setEditTask(null); setFormTitle(''); setFormTime('09:00'); };
           const openEdit = (task) => { setEditTask(task); setFormTitle(task.title); setFormTime(task.startTime); setFormCat(task.category); setIsModalOpen(true); };
-          const deleteTask = (id) => setTasks(tasks.filter(t => t.id !== id));
+          const deleteTask = (id) => { if(confirm('Silmek istediğine emin misin?')) setTasks(tasks.filter(t => t.id !== id)); };
           const completeTask = (id) => setTasks(tasks.map(t => t.id === id ? { ...t, status: 'done' } : t));
 
           const dailyTasks = tasks.filter(t => t.day === getDayName(currentTime)).sort((a,b) => a.startTime.localeCompare(b.startTime));
           const totalScore = tasks.filter(t => t.status === 'done').reduce((acc, t) => acc + t.impactScore, 0);
 
-          return React.createElement('div', { className: 'max-w-xl mx-auto min-h-screen p-4 pb-32 space-y-6' },
-            React.createElement('header', { className: 'flex justify-between items-end pt-4' },
+          return React.createElement('div', { className: 'max-w-xl mx-auto w-full p-4 pb-32 space-y-6' },
+            // Header
+            React.createElement('header', { className: 'flex justify-between items-center pt-6' },
               React.createElement('div', null,
-                React.createElement('h1', { className: 'text-3xl font-black italic tracking-tighter' }, 'ELYSİAN'),
-                React.createElement('p', { className: 'text-[10px] font-bold text-blue-500 uppercase tracking-widest' }, 'BuiXel Digital Disiplin')
+                React.createElement('h1', { className: 'text-2xl font-black italic tracking-tighter text-white' }, 'ELYSİAN'),
+                React.createElement('p', { className: 'text-[9px] font-bold text-blue-500 uppercase tracking-widest' }, 'PROXIMA DISCIPLINE')
               ),
               React.createElement('button', { 
                 onClick: activateDiscipline,
-                className: `px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all flex items-center gap-2 ${notifEnabled ? 'bg-emerald-500/10 text-emerald-500' : 'bg-blue-600 text-white active-pulse'}`
+                className: `relative px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all flex items-center gap-2 ${notifEnabled ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-blue-600 text-white active-ring'}`
               }, 
                 React.createElement(ShieldCheck, { size: 14 }),
-                notifEnabled ? 'Sistem Aktif' : 'Disiplini Aktif Et'
+                notifEnabled ? 'AKTİF' : 'DİSİPLİNİ AÇ'
               )
             ),
 
-            React.createElement('div', { className: 'elysian-glass rounded-[32px] p-6 flex justify-between items-center' },
+            // Score HUD
+            React.createElement('div', { className: 'elysian-glass rounded-[32px] p-6 flex justify-between items-center shadow-2xl' },
               React.createElement('div', null,
-                React.createElement('p', { className: 'text-[10px] font-bold text-slate-500 uppercase' }, 'Toplam İrade Puanı'),
-                React.createElement('p', { className: 'text-4xl font-black' }, totalScore)
+                React.createElement('p', { className: 'text-[10px] font-bold text-slate-500 uppercase' }, 'İRADE PUANI'),
+                React.createElement('p', { className: 'text-4xl font-black text-white' }, totalScore)
               ),
               React.createElement('div', { className: 'text-right' },
                 React.createElement('p', { className: 'text-[10px] font-bold text-slate-500 uppercase' }, getDayName(currentTime)),
-                React.createElement('p', { className: 'text-lg font-bold' }, currentTime.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }))
+                React.createElement('p', { className: 'text-lg font-bold text-white' }, currentTime.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }))
               )
             ),
 
+            // Prayer Widget
+            React.createElement('div', { className: 'grid grid-cols-5 gap-2' },
+              Object.entries(prayerTimes).map(([n, t]) => 
+                React.createElement('div', { key: n, className: 'elysian-glass py-2 rounded-xl text-center' },
+                  React.createElement('p', { className: 'text-[7px] font-black uppercase opacity-40' }, n),
+                  React.createElement('p', { className: 'text-[10px] font-bold text-white' }, t)
+                )
+              )
+            ),
+
+            // Tasks Section
             React.createElement('section', { className: 'space-y-4' },
               React.createElement('div', { className: 'flex justify-between items-center px-2' },
-                React.createElement('h2', { className: 'text-sm font-black uppercase tracking-widest text-slate-400' }, 'Günlük Akış'),
-                React.createElement('button', { onClick: () => setIsModalOpen(true), className: 'p-2 bg-blue-600 rounded-full' }, React.createElement(Plus, { size: 20 }))
+                React.createElement('h2', { className: 'text-xs font-black uppercase tracking-widest text-slate-500' }, 'GÜNLÜK PROTOKOLLER'),
+                React.createElement('button', { onClick: () => setIsModalOpen(true), className: 'w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-600/30' }, React.createElement(Plus, { size: 20, color: 'white' }))
               ),
+              dailyTasks.length === 0 ? React.createElement('div', { className: 'py-20 text-center opacity-20 italic text-sm' }, 'Henüz bir görev eklenmedi.') :
               dailyTasks.map(t => 
-                React.createElement('div', { key: t.id, className: `elysian-glass rounded-[24px] p-5 transition-all ${t.status === 'done' ? 'opacity-20 scale-95' : ''}` },
+                React.createElement('div', { key: t.id, className: `elysian-glass rounded-[28px] p-5 transition-all active:scale-[0.98] ${t.status === 'done' ? 'opacity-20 grayscale scale-95' : ''}` },
                   React.createElement('div', { className: 'flex justify-between items-start' },
                     React.createElement('div', { className: 'space-y-1' },
                       React.createElement('p', { className: 'text-[8px] font-black uppercase text-blue-400' }, t.category),
-                      React.createElement('h3', { className: 'text-lg font-bold' }, t.title)
+                      React.createElement('h3', { className: 'text-lg font-bold text-white leading-tight' }, t.title)
                     ),
                     React.createElement('div', { className: 'flex gap-2' },
-                      t.status === 'todo' && React.createElement('button', { onClick: () => completeTask(t.id), className: 'p-2 bg-emerald-500/10 text-emerald-500 rounded-lg' }, React.createElement(CheckCircle, { size: 18 })),
-                      React.createElement('button', { onClick: () => openEdit(t), className: 'p-2 bg-white/5 rounded-lg text-slate-400' }, React.createElement(Edit3, { size: 18 }))
+                      t.status === 'todo' && React.createElement('button', { onClick: () => completeTask(t.id), className: 'w-10 h-10 bg-emerald-500/10 text-emerald-500 rounded-xl flex items-center justify-center' }, React.createElement(CheckCircle, { size: 20 })),
+                      React.createElement('button', { onClick: () => openEdit(t), className: 'w-10 h-10 bg-white/5 rounded-xl text-slate-400 flex items-center justify-center' }, React.createElement(Edit3, { size: 18 }))
                     )
                   ),
                   React.createElement('div', { className: 'mt-4 flex items-center gap-4 text-[10px] font-bold text-slate-500' },
@@ -147,19 +226,37 @@
               )
             ),
 
-            isModalOpen && React.createElement('div', { className: 'fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md' },
-              React.createElement('div', { className: 'bg-[#0d1117] w-full max-w-sm rounded-[32px] p-8 border border-white/10 space-y-6' },
-                React.createElement('h2', { className: 'text-xl font-black' }, editTask ? 'GÜNCELLE' : 'YENİ PROTOKOL'),
-                React.createElement('input', { type: 'text', placeholder: 'Görev adı...', className: 'w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white', value: formTitle, onChange: e => setFormTitle(e.target.value) }),
+            // Modal
+            isModalOpen && React.createElement('div', { className: 'fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 bg-black/80 backdrop-blur-md' },
+              React.createElement('div', { className: 'bg-[#0d1117] w-full max-w-md rounded-t-[40px] sm:rounded-[40px] p-8 border border-white/10 space-y-6 animate-slide-up shadow-2xl' },
+                React.createElement('div', { className: 'flex justify-between items-center' },
+                  React.createElement('h2', { className: 'text-xl font-black text-white' }, editTask ? 'DÜZENLE' : 'YENİ GÖREV'),
+                  React.createElement('button', { onClick: closeModal }, React.createElement(X, { size: 24, className: 'text-slate-500' }))
+                ),
+                React.createElement('input', { 
+                  type: 'text', placeholder: 'Görev adı...', 
+                  className: 'w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:ring-1 focus:ring-blue-500',
+                  value: formTitle, onChange: e => setFormTitle(e.target.value), autoFocus: true
+                }),
+                React.createElement('div', { className: 'grid grid-cols-2 gap-4' },
+                  React.createElement('input', { 
+                    type: 'time', className: 'bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none',
+                    value: formTime, onChange: e => setFormTime(e.target.value)
+                  }),
+                  React.createElement('select', { 
+                    className: 'bg-white/5 border border-white/10 rounded-2xl p-4 text-white text-[10px] outline-none font-bold',
+                    value: formCat, onChange: e => setFormCat(e.target.value)
+                  }, Object.values(TaskCategory).map(c => React.createElement('option', { key: c, value: c, className: 'bg-[#0d1117]' }, c)))
+                ),
                 React.createElement('div', { className: 'flex gap-3' },
-                  editTask && React.createElement('button', { onClick: () => { deleteTask(editTask.id); closeModal(); }, className: 'flex-1 bg-red-500/10 text-red-500 py-4 rounded-xl font-bold' }, React.createElement(Trash2, { size: 20 })),
-                  React.createElement('button', { onClick: handleSaveTask, className: 'flex-[2] bg-blue-600 text-white py-4 rounded-xl font-black' }, 'KAYDET'),
-                  React.createElement('button', { onClick: closeModal, className: 'flex-1 bg-white/5 text-white py-4 rounded-xl' }, 'İPTAL')
+                  editTask && React.createElement('button', { onClick: () => { deleteTask(editTask.id); closeModal(); }, className: 'flex-1 bg-red-500/10 text-red-500 py-4 rounded-2xl font-bold flex justify-center items-center' }, React.createElement(Trash2, { size: 20 })),
+                  React.createElement('button', { onClick: handleSaveTask, className: 'flex-[3] bg-blue-600 text-white py-4 rounded-2xl font-black shadow-lg shadow-blue-600/30' }, 'KAYDET')
                 )
               )
             ),
 
-            React.createElement('nav', { className: 'fixed bottom-6 left-1/2 -translate-x-1/2 elysian-glass rounded-full px-8 py-4 flex gap-12 z-50 shadow-2xl' },
+            // Bottom Nav
+            React.createElement('nav', { className: 'fixed bottom-6 left-1/2 -translate-x-1/2 elysian-glass rounded-full px-10 py-4 flex gap-12 z-50 shadow-2xl safe-area-bottom' },
               React.createElement(Target, { className: 'text-blue-500', size: 24 }),
               React.createElement(Flame, { className: 'text-slate-600', size: 24 }),
               React.createElement(User, { className: 'text-slate-600', size: 24 })
@@ -167,11 +264,17 @@
           );
         };
 
-        const root = createRoot(document.getElementById('root'));
-        root.render(React.createElement(App));
+        const rootElement = document.getElementById('root');
+        if (rootElement) {
+          const root = createRoot(rootElement);
+          root.render(React.createElement(App));
+        }
 
+        // SW Register
         if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('sw.js');
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(err => console.error('SW failed', err));
+          });
         }
     </script>
 </body>
