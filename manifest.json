@@ -1,8 +1,7 @@
-
 {
   "name": "Elysian Disiplin",
   "short_name": "Elysian",
-  "start_url": "index.html",
+  "start_url": "/asistan/",
   "display": "standalone",
   "background_color": "#0a0c10",
   "theme_color": "#0a0c10",
