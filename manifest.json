@@ -1,0 +1,15 @@
+{
+  "name": "Disiplin Asistanı",
+  "short_name": "Asistan",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0b0a34",
+  "theme_color": "#c57200",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192/0b0a34/c57200?text=A",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
