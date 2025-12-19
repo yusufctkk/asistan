@@ -1,23 +1,16 @@
-const CACHE_NAME = 'elysian-v5'; // Versiyonu artırdık
+
+const CACHE_NAME = 'elysian-v5';
+const assets = ['./', 'index.html', 'manifest.json'];
 
 self.addEventListener('install', (e) => {
-  self.skipWaiting();
-  e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(['index.html', 'manifest.json']))
-  );
-});
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.filter((cacheName) => cacheName !== CACHE_NAME)
-                  .map((cacheName) => caches.delete(cacheName))
-      );
-    })
-  );
+  e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(assets)));
 });
 
 self.addEventListener('fetch', (e) => {
-  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+  e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
+});
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  e.waitUntil(clients.openWindow('.'));
 });
