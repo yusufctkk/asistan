@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="tr">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>ELYSIAN | Neural Discipline</title>
+    <title>YUSUF | PROTOKOL</title>
     <meta name="theme-color" content="#000000" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="description" content="A high-performance neural discipline protocol.">
+    <meta name="description" content="Yusuf Çetinkaya - Kişisel Gelişim ve Görev Protokolü">
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/72x72/26a1.png">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,58 +30,497 @@
               jakarta: ['"Plus Jakarta Sans"', 'sans-serif'],
               mono: ['"JetBrains Mono"', 'monospace'],
             },
-            colors: {
-              black: '#050505',
-            },
-            animation: {
-              'pulse-slow': 'pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            },
-            spacing: {
-              'safe-top': 'env(safe-area-inset-top)',
-              'safe-bottom': 'env(safe-area-inset-bottom)',
-            }
+            colors: { black: '#050505' },
+            animation: { 'pulse-slow': 'pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite' },
+            spacing: { 'safe-top': 'env(safe-area-inset-top)', 'safe-bottom': 'env(safe-area-inset-bottom)' }
           }
         }
       }
     </script>
+
+    <!-- React & Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
     <style>
-      body {
-        background-color: #000000;
-        overscroll-behavior-y: none;
-        -webkit-tap-highlight-color: transparent;
-      }
-      .no-scrollbar::-webkit-scrollbar {
-          display: none;
-      }
-      .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-      }
+      body { background-color: #000000; overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: #111; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+      
+      /* Glassmorphism helpers */
+      .mask-linear-fade { -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
     </style>
-  <script type="importmap">
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('./sw.js').then(function(registration) {
+            console.log('Neural Core (SW) registered.');
+          }, function(err) {
+            console.log('Neural Core (SW) failed: ', err);
+          });
+        });
+      }
+    </script>
+<script type="importmap">
 {
   "imports": {
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
   }
 }
 </script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('./sw.js').then(function(registration) {
-        console.log('Neural Core (SW) registered with scope: ', registration.scope);
-      }, function(err) {
-        console.log('Neural Core (SW) registration failed: ', err);
-      });
-    });
-  }
-</script>
 </head>
-  <body>
+<body>
     <div id="root"></div>
-    <script type="module" src="./index.tsx"></script>
-  </body>
+
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect, useRef } from 'https://esm.sh/react@18.2.0';
+        import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
+        import { 
+          CheckCircle2, Circle, Clock, Zap, AlertTriangle, Lock, Plus, HelpCircle, 
+          Wind, X, ChevronRight, Layers, BellRing, Trash2, Volume2, VolumeX, 
+          Repeat, Edit2, RotateCcw, BookOpen 
+        } from 'https://esm.sh/lucide-react@0.263.1';
+
+        // --- UTILS & CONSTANTS ---
+        
+        const generateId = () => Math.random().toString(36).substr(2, 9);
+
+        class NeuralAudio {
+          constructor() {
+            this.ctx = null;
+            this.node = null;
+            this.gain = null;
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) this.ctx = new AudioContextClass();
+          }
+          start() {
+            if (!this.ctx) return;
+            const bufferSize = 4096;
+            const whiteNoise = this.ctx.createScriptProcessor(bufferSize, 1, 1);
+            let lastOut = 0;
+            whiteNoise.onaudioprocess = (e) => {
+              const output = e.outputBuffer.getChannelData(0);
+              for (let i = 0; i < bufferSize; i++) {
+                const white = Math.random() * 2 - 1;
+                output[i] = (lastOut + (0.02 * white)) / 1.02;
+                lastOut = output[i];
+                output[i] *= 3.5;
+              }
+            };
+            this.gain = this.ctx.createGain();
+            this.gain.gain.value = 0.15;
+            whiteNoise.connect(this.gain);
+            this.gain.connect(this.ctx.destination);
+            this.node = whiteNoise;
+          }
+          stop() {
+            if (this.node) { this.node.disconnect(); this.node = null; }
+            if (this.gain) { this.gain.disconnect(); this.gain = null; }
+          }
+        }
+
+        const DAYS = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+        
+        const CATEGORIES = [
+          { value: 'INGILIZCE', label: 'İngilizce', color: 'bg-blue-500 border-blue-400 text-blue-100' },
+          { value: 'SPOR', label: 'Spor', color: 'bg-indigo-600 border-indigo-400 text-indigo-100' },
+          { value: 'MUSTERI', label: 'Müşteri', color: 'bg-amber-600 border-amber-400 text-amber-100' },
+          { value: 'OKUMA', label: 'Okuma', color: 'bg-pink-600 border-pink-400 text-pink-100' },
+          { value: 'GELISIM', label: 'Kendini Geliştirme', color: 'bg-fuchsia-600 border-fuchsia-400 text-fuchsia-100' },
+          { value: 'SOSYAL', label: 'Sosyallik', color: 'bg-emerald-600 border-emerald-400 text-emerald-100' },
+          { value: 'NAMAZ', label: 'Namaz', color: 'bg-teal-700 border-teal-500 text-teal-100' },
+          { value: 'DIGER', label: 'Diğer', color: 'bg-gray-700 border-gray-500 text-gray-100' },
+        ];
+
+        const DEFAULT_SCHEDULE = [
+          // PAZARTESİ
+          { id: 'def-1', title: 'İngilizce Ders', day: 'Pazartesi', startTime: '08:30', endTime: '09:30', category: 'INGILIZCE', status: 'PENDING', impact: 80, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          { id: 'def-2', title: 'Omuz & Ön Kol & Triceps', day: 'Pazartesi', startTime: '10:00', endTime: '12:00', category: 'SPOR', status: 'PENDING', impact: 90, canSnooze: false, snoozed: false, createdAt: Date.now() },
+          { id: 'def-3', title: 'Müşteri İşleri / Görüşme', day: 'Pazartesi', startTime: '12:00', endTime: '17:00', category: 'MUSTERI', status: 'PENDING', impact: 100, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          { id: 'def-4', title: 'Bence oku ama film de izleyebilirsin', day: 'Pazartesi', startTime: '17:30', endTime: '19:00', category: 'OKUMA', status: 'PENDING', impact: 60, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          { id: 'def-5', title: 'Bak kendini geliştir ama sosyallik de olabilir', day: 'Pazartesi', startTime: '19:30', endTime: '23:30', category: 'GELISIM', status: 'PENDING', impact: 70, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          // SALI
+          { id: 'def-6', title: 'İngilizce Ders', day: 'Salı', startTime: '08:30', endTime: '09:30', category: 'INGILIZCE', status: 'PENDING', impact: 80, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          { id: 'def-7', title: 'Bacak Günü (Sakın Es Geçme)', day: 'Salı', startTime: '10:00', endTime: '12:00', category: 'SPOR', status: 'PENDING', impact: 95, canSnooze: false, snoozed: false, createdAt: Date.now() },
+          { id: 'def-8', title: 'Müşteri İşleri / Görüşme', day: 'Salı', startTime: '12:00', endTime: '17:00', category: 'MUSTERI', status: 'PENDING', impact: 100, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          { id: 'def-9', title: 'Ben diyeyim okuma sen de dizi izle', day: 'Salı', startTime: '17:30', endTime: '19:00', category: 'OKUMA', status: 'PENDING', impact: 60, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          { id: 'def-10', title: 'Tamam bugün serbestsin', day: 'Salı', startTime: '19:30', endTime: '00:00', category: 'SOSYAL', status: 'PENDING', impact: 50, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          // ÇARŞAMBA
+          { id: 'def-11', title: 'İngilizce Ders', day: 'Çarşamba', startTime: '09:30', endTime: '11:00', category: 'INGILIZCE', status: 'PENDING', impact: 80, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          { id: 'def-12', title: 'Müşteri İşleri / Görüşme', day: 'Çarşamba', startTime: '11:30', endTime: '16:00', category: 'MUSTERI', status: 'PENDING', impact: 100, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          { id: 'def-13', title: 'Bu sefer okuyacan kaçış yok', day: 'Çarşamba', startTime: '16:30', endTime: '19:00', category: 'OKUMA', status: 'PENDING', impact: 70, canSnooze: false, snoozed: false, createdAt: Date.now() },
+          { id: 'def-14', title: 'Bugün de çıkmayıver', day: 'Çarşamba', startTime: '19:00', endTime: '00:00', category: 'GELISIM', status: 'PENDING', impact: 85, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          // PERŞEMBE
+          { id: 'def-15', title: 'İngilizce Ders', day: 'Perşembe', startTime: '08:30', endTime: '09:30', category: 'INGILIZCE', status: 'PENDING', impact: 80, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          { id: 'def-16', title: 'Sırt & Ön Kol Bide Trapez', day: 'Perşembe', startTime: '10:00', endTime: '12:00', category: 'SPOR', status: 'PENDING', impact: 90, canSnooze: false, snoozed: false, createdAt: Date.now() },
+          { id: 'def-17', title: 'Müşteri İşleri / Görüşme', day: 'Perşembe', startTime: '12:00', endTime: '17:00', category: 'MUSTERI', status: 'PENDING', impact: 100, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          { id: 'def-18', title: 'Dizi mi izliyecen okuyacan mı iradene kalmış', day: 'Perşembe', startTime: '17:30', endTime: '19:00', category: 'OKUMA', status: 'PENDING', impact: 60, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          { id: 'def-19', title: 'Çık bi hava al ya da kendini geliştir', day: 'Perşembe', startTime: '19:00', endTime: '00:00', category: 'GELISIM', status: 'PENDING', impact: 70, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          // CUMA
+          { id: 'def-20', title: 'İngilizce Ders', day: 'Cuma', startTime: '09:00', endTime: '10:30', category: 'INGILIZCE', status: 'PENDING', impact: 80, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          { id: 'def-21', title: 'Cuma saatine kadar sarar kendini geliştir', day: 'Cuma', startTime: '10:30', endTime: '12:00', category: 'GELISIM', status: 'PENDING', impact: 75, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          { id: 'def-22', title: 'Cuma Namazı', day: 'Cuma', startTime: '13:00', endTime: '14:30', category: 'NAMAZ', status: 'PENDING', impact: 100, canSnooze: false, snoozed: false, createdAt: Date.now() },
+          { id: 'def-23', title: 'Müşteri İşleri / Görüşme', day: 'Cuma', startTime: '14:30', endTime: '19:00', category: 'MUSTERI', status: 'PENDING', impact: 100, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          { id: 'def-24', title: 'Kafana Göre', day: 'Cuma', startTime: '19:00', endTime: '00:00', category: 'SOSYAL', status: 'PENDING', impact: 50, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          // CUMARTESİ
+          { id: 'def-25', title: 'Göğüs & Triceps Pump', day: 'Cumartesi', startTime: '11:00', endTime: '12:30', category: 'SPOR', status: 'PENDING', impact: 90, canSnooze: false, snoozed: false, createdAt: Date.now() },
+          { id: 'def-26', title: 'Haftalık Planlama & Strateji', day: 'Cumartesi', startTime: '13:30', endTime: '14:30', category: 'GELISIM', status: 'PENDING', impact: 80, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          { id: 'def-27', title: 'Serbest Zaman / Aile', day: 'Cumartesi', startTime: '15:00', endTime: '20:00', category: 'SOSYAL', status: 'PENDING', impact: 60, canSnooze: true, snoozed: false, createdAt: Date.now() },
+          // PAZAR
+          { id: 'def-28', title: 'Tam Dinlenme / Deşarj', day: 'Pazar', startTime: '10:00', endTime: '22:00', category: 'SOSYAL', status: 'PENDING', impact: 100, canSnooze: true, snoozed: false, createdAt: Date.now() }
+        ];
+
+        const GUIDE_STEPS = [
+          { title: "1. MATRİS YÜKLEMESİ", description: "Bu uygulama, senin kişisel yaşam algoritman. 'Pazartesi'den 'Pazar'a kadar tüm rutinlerin önceden yüklendi.", icon: 'Matrix' },
+          { title: "2. GÖREV YÖNETİMİ", description: "Tamamla, Geri Al, Düzenle veya Sil. Her görev bir Zap puanı değerindedir.", icon: 'Zap' },
+          { title: "3. KATEGORİ SPEKTRUMU", description: "İngilizce (Mavi), Spor (Mor), Müşteri (Turuncu). Rengi gör, odağını ayarla.", icon: 'Focus' },
+          { title: "4. İSTANBUL SENKRONU", description: "Güneşin konumuna göre dinamik Namaz Vakitleri. İnternet olmasa bile çalışır.", icon: 'Lock' }
+        ];
+
+        const MANUAL_CONTENT = `SİSTEM KULLANIM KILAVUZU v4.0\n\n1. GİRİŞ VE FELSEFE\nElysian, sıradan bir 'to-do' listesi değildir. Bu, senin zihninin dışarıya yansımış dijital iskeletidir. Buradaki her görev, tamamlandığında beynindeki nöral ağları güçlendiren bir 'Zap' sinyali üretir.\n\n2. ARAYÜZ VE KONTROLLER\n- [TAMAMLA]: Görevi bitirir, üzerini çizer ve Zap puanı ekler.\n- [GERİ AL]: Tamamlanan görevi geri açar, puanı geri alır.\n- [DÜZENLE]: Görevin adını, saatini veya kategorisini değiştirmeni sağlar.\n- [SİL]: Görevi kalıcı olarak matristen siler.\n\n3. KATEGORİLER\n- MAVİ: İngilizce\n- MOR: Spor\n- TURUNCU: Müşteri\n- PEMBE: Okuma\n- FUŞYA: Gelişim\n- YEŞİL: Namaz\n- TEAL: Sosyal\n\n4. NAMAZ ALGORİTMASI\nİstanbul koordinatlarına (41°N, 29°E) göre güneş simülasyonu yapar.\n\n5. ODAK MODU\nSağ alttaki 'Rüzgar' butonu 'Kahverengi Gürültü' üretir. Dış dünyayı sustur.\n\n"Disiplin, yapmak istemediğin şeyi, yapmak istediğin şey kadar büyük bir arzuyla yapmaktır."`;
+
+        const getSystemMessage = (type) => {
+          const messages = {
+            SUCCESS: ["İrade çeliği dövüldü.", "Nöral bağlantı güçlendi.", "Kaos azaldı, düzen arttı.", "Bir adım daha ileri."],
+            SNOOZE: ["Zaman beklemez.", "Erteleme, başarının kanseridir.", "Dikkat et, iraden zayıflıyor."],
+            CRITICAL: ["Şimdi değilse ne zaman?", "Harekete geç.", "Matris seni bekliyor."],
+            NEUTRAL: ["Sistem aktif.", "Hazır.", "Emir bekleniyor."]
+          };
+          return messages[type][Math.floor(Math.random() * messages[type].length)];
+        };
+
+        const getNotificationMessage = () => {
+          const msgs = [{ title: "GÖREV ZAMANI", body: "Planına sadık kal. Matris seni izliyor." }, { title: "HAREKETE GEÇ", body: "Düşünmek için değil, yapmak için buradasın." }];
+          return msgs[Math.floor(Math.random() * msgs.length)];
+        };
+
+        const calculatePrayerTimes = () => {
+          const date = new Date();
+          const dayOfYear = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24);
+          const h = date.getHours();
+          const m = date.getMinutes();
+          const currentTime = h * 60 + m;
+          const seasonalOffset = Math.sin((dayOfYear - 80) * 2 * Math.PI / 365); 
+          let imsakBase = 5 * 60; let ogleBase = 13 * 60 + 10; let ikindiBase = 16 * 60 + 30; let aksamBase = 19 * 60 + 30; let yatsiBase = 21 * 60;
+          const imsak = imsakBase - (seasonalOffset * 90);
+          const ogle = ogleBase + (seasonalOffset * 5);
+          const ikindi = ikindiBase + (seasonalOffset * 40);
+          const aksam = aksamBase + (seasonalOffset * 80);
+          const yatsi = yatsiBase + (seasonalOffset * 80);
+          const formatMin = (totalMin) => {
+            const hh = Math.floor(totalMin / 60);
+            const mm = Math.floor(totalMin % 60);
+            return `${hh.toString().padStart(2, '0')}:${mm.toString().padStart(2, '0')}`;
+          };
+          return [
+            { name: 'İMSAK', time: formatMin(imsak), isActive: currentTime >= imsak && currentTime < ogle },
+            { name: 'ÖĞLE', time: formatMin(ogle), isActive: currentTime >= ogle && currentTime < ikindi },
+            { name: 'İKİNDİ', time: formatMin(ikindi), isActive: currentTime >= ikindi && currentTime < aksam },
+            { name: 'AKŞAM', time: formatMin(aksam), isActive: currentTime >= aksam && currentTime < yatsi },
+            { name: 'YATSI', time: formatMin(yatsi), isActive: currentTime >= yatsi || currentTime < imsak },
+          ];
+        };
+
+        const formatDate = (dateString) => new Date(dateString).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' });
+        const formatTime = (dateString) => new Date(dateString).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+
+        // --- COMPONENTS ---
+
+        const NeuralGuide = ({ isOpen, onClose }) => {
+          const [step, setStep] = useState(0);
+          const [showFullManual, setShowFullManual] = useState(false);
+          if (!isOpen) return null;
+          
+          if (showFullManual) {
+            return (
+              <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl animate-in fade-in">
+                 <div className="w-full max-w-2xl h-[80vh] bg-black/50 border border-emerald-500/30 rounded-3xl p-6 relative flex flex-col">
+                    <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-4">
+                      <h3 className="text-xl font-bold text-emerald-400 tracking-widest font-mono">SİSTEM KILAVUZU</h3>
+                      <button onClick={() => setShowFullManual(false)}><X className="text-white" /></button>
+                    </div>
+                    <div className="overflow-y-auto pr-2 custom-scrollbar text-gray-300 font-mono text-sm leading-relaxed whitespace-pre-wrap">{MANUAL_CONTENT}</div>
+                 </div>
+              </div>
+            );
+          }
+
+          const currentStep = GUIDE_STEPS[step];
+          const handleNext = () => { if (step < GUIDE_STEPS.length - 1) setStep(s => s + 1); else onClose(); };
+
+          return (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300">
+              <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none"></div>
+              <div className="w-full max-w-md bg-black/40 border border-emerald-500/30 rounded-3xl p-8 relative overflow-hidden shadow-[0_0_50px_rgba(16,185,129,0.1)]">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-70" />
+                <div className="flex justify-between items-start mb-8">
+                  <div className="flex items-center space-x-2"><span className="text-emerald-500 text-xs font-mono tracking-[0.2em]">SİSTEM EĞİTİMİ</span><span className="text-white/20 text-xs font-mono">0{step + 1}/04</span></div>
+                  <button onClick={onClose} className="text-white/40 hover:text-white transition-colors"><X className="w-6 h-6" /></button>
+                </div>
+                <div className="min-h-[200px] flex flex-col items-center text-center space-y-6">
+                  <div className="w-20 h-20 rounded-full bg-emerald-900/20 border border-emerald-500/20 flex items-center justify-center relative">
+                    <div className="absolute inset-0 rounded-full border border-emerald-500/30 animate-ping opacity-20"></div>
+                    {currentStep.icon === 'Zap' && <Zap className="w-10 h-10 text-emerald-400" />}
+                    {currentStep.icon === 'Lock' && <Lock className="w-10 h-10 text-rose-400" />}
+                    {currentStep.icon === 'Focus' && <Wind className="w-10 h-10 text-blue-400" />}
+                    {currentStep.icon === 'Matrix' && <Layers className="w-10 h-10 text-purple-400" />}
+                  </div>
+                  <div><h3 className="text-2xl font-bold text-white mb-3 font-jakarta tracking-tight">{currentStep.title}</h3><p className="text-gray-400 text-sm leading-relaxed">{currentStep.description}</p></div>
+                </div>
+                <div className="space-y-3 mt-8">
+                  <button onClick={handleNext} className="w-full bg-emerald-600 hover:bg-emerald-500 text-black font-bold py-4 rounded-xl flex items-center justify-center space-x-2 transition-all active:scale-[0.98]"><span>{step === GUIDE_STEPS.length - 1 ? "SİSTEME BAĞLAN" : "DEVAM ET"}</span><ChevronRight className="w-4 h-4" /></button>
+                  <button onClick={() => setShowFullManual(true)} className="w-full py-3 text-xs text-gray-500 hover:text-white underline decoration-dotted underline-offset-4">KULLANIM KILAVUZUNU OKU</button>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const FocusMode = ({ isOpen, onClose }) => {
+          const [phase, setPhase] = useState('Inhale');
+          const [text, setText] = useState("NEFES AL");
+          const [audioActive, setAudioActive] = useState(false);
+          const audioRef = useRef(null);
+
+          useEffect(() => {
+            if (!isOpen) { if (audioRef.current) { audioRef.current.stop(); audioRef.current = null; setAudioActive(false); } return; }
+            let mounted = true;
+            const cycle = async () => {
+              if (!mounted) return; setPhase('Inhale'); setText("NEFES AL (4s)"); await new Promise(r => setTimeout(r, 4000));
+              if (!mounted) return; setPhase('Hold'); setText("TUT (7s)"); await new Promise(r => setTimeout(r, 7000));
+              if (!mounted) return; setPhase('Exhale'); setText("VER (8s)"); await new Promise(r => setTimeout(r, 8000));
+              if (mounted) cycle();
+            };
+            cycle(); return () => { mounted = false; };
+          }, [isOpen]);
+
+          const toggleAudio = (e) => {
+            e.stopPropagation();
+            if (audioActive) { audioRef.current?.stop(); setAudioActive(false); } else { const audio = new NeuralAudio(); audio.start(); audioRef.current = audio; setAudioActive(true); }
+          };
+          if (!isOpen) return null;
+          return (
+            <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center cursor-pointer" onClick={onClose}>
+              <div className="absolute top-10 flex flex-col items-center space-y-4">
+                <p className="text-white/30 text-xs tracking-widest uppercase animate-pulse">Ekrana dokunarak çık</p>
+                <button onClick={toggleAudio} className={`px-4 py-2 rounded-full border flex items-center space-x-2 transition-all ${audioActive ? 'bg-white text-black border-white' : 'bg-transparent text-white/50 border-white/20'}`}>
+                  {audioActive ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}<span className="text-xs font-bold tracking-widest">{audioActive ? 'İZOLASYON AKTİF' : 'SESİ AÇ'}</span>
+                </button>
+              </div>
+              <div className={`transition-all duration-[4000ms] ease-in-out rounded-full blur-3xl absolute ${phase === 'Inhale' ? 'w-[80vw] h-[80vw] bg-blue-500/30 opacity-60' : phase === 'Hold' ? 'w-[80vw] h-[80vw] bg-purple-500/30 opacity-80' : 'w-[20vw] h-[20vw] bg-emerald-500/20 opacity-40'}`} />
+              <div className={`relative z-10 w-64 h-64 rounded-full border-2 flex items-center justify-center transition-all duration-[4000ms] ease-in-out ${phase === 'Inhale' ? 'scale-150 border-blue-400/50' : phase === 'Hold' ? 'scale-150 border-purple-400/80 shadow-[0_0_50px_rgba(168,85,247,0.4)]' : 'scale-75 border-emerald-500/30'}`}>
+                <span className="text-2xl font-bold text-white font-mono tracking-widest">{text}</span>
+              </div>
+            </div>
+          );
+        };
+
+        const TaskEditor = ({ isOpen, onClose, onSave, initialTask }) => {
+          const [title, setTitle] = useState("");
+          const [day, setDay] = useState('Pazartesi');
+          const [category, setCategory] = useState('DIGER');
+          const [startTime, setStartTime] = useState("");
+          const [endTime, setEndTime] = useState("");
+
+          useEffect(() => {
+            if (isOpen) {
+              if (initialTask) { setTitle(initialTask.title); setDay(initialTask.day); setCategory(initialTask.category); setStartTime(initialTask.startTime); setEndTime(initialTask.endTime); }
+              else { setTitle(""); setDay('Pazartesi'); setCategory('DIGER'); setStartTime(""); setEndTime(""); }
+            }
+          }, [isOpen, initialTask]);
+
+          if (!isOpen) return null;
+          const handleSubmit = (e) => { e.preventDefault(); if (!title || !startTime || !endTime) return; onSave({ title, day, category, startTime, endTime, id: initialTask?.id }); onClose(); };
+
+          return (
+            <div className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+              <div className="w-full max-w-lg bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 shadow-2xl animate-in slide-in-from-bottom duration-300">
+                <div className="flex justify-between items-center mb-6"><h3 className="text-lg font-bold text-white tracking-widest">{initialTask ? 'GÖREVİ DÜZENLE' : 'YENİ GÖREV EKLE'}</h3><button onClick={onClose}><X className="text-gray-500 hover:text-white" /></button></div>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div><label className="block text-xs text-gray-500 uppercase tracking-widest mb-1">Başlık</label><input type="text" value={title} onChange={e => setTitle(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-emerald-500 outline-none" placeholder="Örn: İngilizce Ders" /></div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div><label className="block text-xs text-gray-500 uppercase tracking-widest mb-1">Gün</label><select value={day} onChange={e => setDay(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-emerald-500 outline-none">{DAYS.map(d => <option key={d} value={d} className="bg-black">{d}</option>)}</select></div>
+                    <div><label className="block text-xs text-gray-500 uppercase tracking-widest mb-1">Kategori</label><select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-emerald-500 outline-none">{CATEGORIES.map(c => <option key={c.value} value={c.value} className="bg-black">{c.label}</option>)}</select></div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                     <div><label className="block text-xs text-gray-500 uppercase tracking-widest mb-1">Başlangıç</label><input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-emerald-500 outline-none" /></div>
+                     <div><label className="block text-xs text-gray-500 uppercase tracking-widest mb-1">Bitiş</label><input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-emerald-500 outline-none" /></div>
+                  </div>
+                  <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 text-black font-bold py-4 rounded-xl mt-4 transition-all">{initialTask ? 'GÜNCELLE' : 'EKLE'}</button>
+                </form>
+              </div>
+            </div>
+          );
+        };
+
+        const TaskItem = ({ task, onComplete, onUndo, onDelete, onEdit }) => {
+          const isCompleted = task.status === 'COMPLETED';
+          const categoryInfo = CATEGORIES.find(c => c.value === task.category) || CATEGORIES[7];
+          return (
+            <div className={`relative overflow-hidden rounded-xl border mb-3 transition-all duration-300 ${isCompleted ? 'bg-gray-900/50 border-white/5 opacity-60' : 'bg-white/[0.03] border-white/10 hover:border-white/20'}`}>
+              <div className={`absolute left-0 top-0 bottom-0 w-1 ${isCompleted ? 'bg-gray-600' : categoryInfo.color.split(' ')[0]}`} />
+              <div className="p-4 pl-5">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                     <h4 className={`font-jakarta font-medium text-sm leading-tight mb-1 ${isCompleted ? 'text-gray-500 line-through' : 'text-white'}`}>{task.title}</h4>
+                     <div className="flex items-center space-x-3 text-xs font-mono text-gray-500"><span>{task.startTime} - {task.endTime}</span><span className={`px-1.5 rounded-[3px] text-[10px] font-bold ${categoryInfo.color}`}>{categoryInfo.label}</span></div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2 mt-4">
+                   {isCompleted ? (
+                     <button onClick={() => onUndo(task.id)} className="flex-1 bg-gray-800 hover:bg-gray-700 text-white text-xs font-bold py-2 rounded flex items-center justify-center space-x-1 transition-colors"><RotateCcw className="w-3 h-3" /> <span>GERİ AL</span></button>
+                   ) : (
+                     <button onClick={() => onComplete(task.id)} className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-black text-xs font-bold py-2 rounded flex items-center justify-center space-x-1 transition-colors"><CheckCircle2 className="w-3 h-3" /> <span>TAMAMLA</span></button>
+                   )}
+                   <button onClick={() => onEdit(task)} className="px-3 py-2 bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 rounded transition-colors"><Edit2 className="w-3.5 h-3.5" /></button>
+                   <button onClick={() => onDelete(task.id)} className="px-3 py-2 bg-red-600/20 hover:bg-red-600/40 text-red-400 rounded transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const App = () => {
+          const [tasks, setTasks] = useState(() => { try { const stored = localStorage.getItem('elysian_core_v4'); const parsedTasks = stored ? JSON.parse(stored).tasks || [] : []; return parsedTasks.length > 0 ? parsedTasks : DEFAULT_SCHEDULE; } catch { return DEFAULT_SCHEDULE; } });
+          const [protocols, setProtocols] = useState(() => { try { return JSON.parse(localStorage.getItem('elysian_core_v4') || '{}').protocols || [{ id: 'p1', title: 'Derin Okuma (20dk)', completed: false, streak: 0 }, { id: 'p2', title: 'Su Tüketimi (2.5L)', completed: false, streak: 0 }, { id: 'p3', title: 'Antrenman', completed: false, streak: 0 }]; } catch { return []; } });
+          const [neuralState, setNeuralState] = useState(() => { try { return JSON.parse(localStorage.getItem('elysian_core_v4') || '{}').neuralState || { zapScore: 0, streak: 0, lastActive: new Date().toISOString(), hasSeenOnboarding: false }; } catch { return { zapScore: 0, streak: 0, lastActive: new Date().toISOString(), hasSeenOnboarding: false }; } });
+          const [prayerTimes, setPrayerTimes] = useState([]);
+          const [systemMessage, setSystemMessage] = useState("Sistem başlatılıyor...");
+          const [isMessageVisible, setIsMessageVisible] = useState(false);
+          const [showGuide, setShowGuide] = useState(false);
+          const [showFocus, setShowFocus] = useState(false);
+          const [isEditorOpen, setIsEditorOpen] = useState(false);
+          const [editingTask, setEditingTask] = useState(null);
+
+          useEffect(() => { localStorage.setItem('elysian_core_v4', JSON.stringify({ tasks, protocols, neuralState })); }, [tasks, protocols, neuralState]);
+
+          useEffect(() => {
+            setPrayerTimes(calculatePrayerTimes());
+            triggerSystemMessage(getSystemMessage('NEUTRAL'));
+            const lastDate = new Date(neuralState.lastActive).getDate();
+            const today = new Date().getDate();
+            if (lastDate !== today) {
+              setProtocols(prev => prev.map(p => ({ ...p, completed: false })));
+              setNeuralState(prev => ({ ...prev, lastActive: new Date().toISOString() }));
+              triggerSystemMessage("Gün Döngüsü: Protokoller Sıfırlandı.");
+            }
+            const interval = setInterval(() => setPrayerTimes(calculatePrayerTimes()), 60000);
+            const nagInterval = setInterval(() => {
+              if (Notification.permission === 'granted') { const msg = getNotificationMessage(); new Notification(msg.title, { body: msg.body, icon: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/72x72/26a1.png' }); }
+            }, 45 * 60 * 1000);
+            return () => { clearInterval(interval); clearInterval(nagInterval); };
+          }, []);
+
+          useEffect(() => { if (!neuralState.hasSeenOnboarding) setTimeout(() => setShowGuide(true), 500); }, []);
+
+          const triggerSystemMessage = (msg) => { setSystemMessage(msg); setIsMessageVisible(true); setTimeout(() => setIsMessageVisible(false), 4000); };
+
+          const handleTaskAction = (action, id) => {
+            if (action === 'DELETE') { setTasks(prev => prev.filter(t => t.id !== id)); triggerSystemMessage("Görev matristen silindi."); return; }
+            setTasks(prev => prev.map(t => {
+              if (t.id === id) {
+                if (action === 'COMPLETE') {
+                  setNeuralState(s => ({ ...s, zapScore: s.zapScore + t.impact })); triggerSystemMessage(getSystemMessage('SUCCESS')); if (navigator.vibrate) navigator.vibrate([50]); return { ...t, status: 'COMPLETED' };
+                } else if (action === 'UNDO') {
+                  setNeuralState(s => ({ ...s, zapScore: Math.max(0, s.zapScore - t.impact) })); triggerSystemMessage("İşlem geri alındı."); return { ...t, status: 'PENDING' };
+                }
+              }
+              return t;
+            }));
+          };
+
+          const handleSaveTask = (taskData) => {
+            if (taskData.id) { setTasks(prev => prev.map(t => t.id === taskData.id ? { ...t, ...taskData } : t)); triggerSystemMessage("Görev güncellendi."); }
+            else { const newTask = { id: generateId(), title: taskData.title, day: taskData.day || 'Pazartesi', startTime: taskData.startTime, endTime: taskData.endTime, category: taskData.category || 'DIGER', status: 'PENDING', impact: 50, canSnooze: true, snoozed: false, createdAt: Date.now() }; setTasks(prev => [...prev, newTask]); triggerSystemMessage("Görev matrise eklendi."); }
+          };
+          const openEditor = (task) => { setEditingTask(task || null); setIsEditorOpen(true); };
+          const handlePurge = () => { setTasks(prev => prev.filter(t => t.status !== 'COMPLETED')); triggerSystemMessage("Önbellek Temizlendi."); };
+          const handleResetSchedule = () => { if (confirm("Tüm kişisel değişiklikler silinecek ve varsayılan Yusuf Protokolü yüklenecek. Onaylıyor musun?")) { setTasks(DEFAULT_SCHEDULE); triggerSystemMessage("Sistem Fabrika Ayarlarına Döndü."); } };
+
+          return (
+            <div className="min-h-screen bg-black text-gray-200 font-sans pb-safe-bottom overflow-x-hidden">
+              <div className="fixed inset-0 pointer-events-none z-0">
+                <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-emerald-900/10 rounded-full blur-[120px] animate-pulse-slow" />
+                <div className="absolute bottom-[20%] left-[-20%] w-[400px] h-[400px] bg-blue-900/10 rounded-full blur-[100px] opacity-60" />
+              </div>
+              <NeuralGuide isOpen={showGuide} onClose={() => { setShowGuide(false); setNeuralState(s => ({...s, hasSeenOnboarding: true})); }} />
+              <FocusMode isOpen={showFocus} onClose={() => setShowFocus(false)} />
+              <TaskEditor isOpen={isEditorOpen} onClose={() => setIsEditorOpen(false)} onSave={handleSaveTask} initialTask={editingTask} />
+              
+              <header className="sticky top-0 z-50 pt-safe-top bg-black/80 backdrop-blur-xl border-b border-white/5">
+                <div className="px-6 py-4 flex justify-between items-center">
+                  <div className="flex items-center space-x-3"><div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/50 flex items-center justify-center"><div className="w-3 h-3 bg-emerald-400 rounded-sm rotate-45"></div></div><div><h1 className="text-xl font-extrabold italic tracking-tighter text-white font-jakarta">YUSUF | PROTOKOL</h1></div></div>
+                  <div className="flex items-center space-x-3">
+                     <div className="flex items-center space-x-1.5 mr-2"><Zap className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" /><span className="text-lg font-bold text-white tabular-nums leading-none">{neuralState.zapScore}</span></div>
+                     <button onClick={handlePurge} className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-rose-400 transition-all"><Trash2 className="w-4 h-4" /></button>
+                    <button onClick={() => setShowGuide(true)} className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all"><BookOpen className="w-4 h-4" /></button>
+                  </div>
+                </div>
+              </header>
+
+              <main className="relative z-10 max-w-2xl mx-auto pb-48">
+                <div className="px-6 py-6 overflow-x-auto no-scrollbar mask-linear-fade">
+                  <div className="flex space-x-3 min-w-max">
+                    {prayerTimes.map((p, i) => (
+                      <div key={i} className={`relative flex flex-col items-start justify-center pl-4 pr-8 py-3 rounded-xl border transition-all duration-500 overflow-hidden ${p.isActive ? 'bg-emerald-950/30 border-emerald-500/50 scale-105 shadow-[0_0_20px_-5px_rgba(16,185,129,0.3)]' : 'bg-white/[0.02] border-white/5 grayscale opacity-60'}`}>
+                        {p.isActive && <div className="absolute top-0 right-0 w-[100px] h-full bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none" />}
+                        <span className={`text-[9px] font-black tracking-[0.2em] mb-1 ${p.isActive ? 'text-emerald-400' : 'text-gray-600'}`}>{p.name}</span>
+                        <span className={`text-xl font-mono tracking-tighter tabular-nums ${p.isActive ? 'text-white' : 'text-gray-500'}`}>{p.time}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={`fixed top-[140px] left-0 right-0 z-40 pointer-events-none flex justify-center transition-all duration-500 ease-out transform ${isMessageVisible ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-4 opacity-0 scale-95'}`}>
+                  <div className="bg-black/90 backdrop-blur-xl border border-emerald-500/30 px-5 py-2.5 rounded-full shadow-[0_0_30px_rgba(0,0,0,0.5)] flex items-center space-x-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /><p className="text-emerald-50 text-[10px] font-mono tracking-widest uppercase">{systemMessage}</p></div>
+                </div>
+
+                <div className="px-6 mb-6">
+                  <div className="grid grid-cols-1 gap-2">
+                    {protocols.map(p => (
+                      <button key={p.id} onClick={() => {
+                        setProtocols(prev => prev.map(proto => proto.id === p.id ? { ...proto, completed: !proto.completed } : proto));
+                        if (!p.completed) { triggerSystemMessage("Alt-Rutin Tamamlandı."); if (navigator.vibrate) navigator.vibrate(20); }
+                      }} className={`flex items-center justify-between p-3 rounded-lg border transition-all ${p.completed ? 'bg-emerald-900/10 border-emerald-500/30' : 'bg-white/5 border-white/5'}`}>
+                         <div className="flex items-center space-x-3"><div className={`w-4 h-4 rounded flex items-center justify-center border ${p.completed ? 'bg-emerald-500 border-emerald-500' : 'border-white/20'}`}>{p.completed && <CheckCircle2 className="w-3 h-3 text-black" />}</div><span className={`text-xs font-bold ${p.completed ? 'text-emerald-400' : 'text-gray-400'}`}>{p.title}</span></div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="px-4 space-y-6">
+                  {DAYS.map(day => {
+                    const dayTasks = tasks.filter(t => t.day === day).sort((a, b) => a.startTime.localeCompare(b.startTime));
+                    if (dayTasks.length === 0) return null;
+                    return (
+                      <div key={day} className="animate-in slide-in-from-bottom duration-500">
+                        <div className="flex items-center space-x-4 mb-3 px-2"><div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-white/10" /><h2 className="text-sm font-black tracking-[0.2em] text-emerald-500 uppercase">{day}</h2><div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-white/10" /></div>
+                        <div>{dayTasks.map(task => <TaskItem key={task.id} task={task} onComplete={() => handleTaskAction('COMPLETE', task.id)} onUndo={() => handleTaskAction('UNDO', task.id)} onDelete={() => handleTaskAction('DELETE', task.id)} onEdit={openEditor} />)}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="text-center mt-12 mb-4"><button onClick={handleResetSchedule} className="text-[10px] text-gray-700 hover:text-red-500 underline uppercase tracking-widest">Sistemi Varsayılana Döndür</button></div>
+              </main>
+
+              <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black via-black/95 to-transparent pt-10 pb-6 px-6">
+                <div className="max-w-2xl mx-auto flex items-center gap-4">
+                   <button onClick={() => setShowFocus(true)} className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-blue-400/70 hover:text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/30 transition-all active:scale-95"><Wind className="w-6 h-6" /></button>
+                   <button onClick={() => openEditor()} className="flex-1 h-14 bg-emerald-600 rounded-2xl flex items-center justify-center text-black font-bold text-sm tracking-widest hover:bg-emerald-500 transition-colors shadow-[0_0_20px_rgba(16,185,129,0.3)] active:scale-98"><Plus className="w-5 h-5 mr-2" /> YENİ GÖREV</button>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
 </html>
