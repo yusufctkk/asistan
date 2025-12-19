@@ -2,7 +2,7 @@
   "name": "YUSUF | PROTOKOL",
   "short_name": "ELYSIAN",
   "description": "Neural Discipline Protocol & Task Matrix",
-  "start_url": ".",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
