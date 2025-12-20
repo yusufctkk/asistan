@@ -3,487 +3,277 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>YUSUF | PROTOKOL</title>
+    <title>YUSUF | PROTOKOL V5</title>
     <meta name="theme-color" content="#000000" />
+    
+    <!-- PWA -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="description" content="Yusuf Çetinkaya - Kişisel Gelişim ve Görev Protokolü">
-    
-    <!-- PWA Manifest -->
     <link rel="manifest" href="./manifest.json">
     <link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/72x72/26a1.png">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-    <!-- Tailwind -->
+    <!-- CSS Framework -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
-            fontFamily: {
-              sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-              jakarta: ['"Plus Jakarta Sans"', 'sans-serif'],
-              mono: ['"JetBrains Mono"', 'monospace'],
-            },
-            colors: { black: '#050505' },
+            fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] },
+            colors: { black: '#000000', dark: '#050505', emerald: { 450: '#10b981' } },
             animation: { 'pulse-slow': 'pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite' },
-            spacing: { 'safe-top': 'env(safe-area-inset-top)', 'safe-bottom': 'env(safe-area-inset-bottom)' }
+            spacing: { 'safe-top': 'env(safe-area-inset-top)', 'safe-bottom': 'env(safe-area-inset-bottom)' },
+            backgroundImage: { 'neural-gradient': 'radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.15), transparent 70%)' }
           }
         }
       }
     </script>
-
-    <!-- React & Babel -->
+    
+    <!-- React Core (UMD - Stable) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-      body { background-color: #000000; overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
-      .no-scrollbar::-webkit-scrollbar { display: none; }
-      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-      .custom-scrollbar::-webkit-scrollbar-track { background: #111; }
-      .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-      .mask-linear-fade { -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
+      body { background-color: #000000; color: #e5e7eb; overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; }
+      .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      .glass-panel { background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+      #loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
+      .spinner { width: 50px; height: 50px; border: 3px solid rgba(16, 185, 129, 0.2); border-radius: 50%; border-top-color: #10b981; animation: spin 1s ease-in-out infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
     </style>
-
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('./sw.js').then(function(registration) {
-            console.log('Neural Core (SW) registered with scope:', registration.scope);
-          }, function(err) {
-            console.log('Neural Core (SW) failed:', err);
-          });
-        });
-      }
-    </script>
 <script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@18.2.0",
-    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-    "lucide-react": "https://esm.sh/lucide-react@0.263.1",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
     "react/": "https://esm.sh/react@^19.2.3/"
   }
 }
 </script>
 </head>
 <body>
+    <div id="loader">
+        <div class="spinner"></div>
+        <div class="mt-6 text-emerald-500 font-mono text-[10px] tracking-[0.4em] animate-pulse">SİSTEM BAŞLATILIYOR</div>
+    </div>
     <div id="root"></div>
 
-    <script type="text/babel" data-type="module">
-        import React, { useState, useEffect, useRef } from 'react';
-        import { createRoot } from 'react-dom/client';
-        import { 
-          CheckCircle2, Circle, Clock, Zap, AlertTriangle, Lock, Plus, HelpCircle, 
-          Wind, X, ChevronRight, Layers, BellRing, Trash2, Volume2, VolumeX, 
-          Repeat, Edit2, RotateCcw, BookOpen, Bell 
-        } from 'lucide-react';
+    <!-- Hata Yakalama Sistemi -->
+    <script>
+      window.onerror = function(msg, url, line) {
+        document.getElementById('loader').style.display='none';
+        document.body.innerHTML = `<div style="background:black;color:#ef4444;padding:24px;font-family:monospace;height:100vh;">
+          <h2 style="border-bottom:1px solid #333;padding-bottom:12px;">SİSTEM HATASI</h2>
+          <p style="margin-top:16px;font-size:12px;opacity:0.8;">${msg}</p>
+          <button onclick="localStorage.clear();location.reload()" style="margin-top:24px;background:#ef4444;color:white;border:none;padding:12px 24px;border-radius:8px;font-weight:bold;">SİSTEMİ SIFIRLA</button>
+        </div>`;
+      };
+    </script>
 
-        // --- UTILS & CONSTANTS ---
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const { createRoot } = ReactDOM;
+
+        // --- ICONS (Manuel SVG Tanımları - Hata Riskini Sıfırlar) ---
+        const Icon = ({ path, className = "w-5 h-5", ...props }) => (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>{path}</svg>
+        );
+        const Zap = (p) => <Icon path={<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />} {...p} />;
+        const Trash2 = (p) => <Icon path={<><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></>} {...p} />;
+        const Edit2 = (p) => <Icon path={<path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>} {...p} />;
+        const Plus = (p) => <Icon path={<><path d="M5 12h14"/><path d="M12 5v14"/></>} {...p} />;
+        const X = (p) => <Icon path={<><path d="M18 6 6 18"/><path d="m6 6 18 18"/></>} {...p} />;
+        const BellRing = (p) => <Icon path={<><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></>} {...p} />;
+        const CheckCircle2 = (p) => <Icon path={<><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></>} {...p} />;
+        const ChevronRight = (p) => <Icon path={<path d="m9 18 6-6-6-6"/>} {...p} />;
+
+        // --- VERİ VE MANTIK ---
         const generateId = () => Math.random().toString(36).substr(2, 9);
-
-        // Brown Noise Engine
-        class NeuralAudio {
-          constructor() {
-            this.ctx = null; this.node = null; this.gain = null;
-            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-            if (AudioContextClass) this.ctx = new AudioContextClass();
-          }
-          start() {
-            if (!this.ctx) return;
-            const bufferSize = 4096;
-            const whiteNoise = this.ctx.createScriptProcessor(bufferSize, 1, 1);
-            let lastOut = 0;
-            whiteNoise.onaudioprocess = (e) => {
-              const output = e.outputBuffer.getChannelData(0);
-              for (let i = 0; i < bufferSize; i++) {
-                const white = Math.random() * 2 - 1;
-                output[i] = (lastOut + (0.02 * white)) / 1.02; lastOut = output[i]; output[i] *= 3.5;
-              }
-            };
-            this.gain = this.ctx.createGain();
-            this.gain.gain.value = 0.15;
-            whiteNoise.connect(this.gain);
-            this.gain.connect(this.ctx.destination);
-            this.node = whiteNoise;
-          }
-          stop() {
-            if (this.node) { this.node.disconnect(); this.node = null; }
-            if (this.gain) { this.gain.disconnect(); this.gain = null; }
-          }
-        }
-
-        const DAYS = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
-        const CATEGORIES = [
-          { value: 'INGILIZCE', label: 'İngilizce', color: 'bg-blue-500 border-blue-400 text-blue-100' },
-          { value: 'SPOR', label: 'Spor', color: 'bg-indigo-600 border-indigo-400 text-indigo-100' },
-          { value: 'MUSTERI', label: 'Müşteri', color: 'bg-amber-600 border-amber-400 text-amber-100' },
-          { value: 'OKUMA', label: 'Okuma', color: 'bg-pink-600 border-pink-400 text-pink-100' },
-          { value: 'GELISIM', label: 'Gelişim', color: 'bg-fuchsia-600 border-fuchsia-400 text-fuchsia-100' },
-          { value: 'SOSYAL', label: 'Sosyallik', color: 'bg-emerald-600 border-emerald-400 text-emerald-100' },
-          { value: 'NAMAZ', label: 'Namaz', color: 'bg-teal-700 border-teal-500 text-teal-100' },
-          { value: 'DIGER', label: 'Diğer', color: 'bg-gray-700 border-gray-500 text-gray-100' },
-        ];
-
-        const DEFAULT_SCHEDULE = [
-           { id: 'def-1', title: 'İngilizce Ders', day: 'Pazartesi', startTime: '08:30', endTime: '09:30', category: 'INGILIZCE', status: 'PENDING', impact: 80 },
-           { id: 'def-2', title: 'Omuz & Ön Kol & Triceps', day: 'Pazartesi', startTime: '10:00', endTime: '12:00', category: 'SPOR', status: 'PENDING', impact: 90 },
-           { id: 'def-3', title: 'Müşteri İşleri', day: 'Pazartesi', startTime: '12:00', endTime: '17:00', category: 'MUSTERI', status: 'PENDING', impact: 100 },
-           { id: 'def-4', title: 'Okuma / Film', day: 'Pazartesi', startTime: '17:30', endTime: '19:00', category: 'OKUMA', status: 'PENDING', impact: 60 },
-           { id: 'def-5', title: 'Kendini Geliştir', day: 'Pazartesi', startTime: '19:30', endTime: '23:30', category: 'GELISIM', status: 'PENDING', impact: 70 },
-           
-           { id: 'def-6', title: 'İngilizce Ders', day: 'Salı', startTime: '08:30', endTime: '09:30', category: 'INGILIZCE', status: 'PENDING', impact: 80 },
-           { id: 'def-7', title: 'Bacak Günü (Es Geçme)', day: 'Salı', startTime: '10:00', endTime: '12:00', category: 'SPOR', status: 'PENDING', impact: 95 },
-           { id: 'def-8', title: 'Müşteri İşleri', day: 'Salı', startTime: '12:00', endTime: '17:00', category: 'MUSTERI', status: 'PENDING', impact: 100 },
-           { id: 'def-9', title: 'Okuma / Dizi', day: 'Salı', startTime: '17:30', endTime: '19:00', category: 'OKUMA', status: 'PENDING', impact: 60 },
-           { id: 'def-10', title: 'Serbest Zaman', day: 'Salı', startTime: '19:30', endTime: '00:00', category: 'SOSYAL', status: 'PENDING', impact: 50 },
-
-           { id: 'def-11', title: 'İngilizce Ders', day: 'Çarşamba', startTime: '09:30', endTime: '11:00', category: 'INGILIZCE', status: 'PENDING', impact: 80 },
-           { id: 'def-12', title: 'Müşteri İşleri', day: 'Çarşamba', startTime: '11:30', endTime: '16:00', category: 'MUSTERI', status: 'PENDING', impact: 100 },
-           { id: 'def-13', title: 'Okuma (Kaçış Yok)', day: 'Çarşamba', startTime: '16:30', endTime: '19:00', category: 'OKUMA', status: 'PENDING', impact: 70 },
-           { id: 'def-14', title: 'Evde Gelişim', day: 'Çarşamba', startTime: '19:00', endTime: '00:00', category: 'GELISIM', status: 'PENDING', impact: 85 },
-
-           { id: 'def-15', title: 'İngilizce Ders', day: 'Perşembe', startTime: '08:30', endTime: '09:30', category: 'INGILIZCE', status: 'PENDING', impact: 80 },
-           { id: 'def-16', title: 'Sırt & Ön Kol', day: 'Perşembe', startTime: '10:00', endTime: '12:00', category: 'SPOR', status: 'PENDING', impact: 90 },
-           { id: 'def-17', title: 'Müşteri İşleri', day: 'Perşembe', startTime: '12:00', endTime: '17:00', category: 'MUSTERI', status: 'PENDING', impact: 100 },
-           { id: 'def-18', title: 'Okuma / İrade', day: 'Perşembe', startTime: '17:30', endTime: '19:00', category: 'OKUMA', status: 'PENDING', impact: 60 },
-           { id: 'def-19', title: 'Gelişim / Hava Al', day: 'Perşembe', startTime: '19:00', endTime: '00:00', category: 'GELISIM', status: 'PENDING', impact: 70 },
-
-           { id: 'def-20', title: 'İngilizce Ders', day: 'Cuma', startTime: '09:00', endTime: '10:30', category: 'INGILIZCE', status: 'PENDING', impact: 80 },
-           { id: 'def-21', title: 'Gelişim', day: 'Cuma', startTime: '10:30', endTime: '12:00', category: 'GELISIM', status: 'PENDING', impact: 75 },
-           { id: 'def-22', title: 'Cuma Namazı', day: 'Cuma', startTime: '13:00', endTime: '14:30', category: 'NAMAZ', status: 'PENDING', impact: 100 },
-           { id: 'def-23', title: 'Müşteri İşleri', day: 'Cuma', startTime: '14:30', endTime: '19:00', category: 'MUSTERI', status: 'PENDING', impact: 100 },
-           { id: 'def-24', title: 'Kafana Göre', day: 'Cuma', startTime: '19:00', endTime: '00:00', category: 'SOSYAL', status: 'PENDING', impact: 50 },
-
-           { id: 'def-25', title: 'Göğüs & Triceps', day: 'Cumartesi', startTime: '11:00', endTime: '12:30', category: 'SPOR', status: 'PENDING', impact: 90 },
-           { id: 'def-26', title: 'Planlama', day: 'Cumartesi', startTime: '13:30', endTime: '14:30', category: 'GELISIM', status: 'PENDING', impact: 80 },
-           { id: 'def-27', title: 'Aile / Serbest', day: 'Cumartesi', startTime: '15:00', endTime: '20:00', category: 'SOSYAL', status: 'PENDING', impact: 60 },
-
-           { id: 'def-28', title: 'Deşarj', day: 'Pazar', startTime: '10:00', endTime: '22:00', category: 'SOSYAL', status: 'PENDING', impact: 100 }
-        ];
-
-        const GUIDE_STEPS = [
-          { title: "1. HAFIZA KALICILIĞI", description: "Verilerin artık cihaz hafızasına kazındı. Sayfayı yenilesen de kaçış yok.", icon: 'Matrix' },
-          { title: "2. DİSİPLİN UYARILARI", description: "Sistemin seni darlaması için 'DİSİPLİN MODUNU AÇ' butonuna basmalısın. İrade gerektirir.", icon: 'Zap' },
-          { title: "3. GÖREV ZAMANLAMASI", description: "Tamamla, Geri Al, Düzenle. Yanlışlıkla basarsan geri alabilirsin.", icon: 'Focus' }
-        ];
-
-        const MANUAL_CONTENT = `SİSTEM KULLANIM KILAVUZU v5.0 (Persistence Update)\n\n1. SÜREKLİLİK (PERSISTENCE)\nEski sistemdeki 'yenileyince silinme' hatası giderildi. LocalStorage protokolü ile verilerin telefonunun hafıza çipine yazılıyor.\n\n2. BİLDİRİM MEKANİZMASI\nModern tarayıcılar (iOS/Chrome) otomatik bildirimleri engeller. Bu yüzden ekranın altındaki KIRMIZI butona basarak sisteme 'Beni Rahatsız Etme Hakkı' vermelisin.\n\n3. NÖRAL DARLAMA (NAGGING)\n- Namaz vakitleri girince.\n- Görev saati gelince.\n- Ve her 45 dakikada bir 'Rastgele Disiplin Kontrolü' bildirimi alacaksın.`;
-
-        const getSystemMessage = (type) => {
-          const messages = {
-            SUCCESS: ["İrade çeliği dövüldü.", "Nöral bağlantı güçlendi.", "Disiplin artıyor.", "Mükemmellik alışkanlıktır."],
-            SNOOZE: ["Zaman beklemez.", "Erteleme, başarının kanseridir."],
-            CRITICAL: ["Şimdi değilse ne zaman?", "Harekete geç.", "Matris seni bekliyor."],
-            NEUTRAL: ["Sistem hafızası aktif.", "Protokol devrede.", "Veriler koruma altında."]
-          };
-          return messages[type][Math.floor(Math.random() * messages[type].length)];
-        };
-
-        const calculatePrayerTimes = () => {
-          const date = new Date();
-          const dayOfYear = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24);
-          const h = date.getHours();
-          const m = date.getMinutes();
-          const currentTime = h * 60 + m;
-          const seasonalOffset = Math.sin((dayOfYear - 80) * 2 * Math.PI / 365); 
-          let imsakBase = 5 * 60; let ogleBase = 13 * 60 + 10; let ikindiBase = 16 * 60 + 30; let aksamBase = 19 * 60 + 30; let yatsiBase = 21 * 60;
-          const imsak = imsakBase - (seasonalOffset * 90);
-          const ogle = ogleBase + (seasonalOffset * 5);
-          const ikindi = ikindiBase + (seasonalOffset * 40);
-          const aksam = aksamBase + (seasonalOffset * 80);
-          const yatsi = yatsiBase + (seasonalOffset * 80);
-          const formatMin = (totalMin) => {
-            const hh = Math.floor(totalMin / 60);
-            const mm = Math.floor(totalMin % 60);
-            return `${hh.toString().padStart(2, '0')}:${mm.toString().padStart(2, '0')}`;
-          };
-          return [
-            { name: 'İMSAK', time: formatMin(imsak), raw: imsak, isActive: currentTime >= imsak && currentTime < ogle },
-            { name: 'ÖĞLE', time: formatMin(ogle), raw: ogle, isActive: currentTime >= ogle && currentTime < ikindi },
-            { name: 'İKİNDİ', time: formatMin(ikindi), raw: ikindi, isActive: currentTime >= ikindi && currentTime < aksam },
-            { name: 'AKŞAM', time: formatMin(aksam), raw: aksam, isActive: currentTime >= aksam && currentTime < yatsi },
-            { name: 'YATSI', time: formatMin(yatsi), raw: yatsi, isActive: currentTime >= yatsi || currentTime < imsak },
-          ];
-        };
-
-        // --- COMPONENTS ---
-        const NeuralGuide = ({ isOpen, onClose }) => {
-          const [step, setStep] = useState(0);
-          const [showFullManual, setShowFullManual] = useState(false);
-          if (!isOpen) return null;
-          if (showFullManual) return (
-             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl animate-in fade-in">
-                 <div className="w-full max-w-2xl h-[80vh] bg-black/50 border border-emerald-500/30 rounded-3xl p-6 relative flex flex-col">
-                    <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-4">
-                      <h3 className="text-xl font-bold text-emerald-400 tracking-widest font-mono">SİSTEM KILAVUZU</h3>
-                      <button onClick={() => setShowFullManual(false)}><X className="text-white" /></button>
-                    </div>
-                    <div className="overflow-y-auto pr-2 custom-scrollbar text-gray-300 font-mono text-sm leading-relaxed whitespace-pre-wrap">{MANUAL_CONTENT}</div>
-                 </div>
-              </div>
-          );
-          const currentStep = GUIDE_STEPS[step];
-          const handleNext = () => { if (step < GUIDE_STEPS.length - 1) setStep(s => s + 1); else onClose(); };
-          return (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300">
-              <div className="w-full max-w-md bg-black/40 border border-emerald-500/30 rounded-3xl p-8 relative overflow-hidden shadow-[0_0_50px_rgba(16,185,129,0.1)]">
-                <div className="min-h-[200px] flex flex-col items-center text-center space-y-6">
-                   <div className="w-20 h-20 rounded-full bg-emerald-900/20 border border-emerald-500/20 flex items-center justify-center"><Zap className="w-10 h-10 text-emerald-400" /></div>
-                   <div><h3 className="text-2xl font-bold text-white mb-3 font-jakarta tracking-tight">{currentStep.title}</h3><p className="text-gray-400 text-sm leading-relaxed">{currentStep.description}</p></div>
-                </div>
-                <div className="space-y-3 mt-8">
-                  <button onClick={handleNext} className="w-full bg-emerald-600 hover:bg-emerald-500 text-black font-bold py-4 rounded-xl flex items-center justify-center space-x-2 transition-all"><span>{step === GUIDE_STEPS.length - 1 ? "ANLAŞILDI" : "DEVAM ET"}</span><ChevronRight className="w-4 h-4" /></button>
-                  <button onClick={() => setShowFullManual(true)} className="w-full py-3 text-xs text-gray-500 hover:text-white underline decoration-dotted underline-offset-4">KILAVUZU OKU</button>
-                </div>
-              </div>
-            </div>
-          );
-        };
-
-        const TaskEditor = ({ isOpen, onClose, onSave, initialTask }) => {
-          const [title, setTitle] = useState("");
-          const [day, setDay] = useState('Pazartesi');
-          const [category, setCategory] = useState('DIGER');
-          const [startTime, setStartTime] = useState("");
-          const [endTime, setEndTime] = useState("");
-          useEffect(() => {
-            if (isOpen) {
-              if (initialTask) { setTitle(initialTask.title); setDay(initialTask.day); setCategory(initialTask.category); setStartTime(initialTask.startTime); setEndTime(initialTask.endTime); }
-              else { setTitle(""); setDay('Pazartesi'); setCategory('DIGER'); setStartTime(""); setEndTime(""); }
-            }
-          }, [isOpen, initialTask]);
-          if (!isOpen) return null;
-          const handleSubmit = (e) => { e.preventDefault(); if (!title || !startTime || !endTime) return; onSave({ title, day, category, startTime, endTime, id: initialTask?.id }); onClose(); };
-          return (
-            <div className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-              <div className="w-full max-w-lg bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 shadow-2xl animate-in slide-in-from-bottom duration-300">
-                <div className="flex justify-between items-center mb-6"><h3 className="text-lg font-bold text-white tracking-widest">{initialTask ? 'GÖREVİ DÜZENLE' : 'YENİ GÖREV'}</h3><button onClick={onClose}><X className="text-gray-500 hover:text-white" /></button></div>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div><label className="text-xs text-gray-500 uppercase">Başlık</label><input type="text" value={title} onChange={e => setTitle(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white outline-none focus:border-emerald-500" /></div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div><label className="text-xs text-gray-500 uppercase">Gün</label><select value={day} onChange={e => setDay(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white outline-none bg-black">{DAYS.map(d => <option key={d} value={d}>{d}</option>)}</select></div>
-                    <div><label className="text-xs text-gray-500 uppercase">Kategori</label><select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white outline-none bg-black">{CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}</select></div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                     <div><label className="text-xs text-gray-500 uppercase">Başlangıç</label><input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white outline-none" /></div>
-                     <div><label className="text-xs text-gray-500 uppercase">Bitiş</label><input type="time" value={endTime} onChange={e => setEndTime(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white outline-none" /></div>
-                  </div>
-                  <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 text-black font-bold py-4 rounded-xl mt-4">{initialTask ? 'KAYDET' : 'EKLE'}</button>
-                </form>
-              </div>
-            </div>
-          );
+        const CATEGORIES = {
+          'INGILIZCE': { label: 'İngilizce', color: 'bg-blue-600' }, 'SPOR': { label: 'Spor', color: 'bg-indigo-600' },
+          'MUSTERI': { label: 'Müşteri', color: 'bg-amber-600' }, 'OKUMA': { label: 'Okuma', color: 'bg-pink-600' },
+          'GELISIM': { label: 'Gelişim', color: 'bg-fuchsia-600' }, 'SOSYAL': { label: 'Sosyal', color: 'bg-emerald-600' },
+          'NAMAZ': { label: 'Namaz', color: 'bg-teal-700' }, 'DIGER': { label: 'Diğer', color: 'bg-zinc-600' }
         };
 
         const App = () => {
-          // --- BLACK BOX PERSISTENCE (LOCALSTORAGE) ---
-          const [tasks, setTasks] = useState(() => { 
-            try { 
-              const stored = localStorage.getItem('elysian_core_v5_tasks'); 
-              return stored ? JSON.parse(stored) : DEFAULT_SCHEDULE; 
-            } catch { return DEFAULT_SCHEDULE; } 
+          // BAŞLANGIÇ DURUMU (GÜVENLİ YÜKLEME)
+          const [tasks, setTasks] = useState(() => {
+            try { return JSON.parse(localStorage.getItem('elysian_tasks')) || []; } catch { return []; }
           });
           const [protocols, setProtocols] = useState(() => {
-             try {
-                const stored = localStorage.getItem('elysian_core_v5_protocols');
-                return stored ? JSON.parse(stored) : [{ id: 'p1', title: 'Derin Okuma (20dk)', completed: false }, { id: 'p2', title: 'Su Tüketimi (2.5L)', completed: false }, { id: 'p3', title: 'Antrenman', completed: false }];
-             } catch { return []; }
+            try { return JSON.parse(localStorage.getItem('elysian_protocols')) || [{id:'p1', title:'Derin Okuma', completed:false}, {id:'p2', title:'Su (2.5L)', completed:false}, {id:'p3', title:'Antrenman', completed:false}]; } catch { return []; }
           });
-          const [neuralState, setNeuralState] = useState(() => {
-             try {
-               const stored = localStorage.getItem('elysian_core_v5_state');
-               return stored ? JSON.parse(stored) : { zapScore: 0, hasSeenOnboarding: false, lastActive: new Date().toISOString() };
-             } catch { return { zapScore: 0, hasSeenOnboarding: false }; }
+          const [state, setState] = useState(() => {
+            try { return JSON.parse(localStorage.getItem('elysian_state')) || { zapScore: 0, hasSeenOnboarding: false }; } catch { return { zapScore: 0, hasSeenOnboarding: false }; }
           });
-          const [permission, setPermission] = useState(Notification.permission);
-          
-          // Component State
+
           const [prayerTimes, setPrayerTimes] = useState([]);
-          const [systemMessage, setSystemMessage] = useState("Sistem başlatılıyor...");
-          const [isMessageVisible, setIsMessageVisible] = useState(false);
-          const [showGuide, setShowGuide] = useState(false);
-          const [isEditorOpen, setIsEditorOpen] = useState(false);
+          const [toast, setToast] = useState({ msg: '', show: false });
+          const [isEditorOpen, setEditorOpen] = useState(false);
           const [editingTask, setEditingTask] = useState(null);
+          const [guideOpen, setGuideOpen] = useState(!state.hasSeenOnboarding);
 
-          // --- SAVING LOGIC (The "Save" Button is automatic now) ---
-          useEffect(() => { localStorage.setItem('elysian_core_v5_tasks', JSON.stringify(tasks)); }, [tasks]);
-          useEffect(() => { localStorage.setItem('elysian_core_v5_protocols', JSON.stringify(protocols)); }, [protocols]);
-          useEffect(() => { localStorage.setItem('elysian_core_v5_state', JSON.stringify(neuralState)); }, [neuralState]);
-
-          // --- NEURAL NAGGING & NOTIFICATIONS ---
-          const sendNotification = (title, body) => {
-            if (Notification.permission === 'granted') {
-              try {
-                new Notification(title, { body, icon: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/72x72/26a1.png', vibrate: [200, 100, 200] });
-              } catch(e) { console.log('Notif error', e); }
-            }
-          };
-
-          const requestPermission = async () => {
-            const result = await Notification.requestPermission();
-            setPermission(result);
-            if (result === 'granted') {
-              triggerSystemMessage("BİLDİRİM AĞI AKTİF.");
-              sendNotification("DİSİPLİN AKTİF", "Sistem seni izlemeye başladı.");
-            }
-          };
-
-          useEffect(() => {
-             const checkInterval = setInterval(() => {
-                const now = new Date();
-                const h = now.getHours();
-                const m = now.getMinutes();
-                const currentMin = h * 60 + m;
-                
-                // 1. Prayer Checks
-                const pts = calculatePrayerTimes();
-                setPrayerTimes(pts);
-                pts.forEach(p => {
-                  const pMin = Math.floor(p.raw);
-                  if (currentMin === pMin) {
-                     sendNotification("NAMAZ VAKTİ", `${p.name} girdi. Matris'ten kop, secdeye bağlan.`);
-                  }
-                });
-
-                // 2. Task Checks
-                const todayName = DAYS[now.getDay() === 0 ? 6 : now.getDay() - 1];
-                tasks.forEach(t => {
-                   if (t.day === todayName && t.status !== 'COMPLETED') {
-                      const [th, tm] = t.startTime.split(':').map(Number);
-                      if (th === h && tm === m) {
-                         sendNotification("GÖREV ZAMANI", `${t.title} - Şimdi başla. Erteleme.`);
-                      }
-                   }
-                });
-             }, 30000); // Check every 30s
-
-             // 3. Random Nagging (Every 45 mins)
-             const nagInterval = setInterval(() => {
-                if (Math.random() > 0.3) {
-                   sendNotification("DİSİPLİN KONTROLÜ", "45 dakika geçti. Hala odakta mısın yoksa kaytarıyor musun?");
-                }
-             }, 45 * 60 * 1000);
-
-             return () => { clearInterval(checkInterval); clearInterval(nagInterval); };
-          }, [tasks]);
-
-          useEffect(() => { if (!neuralState.hasSeenOnboarding) setTimeout(() => setShowGuide(true), 500); }, []);
-
-          const triggerSystemMessage = (msg) => { setSystemMessage(msg); setIsMessageVisible(true); setTimeout(() => setIsMessageVisible(false), 4000); };
-
-          const handleTaskAction = (action, id) => {
-            if (action === 'DELETE') { setTasks(prev => prev.filter(t => t.id !== id)); triggerSystemMessage("Görev silindi."); return; }
-            setTasks(prev => prev.map(t => {
-              if (t.id === id) {
-                if (action === 'COMPLETE') {
-                  setNeuralState(s => ({ ...s, zapScore: s.zapScore + t.impact })); triggerSystemMessage(getSystemMessage('SUCCESS')); return { ...t, status: 'COMPLETED' };
-                } else if (action === 'UNDO') {
-                  setNeuralState(s => ({ ...s, zapScore: Math.max(0, s.zapScore - t.impact) })); triggerSystemMessage("Geri alındı."); return { ...t, status: 'PENDING' };
-                }
-              }
-              return t;
-            }));
-          };
+          // EFEKTLER
+          useEffect(() => { localStorage.setItem('elysian_tasks', JSON.stringify(tasks)); }, [tasks]);
+          useEffect(() => { localStorage.setItem('elysian_protocols', JSON.stringify(protocols)); }, [protocols]);
+          useEffect(() => { localStorage.setItem('elysian_state', JSON.stringify(state)); }, [state]);
           
-          const handleSaveTask = (taskData) => {
-            if (taskData.id) { setTasks(prev => prev.map(t => t.id === taskData.id ? { ...t, ...taskData } : t)); triggerSystemMessage("Görev güncellendi."); }
-            else { const newTask = { id: generateId(), ...taskData, status: 'PENDING', impact: 70 }; setTasks(prev => [...prev, newTask]); triggerSystemMessage("Görev eklendi."); }
+          useEffect(() => {
+            const loader = document.getElementById('loader');
+            if(loader) { loader.style.opacity = '0'; setTimeout(()=>loader.remove(),500); }
+            updatePrayers();
+            const interval = setInterval(updatePrayers, 60000);
+            return () => clearInterval(interval);
+          }, []);
+
+          const updatePrayers = () => {
+            const d = new Date(), now = d.getHours()*60 + d.getMinutes();
+            // Basitleştirilmiş Namaz Vakti Hesabı (Temsili)
+            const times = [{n:'İMSAK',t:300}, {n:'ÖĞLE',t:780}, {n:'İKİNDİ',t:1000}, {n:'AKŞAM',t:1200}, {n:'YATSI',t:1300}];
+            setPrayerTimes(times.map(t => ({
+              ...t, time: `${Math.floor(t.t/60).toString().padStart(2,'0')}:${(t.t%60).toString().padStart(2,'0')}`,
+              active: now >= t.t && now < t.t+60
+            })));
+          };
+
+          const showToast = (msg) => { setToast({msg, show:true}); setTimeout(()=>setToast({msg:'', show:false}), 3000); };
+          
+          const handleTask = (id, type) => {
+             if(type === 'DEL') { setTasks(t => t.filter(x=>x.id!==id)); showToast('Görev Silindi'); return; }
+             setTasks(prev => prev.map(t => {
+               if(t.id !== id) return t;
+               const isDone = type === 'DONE';
+               setState(s => ({...s, zapScore: s.zapScore + (isDone ? t.impact || 50 : -(t.impact || 50))}));
+               showToast(isDone ? 'İrade Güçlendi' : 'Geri Alındı');
+               return {...t, status: isDone ? 'COMPLETED' : 'PENDING'};
+             }));
           };
 
           return (
-            <div className="min-h-screen bg-black text-gray-200 font-sans pb-48 overflow-x-hidden">
-              <div className="fixed inset-0 pointer-events-none z-0">
-                <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-emerald-900/10 rounded-full blur-[120px] animate-pulse-slow" />
-              </div>
-
-              <NeuralGuide isOpen={showGuide} onClose={() => { setShowGuide(false); setNeuralState(s => ({...s, hasSeenOnboarding: true})); }} />
-              <TaskEditor isOpen={isEditorOpen} onClose={() => setIsEditorOpen(false)} onSave={handleSaveTask} initialTask={editingTask} />
-
-              <header className="sticky top-0 z-50 pt-safe-top bg-black/80 backdrop-blur-xl border-b border-white/5">
-                <div className="px-6 py-4 flex justify-between items-center">
-                  <div className="flex items-center space-x-3"><div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/50 flex items-center justify-center"><div className="w-3 h-3 bg-emerald-400 rounded-sm rotate-45"></div></div><h1 className="text-xl font-extrabold italic tracking-tighter text-white font-jakarta">YUSUF | V5</h1></div>
-                  <div className="flex items-center space-x-3">
-                     <div className="flex items-center space-x-1.5 mr-2"><Zap className="w-3.5 h-3.5 text-yellow-400" /><span className="text-lg font-bold text-white tabular-nums">{neuralState.zapScore}</span></div>
-                     <button onClick={() => { if(confirm('Tüm veriler silinsin mi?')) { localStorage.clear(); window.location.reload(); } }} className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-white/50 hover:text-rose-400"><Trash2 className="w-4 h-4" /></button>
-                  </div>
+            <div className="min-h-screen bg-black text-white font-sans pb-32 overflow-x-hidden selection:bg-emerald-500/30">
+              <div className="fixed inset-0 bg-neural-gradient pointer-events-none opacity-50"></div>
+              
+              {/* HEADER */}
+              <header className="sticky top-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex justify-between items-center">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/40 flex items-center justify-center"><div className="w-2 h-2 bg-emerald-400 rotate-45"></div></div>
+                  <h1 className="text-lg font-black tracking-tighter italic">YUSUF <span className="text-emerald-500">V5</span></h1>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2 px-3 py-1 bg-white/5 rounded-full border border-white/5"><Zap className="text-yellow-400 w-4 h-4"/><span className="font-mono font-bold text-sm">{state.zapScore}</span></div>
+                  <button onClick={()=>{if(confirm('Tüm veriler silinsin mi?')){localStorage.clear();location.reload()}}} className="text-white/30 hover:text-red-500"><Trash2 className="w-4 h-4"/></button>
                 </div>
               </header>
 
-              <main className="relative z-10 max-w-2xl mx-auto">
-                <div className="px-6 py-6 overflow-x-auto no-scrollbar mask-linear-fade">
-                  <div className="flex space-x-3 min-w-max">
-                    {prayerTimes.map((p, i) => (
-                      <div key={i} className={`flex flex-col pl-4 pr-8 py-3 rounded-xl border transition-all ${p.isActive ? 'bg-emerald-950/30 border-emerald-500/50 scale-105' : 'bg-white/[0.02] border-white/5 grayscale opacity-60'}`}>
-                        <span className={`text-[9px] font-black tracking-[0.2em] mb-1 ${p.isActive ? 'text-emerald-400' : 'text-gray-600'}`}>{p.name}</span>
-                        <span className="text-xl font-mono tracking-tighter text-white">{p.time}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className={`fixed top-[140px] left-0 right-0 z-40 pointer-events-none flex justify-center transition-all duration-500 ${isMessageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
-                  <div className="bg-black/90 border border-emerald-500/30 px-5 py-2.5 rounded-full shadow-lg flex items-center space-x-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /><p className="text-emerald-50 text-[10px] font-mono tracking-widest uppercase">{systemMessage}</p></div>
-                </div>
-
-                <div className="px-6 mb-6">
-                  {protocols.map(p => (
-                    <button key={p.id} onClick={() => setProtocols(prev => prev.map(proto => proto.id === p.id ? { ...proto, completed: !proto.completed } : proto))} className={`w-full flex items-center justify-between p-3 rounded-lg border mb-2 transition-all ${p.completed ? 'bg-emerald-900/10 border-emerald-500/30' : 'bg-white/5 border-white/5'}`}>
-                       <div className="flex items-center space-x-3"><div className={`w-4 h-4 rounded border flex items-center justify-center ${p.completed ? 'bg-emerald-500 border-emerald-500' : 'border-white/20'}`}>{p.completed && <CheckCircle2 className="w-3 h-3 text-black" />}</div><span className={`text-xs font-bold ${p.completed ? 'text-emerald-400' : 'text-gray-400'}`}>{p.title}</span></div>
-                    </button>
+              {/* MAIN CONTENT */}
+              <main className="px-6 mt-6 relative z-10 max-w-2xl mx-auto">
+                {/* PRAYER TIMES */}
+                <div className="flex space-x-3 overflow-x-auto no-scrollbar mb-8 pb-2">
+                  {prayerTimes.map((p,i) => (
+                    <div key={i} className={`flex flex-col p-3 rounded-xl border min-w-[90px] transition-all ${p.active ? 'bg-emerald-900/20 border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.1)]' : 'bg-white/5 border-white/5 opacity-50'}`}>
+                      <span className="text-[9px] font-black tracking-widest text-emerald-500/80 mb-1">{p.n}</span>
+                      <span className="text-lg font-mono font-bold">{p.time}</span>
+                    </div>
                   ))}
                 </div>
 
-                <div className="px-4 space-y-6">
-                  {DAYS.map(day => {
-                    const dayTasks = tasks.filter(t => t.day === day).sort((a, b) => a.startTime.localeCompare(b.startTime));
-                    if (dayTasks.length === 0) return null;
-                    return (
-                      <div key={day} className="animate-in slide-in-from-bottom duration-500">
-                        <div className="flex items-center space-x-4 mb-3 px-2"><div className="h-[1px] flex-1 bg-white/10" /><h2 className="text-sm font-black tracking-[0.2em] text-emerald-500 uppercase">{day}</h2><div className="h-[1px] flex-1 bg-white/10" /></div>
-                        <div>{dayTasks.map(task => {
-                           const isCompleted = task.status === 'COMPLETED';
-                           const cat = CATEGORIES.find(c => c.value === task.category) || CATEGORIES[7];
-                           return (
-                             <div key={task.id} className={`relative overflow-hidden rounded-xl border mb-3 transition-all ${isCompleted ? 'bg-gray-900/50 border-white/5 opacity-50' : 'bg-white/[0.03] border-white/10'}`}>
-                               <div className={`absolute left-0 top-0 bottom-0 w-1 ${isCompleted ? 'bg-gray-600' : cat.color.split(' ')[0]}`} />
-                               <div className="p-4 pl-5">
-                                 <h4 className={`font-jakarta font-medium text-sm mb-1 ${isCompleted ? 'line-through text-gray-500' : 'text-white'}`}>{task.title}</h4>
-                                 <div className="flex items-center space-x-3 text-xs font-mono text-gray-500"><span>{task.startTime}-{task.endTime}</span><span className={`px-1 rounded ${cat.color}`}>{cat.label}</span></div>
-                                 <div className="flex items-center space-x-2 mt-4">
-                                   <button onClick={() => handleTaskAction(isCompleted ? 'UNDO' : 'COMPLETE', task.id)} className={`flex-1 text-xs font-bold py-2 rounded flex items-center justify-center space-x-1 ${isCompleted ? 'bg-gray-800' : 'bg-emerald-600 text-black'}`}>{isCompleted ? 'GERİ AL' : 'TAMAMLA'}</button>
-                                   <button onClick={() => { setEditingTask(task); setIsEditorOpen(true); }} className="px-3 py-2 bg-blue-600/20 text-blue-400 rounded"><Edit2 className="w-3.5 h-3.5" /></button>
-                                   <button onClick={() => handleTaskAction('DELETE', task.id)} className="px-3 py-2 bg-red-600/20 text-red-400 rounded"><Trash2 className="w-3.5 h-3.5" /></button>
-                                 </div>
-                               </div>
-                             </div>
-                           );
-                        })}</div>
+                {/* PROTOCOLS */}
+                <div className="space-y-3 mb-10">
+                  {protocols.map(p => (
+                    <div key={p.id} onClick={()=>setProtocols(prev=>prev.map(x=>x.id===p.id?{...x,completed:!x.completed}:x))} className={`p-4 rounded-xl border flex items-center cursor-pointer transition-all ${p.completed ? 'bg-emerald-900/10 border-emerald-500/40' : 'bg-white/5 border-white/5 hover:bg-white/10'}`}>
+                      <div className={`w-5 h-5 rounded border flex items-center justify-center mr-4 transition-colors ${p.completed ? 'bg-emerald-500 border-emerald-500' : 'border-white/20'}`}>
+                        {p.completed && <CheckCircle2 className="w-3.5 h-3.5 text-black" />}
                       </div>
-                    );
-                  })}
+                      <span className={`font-bold text-sm ${p.completed ? 'text-emerald-400 line-through' : 'text-gray-300'}`}>{p.title}</span>
+                    </div>
+                  ))}
                 </div>
+
+                {/* TASKS */}
+                {['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'].map(day => {
+                  const dTasks = tasks.filter(t=>t.day===day).sort((a,b)=>a.startTime.localeCompare(b.startTime));
+                  if(!dTasks.length) return null;
+                  return (
+                    <div key={day} className="mb-8">
+                      <div className="flex items-center mb-4"><div className="h-px bg-white/10 flex-1"/><span className="px-3 text-[10px] font-black text-emerald-600 tracking-[0.2em]">{day.toUpperCase()}</span><div className="h-px bg-white/10 flex-1"/></div>
+                      <div className="space-y-3">
+                        {dTasks.map(t => {
+                          const isDone = t.status === 'COMPLETED';
+                          const cat = CATEGORIES[t.category] || CATEGORIES.DIGER;
+                          return (
+                            <div key={t.id} className={`relative rounded-2xl border overflow-hidden transition-all group ${isDone ? 'bg-black/40 border-white/5 opacity-50' : 'glass-panel border-white/10 hover:border-emerald-500/30'}`}>
+                              <div className={`absolute left-0 top-0 bottom-0 w-1 ${isDone ? 'bg-gray-700' : cat.color}`}/>
+                              <div className="p-5 pl-6">
+                                <div className="flex justify-between items-start mb-2">
+                                  <span className={`text-[9px] font-black px-2 py-0.5 rounded bg-white/5 text-gray-400 mb-2 inline-block`}>{cat.label}</span>
+                                  <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onClick={()=>{setEditingTask(t);setEditorOpen(true)}} className="p-1.5 hover:bg-white/10 rounded"><Edit2 className="w-3.5 h-3.5 text-gray-400"/></button>
+                                    <button onClick={()=>handleTask(t.id,'DEL')} className="p-1.5 hover:bg-red-900/20 rounded"><Trash2 className="w-3.5 h-3.5 text-red-400"/></button>
+                                  </div>
+                                </div>
+                                <h4 className={`text-base font-bold mb-3 ${isDone?'line-through text-gray-600':'text-gray-200'}`}>{t.title}</h4>
+                                <div className="flex justify-between items-center pt-3 border-t border-white/5">
+                                  <span className="font-mono text-xs text-gray-500">{t.startTime} - {t.endTime}</span>
+                                  <button onClick={()=>handleTask(t.id, isDone?'UNDO':'DONE')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black tracking-widest ${isDone?'bg-gray-800 text-gray-500':'bg-emerald-600 text-black hover:bg-emerald-500'}`}>{isDone?'GERİ AL':'TAMAMLA'}</button>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
               </main>
 
-              {/* DİSİPLİN BUTONU (Notification Trigger) */}
-              {permission !== 'granted' && (
-                <div className="fixed bottom-24 left-0 right-0 z-50 px-6 flex justify-center animate-bounce">
-                  <button onClick={requestPermission} className="bg-red-600 hover:bg-red-500 text-white font-black text-xs py-3 px-6 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)] flex items-center space-x-2 tracking-widest uppercase border-2 border-red-400">
-                    <BellRing className="w-4 h-4" /> <span>DİSİPLİN MODUNU AÇ</span>
-                  </button>
+              {/* TOAST MESSAGE */}
+              <div className={`fixed top-24 left-1/2 -translate-x-1/2 bg-emerald-900/80 border border-emerald-500/50 text-white px-6 py-3 rounded-full flex items-center space-x-3 backdrop-blur-md shadow-2xl transition-all duration-300 z-50 ${toast.show ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
+                 <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"/>
+                 <span className="text-xs font-bold tracking-widest">{toast.msg}</span>
+              </div>
+
+              {/* FAB */}
+              <div className="fixed bottom-8 left-6 right-6 z-40">
+                <button onClick={()=>{setEditingTask(null);setEditorOpen(true)}} className="w-full h-14 bg-emerald-600 hover:bg-emerald-500 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all active:scale-95">
+                  <Plus className="text-black w-6 h-6 mr-2" />
+                  <span className="text-black font-black tracking-[0.2em] text-sm">GÖREV EKLE</span>
+                </button>
+              </div>
+
+              {/* EDITOR MODAL */}
+              {isEditorOpen && (
+                <div className="fixed inset-0 z-[60] bg-black/90 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+                  <div className="w-full max-w-lg bg-[#0a0a0a] border border-white/10 rounded-3xl p-6 shadow-2xl animate-pulse-slow">
+                    <div className="flex justify-between mb-6"><h3 className="font-bold">GÖREV</h3><button onClick={()=>setEditorOpen(false)}><X/></button></div>
+                    <form onSubmit={(e)=>{
+                      e.preventDefault();
+                      const fd = new FormData(e.target);
+                      const data = Object.fromEntries(fd);
+                      if(editingTask) setTasks(p=>p.map(x=>x.id===editingTask.id?{...x, ...data}:x));
+                      else setTasks(p=>[...p, {id:generateId(), status:'PENDING', impact:70, ...data}]);
+                      setEditorOpen(false);
+                      showToast(editingTask?'Güncellendi':'Eklendi');
+                    }} className="space-y-4">
+                      <input name="title" required defaultValue={editingTask?.title} placeholder="Görev Adı" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 outline-none focus:border-emerald-500"/>
+                      <div className="grid grid-cols-2 gap-4">
+                        <select name="day" defaultValue={editingTask?.day||'Pazartesi'} className="bg-black border border-white/10 rounded-xl p-3 text-sm">{['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'].map(d=><option key={d} value={d}>{d}</option>)}</select>
+                        <select name="category" defaultValue={editingTask?.category||'DIGER'} className="bg-black border border-white/10 rounded-xl p-3 text-sm">{Object.entries(CATEGORIES).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}</select>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <input name="startTime" type="time" required defaultValue={editingTask?.startTime} className="bg-white/5 border border-white/10 rounded-xl p-3"/>
+                        <input name="endTime" type="time" required defaultValue={editingTask?.endTime} className="bg-white/5 border border-white/10 rounded-xl p-3"/>
+                      </div>
+                      <button className="w-full bg-emerald-600 h-12 rounded-xl text-black font-bold mt-2">KAYDET</button>
+                    </form>
+                  </div>
                 </div>
               )}
-
-              <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black via-black/95 to-transparent pt-10 pb-6 px-6">
-                <button onClick={() => { setEditingTask(null); setIsEditorOpen(true); }} className="w-full h-14 bg-emerald-600 rounded-2xl flex items-center justify-center text-black font-bold text-sm tracking-widest hover:bg-emerald-500 transition-colors shadow-[0_0_20px_rgba(16,185,129,0.3)] active:scale-98"><Plus className="w-5 h-5 mr-2" /> YENİ GÖREV EKLE</button>
-              </div>
             </div>
           );
         };
