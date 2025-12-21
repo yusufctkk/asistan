@@ -10,14 +10,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#09090b">
-    <link rel="icon" type="image/svg+xml" href="https://api.iconify.design/lucide:cpu.svg?color=%2310b981">
-    <link rel="apple-touch-icon" href="https://api.iconify.design/lucide:cpu.svg?color=%2310b981">
+    <link rel="icon" type="image/png" href="/icon-192.png">
+    <link rel="apple-touch-icon" href="/icon-192.png">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="apple-touch-icon" href="https://api.iconify.design/lucide:cpu.svg?color=%2310b981">
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -1264,7 +1264,7 @@
                      navigator.serviceWorker.ready.then(registration => {
                          registration.showNotification(title, {
                              body: body,
-                             icon: "https://api.iconify.design/lucide:cpu.svg?color=%2310b981",
+                             icon: "/icon-192.png",
                              vibrate: [200, 100, 200],
                              tag: tag,
                              requireInteraction: true // Keep notification until user interacts
@@ -1273,7 +1273,7 @@
                  } else {
                      new Notification(title, {
                          body: body,
-                         icon: "https://api.iconify.design/lucide:cpu.svg?color=%2310b981",
+                         icon: "/icon-192.png",
                          requireInteraction: true
                      });
                  }
@@ -1288,7 +1288,7 @@
                         try {
                              new Notification("Corthon OS", {
                                 body: "Test sinyali başarılı. Sistem izleniyor.",
-                                icon: "https://api.iconify.design/lucide:cpu.svg?color=%2310b981"
+                                icon: "/icon-192.png"
                             });
                         } catch(e) {}
                     } else {
