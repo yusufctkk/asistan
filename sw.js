@@ -10,6 +10,8 @@ const ASSETS_TO_CACHE = [
 ];
 
 self.addEventListener('install', (event) => {
+  // Force the waiting service worker to become the active service worker.
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
@@ -26,6 +28,8 @@ self.addEventListener('fetch', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
+  // Tell the active service worker to take control of the page immediately.
+  event.waitUntil(clients.claim());
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -35,6 +39,28 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
+    })
+  );
+});
+
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({
+      type: 'window',
+      includeUncontrolled: true
+    }).then(function(clientList) {
+      // Focus existing window if available
+      for (var i = 0; i < clientList.length; i++) {
+        var client = clientList[i];
+        if (client.url === '/' && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // Otherwise open new window
+      if (clients.openWindow) {
+        return clients.openWindow('/');
+      }
     })
   );
 });
