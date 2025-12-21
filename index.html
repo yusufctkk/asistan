@@ -6,12 +6,12 @@
     <title>CORTHON // NEURAL OS</title>
     
     <!-- PWA Meta Tags -->
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#09090b">
-    <link rel="icon" type="image/png" href="/icon-192.png">
-    <link rel="apple-touch-icon" href="/icon-192.png">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -158,7 +158,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker.register('sw.js')
                     .then(req => console.log('Corthon Service Worker Registered'))
                     .catch(err => console.log('Service Worker Failed', err));
             });
@@ -1264,7 +1264,7 @@
                      navigator.serviceWorker.ready.then(registration => {
                          registration.showNotification(title, {
                              body: body,
-                             icon: "/icon-192.png",
+                             icon: "icon-192.png",
                              vibrate: [200, 100, 200],
                              tag: tag,
                              requireInteraction: true // Keep notification until user interacts
@@ -1273,7 +1273,7 @@
                  } else {
                      new Notification(title, {
                          body: body,
-                         icon: "/icon-192.png",
+                         icon: "icon-192.png",
                          requireInteraction: true
                      });
                  }
@@ -1288,7 +1288,7 @@
                         try {
                              new Notification("Corthon OS", {
                                 body: "Test sinyali başarılı. Sistem izleniyor.",
-                                icon: "/icon-192.png"
+                                icon: "icon-192.png"
                             });
                         } catch(e) {}
                     } else {
