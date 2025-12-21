@@ -17,7 +17,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="https://api.iconify.design/lucide:cpu.svg?color=%2310b981">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -456,6 +456,53 @@
             return routine;
         };
 
+        // --- BACKGROUND WORKER CODE (BLOB) ---
+        // This runs in a separate thread, which is throttled less than the main UI thread
+        const backgroundWorkerCode = `
+        self.tasks = {};
+        self.sentNotifications = {};
+
+        self.onmessage = function(e) {
+            if (e.data.type === 'UPDATE_SCHEDULE') {
+                self.tasks = e.data.payload;
+            }
+            if (e.data.type === 'SYNC_SENT_LOG') {
+                self.sentNotifications = e.data.payload;
+            }
+        };
+
+        setInterval(() => {
+            // "Tick" every 10 seconds to check for notifications
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            const dayId = now.getDay();
+            const dateStr = now.toISOString().split('T')[0];
+            
+            const todayTasks = self.tasks[dayId] || [];
+
+            todayTasks.forEach(task => {
+                if (task.completed) return;
+                
+                const key = dateStr + '-' + task.id + '-' + timeStr;
+                
+                // If time matches and NOT sent yet
+                if (task.time === timeStr && !self.sentNotifications[key]) {
+                    self.sentNotifications[key] = true;
+                    
+                    const title = task.category === 'NAMAZ' ? 'Vakit Girdi: ' + task.title : 'Görev Zamanı: ' + task.title;
+                    const body = task.note || "Disiplin protokolünü uygula.";
+                    
+                    self.postMessage({
+                        type: 'TRIGGER_NOTIFICATION',
+                        title: title,
+                        body: body,
+                        key: key
+                    });
+                }
+            });
+        }, 10000); // Check every 10 seconds
+        `;
+
         // --- COMPONENTS ---
 
         const CorthonLogo = () => (
@@ -466,6 +513,40 @@
                 <path d="M9.5 9.5C9.5 9.5 10 12 14 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
         );
+
+        const PermissionModal = ({ onGrant, onSkip }) => {
+            return (
+                <div className="fixed inset-0 z-[250] bg-black/90 flex flex-col items-center justify-center p-6 animate-fade-in backdrop-blur-md">
+                    <div className="max-w-sm w-full bg-[#121214] border border-corthon-emerald/50 rounded-2xl p-6 text-center relative overflow-hidden shadow-[0_0_50px_rgba(16,185,129,0.2)]">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-corthon-emerald to-transparent animate-pulse"></div>
+                        
+                        <Bell size={48} className="mx-auto text-corthon-emerald mb-4 animate-bounce" />
+                        
+                        <h2 className="text-xl font-bold text-white mb-2">SİNYAL BAĞLANTISI</h2>
+                        <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                            Nöral protokollerin ve manevi çağrıların zamanında iletilmesi için <span className="text-corthon-emerald font-bold">bildirim izni</span> gereklidir.
+                            <br/><br/>
+                            <span className="text-xs text-gray-500">Not: En iyi performans için uygulamayı "Arka Planda" tutun, tamamen kapatmayın.</span>
+                        </p>
+
+                        <div className="space-y-3">
+                            <button 
+                                onClick={onGrant}
+                                className="w-full py-4 bg-corthon-emerald text-black font-bold rounded-xl hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-900/40 flex items-center justify-center gap-2"
+                            >
+                                <Zap size={18} fill="black" /> BAĞLANTIYI KUR
+                            </button>
+                            <button 
+                                onClick={onSkip}
+                                className="text-xs text-gray-500 hover:text-gray-300 underline"
+                            >
+                                Manuel Modda Devam Et
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
 
         const TutorialOverlay = ({ step, onNext, onSkip }) => {
             if (step === 0) return null;
@@ -1053,6 +1134,48 @@
             // Tutorial State
             const [tutorialStep, setTutorialStep] = useState(0);
 
+            // Permission Modal State
+            const [showPermissionModal, setShowPermissionModal] = useState(false);
+            
+            // Background Worker Reference
+            const workerRef = useRef(null);
+            // Track sent notifications locally to avoid duplicates in current session, and sync to worker
+            const [sentNotifications, setSentNotifications] = useState({});
+
+            // Initialize Background Worker
+            useEffect(() => {
+                // Create Worker from Blob
+                const blob = new Blob([backgroundWorkerCode], { type: "application/javascript" });
+                const worker = new Worker(URL.createObjectURL(blob));
+                workerRef.current = worker;
+
+                worker.onmessage = (e) => {
+                    if (e.data.type === 'TRIGGER_NOTIFICATION') {
+                        const { title, body, key } = e.data;
+                        
+                        // Double check in main thread just in case
+                        if (!sentNotifications[key]) {
+                            showNotification(title, body, key);
+                            setSentNotifications(prev => {
+                                const newVal = { ...prev, [key]: true };
+                                // Sync back to worker
+                                worker.postMessage({ type: 'SYNC_SENT_LOG', payload: newVal });
+                                return newVal;
+                            });
+                        }
+                    }
+                };
+
+                return () => worker.terminate();
+            }, []); // Run once on mount
+
+            // Sync Tasks to Worker whenever they change
+            useEffect(() => {
+                if (workerRef.current) {
+                    workerRef.current.postMessage({ type: 'UPDATE_SCHEDULE', payload: tasks });
+                }
+            }, [tasks]);
+
             useEffect(() => {
                 const initSystem = async () => {
                     // Load DB...
@@ -1089,10 +1212,7 @@
                             newTasks[dayId] = newTasks[dayId].map(t => {
                                 if (t.category === 'NAMAZ' && t.id.includes('prayer_')) {
                                     let timeStr = t.time;
-                                    // Map prayer indices to fetched data (Aladhan array order: Imsak, Gunes, Ogle, Ikindi, Aksam, Yatsi)
-                                    // Original template order: Sabah(0), Ogle(1), Ikindi(2), Aksam(3), Yatsi(4)
-                                    // Sabah Namazi typically associated with Imsak time for start
-                                    
+                                    // Map prayer indices to fetched data
                                     if (t.id.includes('_0')) timeStr = times.find(x => x.name === 'İMSAK')?.time || t.time;
                                     if (t.id.includes('_1')) timeStr = times.find(x => x.name === 'ÖĞLE')?.time || t.time;
                                     if (t.id.includes('_2')) timeStr = times.find(x => x.name === 'İKİNDİ')?.time || t.time;
@@ -1114,6 +1234,13 @@
                     if (!hasCompletedTutorial) {
                         setTimeout(() => setTutorialStep(1), 3500); // Wait for boot animation
                     }
+
+                    // Check Permission for Notifications
+                    if ('Notification' in window) {
+                         if (Notification.permission === 'default') {
+                             setTimeout(() => setShowPermissionModal(true), 4000);
+                         }
+                    }
                 };
                 initSystem();
             }, []);
@@ -1128,6 +1255,48 @@
                 const timeout = setTimeout(saveData, 1000);
                 return () => clearTimeout(timeout);
             }, [xp, streak, tasks, history, settings, mounted]);
+
+            // Helper to show actual notification
+            const showNotification = (title, body, tag) => {
+                if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+                if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+                     navigator.serviceWorker.ready.then(registration => {
+                         registration.showNotification(title, {
+                             body: body,
+                             icon: "https://api.iconify.design/lucide:cpu.svg?color=%2310b981",
+                             vibrate: [200, 100, 200],
+                             tag: tag,
+                             requireInteraction: true // Keep notification until user interacts
+                         });
+                     });
+                 } else {
+                     new Notification(title, {
+                         body: body,
+                         icon: "https://api.iconify.design/lucide:cpu.svg?color=%2310b981",
+                         requireInteraction: true
+                     });
+                 }
+                 playSound('click');
+            };
+
+            const requestNotificationAccess = () => {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        playSound('success');
+                        showToast("SİNYAL HATTI AÇIK: Bildirimler Aktif", "success");
+                        try {
+                             new Notification("Corthon OS", {
+                                body: "Test sinyali başarılı. Sistem izleniyor.",
+                                icon: "https://api.iconify.design/lucide:cpu.svg?color=%2310b981"
+                            });
+                        } catch(e) {}
+                    } else {
+                        showToast("BAĞLANTI REDDEDİLDİ: Manuel Takip Gerekli", "warning");
+                    }
+                    setShowPermissionModal(false);
+                });
+            };
 
             const showToast = (msg, type = 'success') => {
                 setToast({ msg, type });
@@ -1429,6 +1598,14 @@
                     
                     <TutorialOverlay step={tutorialStep} onNext={nextTutorialStep} onSkip={finishTutorial} />
 
+                    {/* Permission Modal */}
+                    {showPermissionModal && (
+                        <PermissionModal 
+                            onGrant={requestNotificationAccess} 
+                            onSkip={() => setShowPermissionModal(false)} 
+                        />
+                    )}
+
                     {/* Reset Overlay */}
                     {isResetting && (
                          <div className="fixed inset-0 z-[300] bg-black/80 flex flex-col items-center justify-center backdrop-blur-sm">
@@ -1631,4 +1808,3 @@
     </script>
 </body>
 </html>
-
