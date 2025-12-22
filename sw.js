@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'corthon-os-v2';
+const CACHE_NAME = 'corthon-os-v3';
 const ASSETS_TO_CACHE = [
   './',
   'index.html',
