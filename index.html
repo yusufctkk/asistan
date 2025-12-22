@@ -472,9 +472,13 @@
         };
 
         setInterval(() => {
-            // "Tick" every 10 seconds to check for notifications
+            // "Tick" every 5 seconds to be more precise
             const now = new Date();
-            const timeStr = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+            // Force strict HH:MM formatting to avoid locale issues
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const timeStr = \`\${hours}:\${minutes}\`;
+            
             const dayId = now.getDay();
             const dateStr = now.toISOString().split('T')[0];
             
@@ -485,7 +489,7 @@
                 
                 const key = dateStr + '-' + task.id + '-' + timeStr;
                 
-                // If time matches and NOT sent yet
+                // Compare exact string HH:MM
                 if (task.time === timeStr && !self.sentNotifications[key]) {
                     self.sentNotifications[key] = true;
                     
@@ -500,7 +504,7 @@
                     });
                 }
             });
-        }, 10000); // Check every 10 seconds
+        }, 5000); // Check every 5 seconds
         `;
 
         // --- COMPONENTS ---
@@ -1186,7 +1190,12 @@
                             setStreak(savedData.streak || 0);
                             setTasks({ ...generateInitialRoutine(), ...savedData.tasks });
                             setHistory(savedData.history || {});
-                            setAppSettings(savedData.settings || { notifications: false, sync: false });
+                            // Check permission and sync settings
+                            const isPermGranted = Notification.permission === 'granted';
+                            setAppSettings({
+                                ...(savedData.settings || { notifications: false, sync: false }),
+                                notifications: isPermGranted // Force sync with actual permission
+                            });
                         } else {
                              const localData = localStorage.getItem('corthon_pro_v1');
                              if(localData) {
@@ -1195,6 +1204,11 @@
                                 setStreak(parsed.streak || 0);
                                 setTasks(parsed.tasks || generateInitialRoutine());
                                 setHistory(parsed.history || {});
+                                const isPermGranted = Notification.permission === 'granted';
+                                setAppSettings({
+                                    ...(parsed.settings || { notifications: false, sync: false }),
+                                    notifications: isPermGranted
+                                });
                              }
                         }
                     } catch (e) {
@@ -1284,6 +1298,8 @@
                 Notification.requestPermission().then(permission => {
                     if (permission === 'granted') {
                         playSound('success');
+                        // Auto-enable setting
+                        setAppSettings(prev => ({ ...prev, notifications: true }));
                         showToast("SİNYAL HATTI AÇIK: Bildirimler Aktif", "success");
                         try {
                              new Notification("Corthon OS", {
