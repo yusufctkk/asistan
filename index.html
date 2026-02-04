@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>CORTHON // NEURAL OS</title>
     
-    <!-- PWA & Meta -->
-    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiQ09RVEhPTiIs" id="dynamic-manifest">
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#09090b">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,12 +45,10 @@
                     },
                     animation: {
                         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'slide-up': 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-                        'fade-in': 'fadeIn 0.4s ease-out forwards',
-                        'boot-bar': 'bootBar 1.5s ease-out forwards',
+                        'slide-up': 'slideUp 0.3s ease-out forwards',
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'boot-text': 'bootText 2s steps(40, end)',
                         'float': 'float 3s ease-in-out infinite',
-                        'spin-slow': 'spin 3s linear infinite',
-                        'ping-slow': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
                     },
                     keyframes: {
                         slideUp: {
@@ -59,9 +59,9 @@
                             '0%': { opacity: '0' },
                             '100%': { opacity: '1' },
                         },
-                        bootBar: {
+                        bootText: {
                             '0%': { width: '0%' },
-                            '100%': { width: '100%' }
+                            '100%': { width: '100%' },
                         },
                         float: {
                             '0%, 100%': { transform: 'translateY(0)' },
@@ -73,8 +73,17 @@
         }
     </script>
 
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <!-- React & Babel -->
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.2.0",
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+            "lucide-react": "https://esm.sh/lucide-react@0.292.0"
+        }
+    }
+    </script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
         body {
@@ -82,11 +91,6 @@
             color: #fafafa;
             overscroll-behavior-y: none;
             -webkit-tap-highlight-color: transparent;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
         }
         
         ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -95,69 +99,244 @@
         ::-webkit-scrollbar-thumb:hover { background: #10b981; }
 
         .glass-panel {
-            background: rgba(18, 18, 20, 0.7);
+            background: rgba(20, 20, 22, 0.6);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
         .modal-overlay {
             background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(8px);
         }
 
         .safe-area-top { padding-top: env(safe-area-inset-top); }
         .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: rgba(16, 185, 129, 0.5);
-            box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.1);
-        }
-
         .radar-poly { transition: all 1s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        /* Cinematic Boot Effects */
-        .scanline {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, transparent 50%, rgba(16, 185, 129, 0.02) 51%);
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 9999;
+        /* Highlight for Tutorial */
+        .tutorial-highlight {
+            position: relative;
+            z-index: 60 !important;
+            box-shadow: 0 0 30px 5px rgba(16, 185, 129, 0.25) !important;
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            pointer-events: auto !important;
+            border-radius: 12px;
         }
-        .crt-flicker { animation: flicker 0.15s infinite; }
-        @keyframes flicker {
-            0% { opacity: 0.98; } 50% { opacity: 0.95; } 100% { opacity: 0.98; }
+        
+        .tutorial-overlay-container {
+            position: fixed;
+            inset: 0;
+            z-index: 55;
+            pointer-events: all; /* Blocks clicks elsewhere */
+        }
+
+        /* Input Autofill Fix */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active{
+            -webkit-box-shadow: 0 0 0 30px #121214 inset !important;
+            -webkit-text-fill-color: white !important;
+        }
+
+        /* Toggle Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #10b981;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #10b981;
         }
     </style>
 </head>
 <body>
-    <div id="app"></div>
-    <div class="scanline"></div>
-    <input type="file" id="import-file" style="display: none;" onchange="CORTHON.importData(this)" accept=".json">
+    <div id="root"></div>
 
-    <!-- Main Logic -->
-    <script type="module">
-        // Inject dynamic manifest
-        const manifest = {
-            name: "CORTHON",
-            short_name: "CORTHON",
-            start_url: "./",
-            display: "standalone",
-            background_color: "#09090b",
-            theme_color: "#09090b",
-            icons: [{ src: "https://unpkg.com/lucide-static@latest/icons/brain.svg", sizes: "192x192", type: "image/svg+xml" }]
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(req => console.log('Corthon Service Worker Registered'))
+                    .catch(err => console.log('Service Worker Failed', err));
+            });
+        }
+    </script>
+
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect, useRef, useMemo } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { 
+            Brain, Activity, Zap, CheckCircle2, RotateCcw, 
+            Lock, Clock, Flame, ChevronRight, AlertTriangle, 
+            Calendar, X, Play, Pause, RefreshCw,
+            Plus, Edit3, Trash2, Save, MoreHorizontal,
+            HelpCircle, BarChart, LayoutDashboard, LineChart,
+            Timer, Quote, AlignLeft, Sun, Moon, Sunrise, Sunset,
+            BookOpen, Target, Check, Layers, Flag, Award, Terminal,
+            Settings, HardDrive, Bell, Cloud, ShieldAlert, Database, Trash,
+            TrendingUp, Percent, History, Hourglass, CalendarDays,
+            Coffee, Battery, Briefcase, AlertOctagon, ArrowRight, MousePointer2
+        } from 'lucide-react';
+
+        // --- DATABASE SYSTEM (INDEXEDDB) ---
+        class CorthonDB {
+            constructor() {
+                this.dbName = 'CorthonOS_DB';
+                this.storeName = 'neural_data';
+                this.version = 1;
+                this.db = null;
+            }
+
+            async init() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(this.dbName, this.version);
+                    
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        if (!db.objectStoreNames.contains(this.storeName)) {
+                            db.createObjectStore(this.storeName, { keyPath: 'id' });
+                        }
+                    };
+
+                    request.onsuccess = (event) => {
+                        this.db = event.target.result;
+                        resolve(this.db);
+                    };
+
+                    request.onerror = (event) => {
+                        console.error('Neural Database Error:', event.target.error);
+                        reject(event.target.error);
+                    };
+                });
+            }
+
+            async save(key, data) {
+                if (!this.db) await this.init();
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction([this.storeName], 'readwrite');
+                    const store = transaction.objectStore(this.storeName);
+                    const request = store.put({ id: key, value: data, timestamp: Date.now() });
+                    
+                    request.onsuccess = () => resolve(true);
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            async load(key) {
+                if (!this.db) await this.init();
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction([this.storeName], 'readonly');
+                    const store = transaction.objectStore(this.storeName);
+                    const request = store.get(key);
+                    
+                    request.onsuccess = () => {
+                        resolve(request.result ? request.result.value : null);
+                    };
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            async clearAll() {
+                 if (!this.db) await this.init();
+                 return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction([this.storeName], 'readwrite');
+                    const store = transaction.objectStore(this.storeName);
+                    const request = store.clear();
+                    request.onsuccess = () => resolve(true);
+                    request.onerror = () => reject(request.error);
+                 });
+            }
+        }
+
+        const neuralDB = new CorthonDB();
+
+        // --- PROFESSIONAL AUDIO SYSTEM ---
+        const playSound = (type) => {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                const now = ctx.currentTime;
+
+                // Helper to play a single tone
+                const playTone = (freq, type, startTime, duration, vol = 0.1) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, startTime);
+                    gain.gain.setValueAtTime(0, startTime);
+                    gain.gain.linearRampToValueAtTime(vol, startTime + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(startTime);
+                    osc.stop(startTime + duration);
+                };
+
+                if (type === 'complete' || type === 'success') {
+                    playTone(880.00, 'sine', now, 0.6, 0.1);      
+                    playTone(1108.73, 'sine', now + 0.05, 0.6, 0.1); 
+                    playTone(1318.51, 'sine', now + 0.10, 0.8, 0.1); 
+                } 
+                else if (type === 'click') {
+                    playTone(1200, 'sine', now, 0.05, 0.02);
+                } 
+                else if (type === 'boot') {
+                    // Start up sound
+                    playTone(220, 'square', now, 0.1, 0.05);
+                    playTone(440, 'square', now + 0.1, 0.1, 0.05);
+                    playTone(880, 'square', now + 0.2, 0.3, 0.05);
+                }
+                else if (type === 'purge' || type === 'lazy') {
+                    // Deep Bass Drop
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.exponentialRampToValueAtTime(40, now + 0.3);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                }
+                else if (type === 'warning') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.linearRampToValueAtTime(200, now + 0.2);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                }
+                else if (type === 'mercy') {
+                     // Soft sine
+                    playTone(440, 'sine', now, 0.5, 0.05);
+                }
+            } catch (e) { console.error(e); }
         };
-        document.getElementById('dynamic-manifest').href = 'data:application/manifest+json;base64,' + btoa(JSON.stringify(manifest));
 
-        // --- CONSTANTS ---
-        const XP_DIFFICULTY_SCALAR = 3500;
-        const CATEGORIES = ['İş/Okul', 'Spor', 'Gelişim', 'Sağlık', 'Sosyal', 'Diğer'];
+        // --- CONSTANTS & CONFIG ---
+        const XP_DIFFICULTY_SCALAR = 3500; 
+
+        const MOTIVATION_QUOTES = [
+            "Kontrolsüz güç, güç değildir.",
+            "Yönetemediğin şeyi ölçemezsin.",
+            "Bugün ektiğin tohumlar, yarınki gölgeni oluşturur.",
+            "Zorluklar, başarının bedelidir.",
+            "Mükemmellik bir eylem değil, bir alışkanlıktır.",
+            "Acı geçicidir, vazgeçmenin pişmanlığı sonsuzdur.",
+            "Sistem, kaosun ilacıdır."
+        ];
+
         const DAYS = [
             { id: 1, name: 'Pazartesi', short: 'Pzt' },
             { id: 2, name: 'Salı', short: 'Sal' },
@@ -167,1000 +346,1481 @@
             { id: 6, name: 'Cumartesi', short: 'Cmt' },
             { id: 0, name: 'Pazar', short: 'Paz' },
         ];
+
+        const CATEGORIES = ['İş/Okul', 'Spor', 'Gelişim', 'Sağlık', 'NAMAZ', 'Sosyal', 'Diğer'];
+        
         const SNOOZE_REASONS = [
-            { id: 'LAZY', label: 'Üşengeçlik', penalty: 50, color: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/20', icon: 'coffee' },
-            { id: 'TIRED', label: 'Yorgunluk', penalty: 15, color: 'text-orange-400', bg: 'bg-orange-400/10', border: 'border-orange-400/20', icon: 'battery' },
-            { id: 'BUSY', label: 'Yoğunluk', penalty: 10, color: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20', icon: 'briefcase' },
-            { id: 'EMERGENCY', label: 'Acil Durum', penalty: 0, color: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-400/20', icon: 'alert-octagon' },
+            { id: 'LAZY', label: 'Üşengeçlik', penalty: 50, color: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/20', icon: Coffee },
+            { id: 'TIRED', label: 'Yorgunluk', penalty: 15, color: 'text-orange-400', bg: 'bg-orange-400/10', border: 'border-orange-400/20', icon: Battery },
+            { id: 'BUSY', label: 'Yoğunluk', penalty: 10, color: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20', icon: Briefcase },
+            { id: 'EMERGENCY', label: 'Acil Durum', penalty: 0, color: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-400/20', icon: AlertOctagon },
         ];
+
+        const MACRO_AXES = {
+            'ÜRETİM': ['İş/Okul', 'Gelişim', 'Diğer'],
+            'MANEVİYAT': ['NAMAZ'],
+            'FİZİKSEL': ['Spor', 'Sağlık'],
+            'SOSYAL': ['Sosyal']
+        };
+
         const IMPACTS = [
             { id: 'LOW', label: 'Düşük', xp: 50, color: 'text-gray-400' },
             { id: 'MED', label: 'Orta', xp: 75, color: 'text-blue-400' },
             { id: 'HIGH', label: 'Yüksek', xp: 100, color: 'text-orange-400' },
             { id: 'CRITICAL', label: 'Kritik', xp: 150, color: 'text-red-400' },
         ];
-        const MACRO_AXES = {
-            'ÜRETİM': ['İş/Okul', 'Gelişim', 'Diğer'],
-            'FİZİKSEL': ['Spor', 'Sağlık'],
-            'SOSYAL': ['Sosyal']
-        };
 
-        const esc = (str) => {
-            if (typeof str !== 'string') return str;
-            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-        };
+        // Fetch Prayer Times from API (Method 13 = Diyanet İşleri Başkanlığı, Turkey)
+        const fetchPrayerTimes = async () => {
+            const date = new Date().toISOString().split('T')[0];
+            const cacheKey = `corthon_prayer_${date}`;
+            const cached = localStorage.getItem(cacheKey);
 
-        // --- GLOBAL AUDIO ENGINE ---
-        let audioCtx = null;
-        
-        const initAudio = () => {
-            if (!audioCtx) {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if(AudioContext) audioCtx = new AudioContext();
+            if (cached) {
+                return JSON.parse(cached);
             }
-            if(audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-        };
 
-        const playSound = (type) => {
-            if (!audioCtx) return;
             try {
-                const now = audioCtx.currentTime;
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain); gain.connect(audioCtx.destination);
+                // Method 13: Diyanet / Turkey
+                const response = await fetch(`https://api.aladhan.com/v1/timingsByCity?city=Istanbul&country=Turkey&method=13`);
+                const data = await response.json();
+                const timings = data.data.timings;
 
-                if (type === 'click') {
-                    osc.type = 'sine'; osc.frequency.setValueAtTime(1200, now);
-                    gain.gain.setValueAtTime(0.05, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-                    osc.start(now); osc.stop(now + 0.05);
-                } else if (type === 'success') {
-                    [880, 1108, 1318].forEach((f, i) => {
-                        const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-                        o.type = 'sine'; o.frequency.value = f;
-                        g.gain.value = 0.05; g.gain.exponentialRampToValueAtTime(0.001, now + 0.6 + (i*0.1));
-                        o.connect(g); g.connect(audioCtx.destination);
-                        o.start(now + (i*0.05)); o.stop(now + 0.8);
-                    });
-                } else if (type === 'warning') {
-                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(300, now);
-                    gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-                    osc.start(now); osc.stop(now + 0.2);
-                } else if (type === 'boot') {
-                    osc.type = 'triangle'; 
-                    osc.frequency.setValueAtTime(110, now);
-                    osc.frequency.linearRampToValueAtTime(440, now + 0.5);
-                    gain.gain.setValueAtTime(0, now);
-                    gain.gain.linearRampToValueAtTime(0.1, now + 0.1);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
-                    osc.start(now); osc.stop(now + 1.0);
-                }
-            } catch (e) { console.warn("Audio Error", e); }
+                // Format: HH:MM
+                const formatted = [
+                    { name: 'İMSAK', time: timings.Fajr },
+                    { name: 'GÜNEŞ', time: timings.Sunrise },
+                    { name: 'ÖĞLE', time: timings.Dhuhr },
+                    { name: 'İKİNDİ', time: timings.Asr },
+                    { name: 'AKŞAM', time: timings.Maghrib },
+                    { name: 'YATSI', time: timings.Isha },
+                ];
+                
+                localStorage.setItem(cacheKey, JSON.stringify(formatted));
+                return formatted;
+            } catch (error) {
+                console.error("Prayer fetch error", error);
+                // Fallback (Approximate average times if offline and no cache)
+                return [
+                    { name: 'İMSAK', time: '05:40' },
+                    { name: 'GÜNEŞ', time: '07:10' },
+                    { name: 'ÖĞLE', time: '13:15' },
+                    { name: 'İKİNDİ', time: '16:05' },
+                    { name: 'AKŞAM', time: '18:15' },
+                    { name: 'YATSI', time: '19:40' },
+                ];
+            }
         };
 
-        // --- NOISE GENERATOR ---
-        class NoiseGen {
-            constructor() {
-                this.node = null;
-                this.active = false;
-            }
-            toggle() {
-                if (this.active) this.stop();
-                else this.start();
-                return this.active;
-            }
-            start() {
-                if (!audioCtx) initAudio();
-                if (!audioCtx) return;
-                
-                const bufferSize = 4096;
-                this.node = audioCtx.createScriptProcessor(bufferSize, 1, 1);
-                this.node.onaudioprocess = (e) => {
-                    const output = e.outputBuffer.getChannelData(0);
-                    for (let i = 0; i < bufferSize; i++) {
-                        const white = Math.random() * 2 - 1;
-                        output[i] = (this.lastOut + (0.02 * white)) / 1.02;
-                        this.lastOut = output[i];
-                        output[i] *= 3.5; 
-                    }
-                };
-                this.lastOut = 0;
-                this.gain = audioCtx.createGain();
-                this.gain.gain.value = 0.05;
-                this.node.connect(this.gain);
-                this.gain.connect(audioCtx.destination);
-                this.active = true;
-            }
-            stop() {
-                if (this.node) {
-                    this.node.disconnect();
-                    this.gain.disconnect();
-                    this.node = null;
-                }
-                this.active = false;
-            }
-        }
-        const noiseGen = new NoiseGen();
+        const generateInitialRoutine = () => {
+            const routine = {};
+            // Placeholders, will be updated by API
+            const prayerTemplates = [
+                { title: 'Sabah Namazı', time: '06:00' }, // Maps to Imsak index 0
+                { title: 'Öğle Namazı', time: '13:00' }, // Maps to Ogle index 2 (in our fetch list)
+                { title: 'İkindi Namazı', time: '16:00' }, // Maps to Ikindi index 3
+                { title: 'Akşam Namazı', time: '18:00' }, // Maps to Aksam index 4
+                { title: 'Yatsı Namazı', time: '19:30' }  // Maps to Yatsi index 5
+            ];
 
-        // --- BACKGROUND WORKER ---
-        const bgWorkerCode = `
-        self.tasks = {}; self.sent = {};
-        self.onmessage = e => { if(e.data.type === 'UPDATE') self.tasks = e.data.payload; };
+            DAYS.forEach(day => {
+                const dayTasks = prayerTemplates.map((p, index) => ({
+                    id: `prayer_${day.id}_${index}`,
+                    title: p.title,
+                    category: 'NAMAZ',
+                    time: p.time,
+                    completed: false,
+                    snoozed: 0,
+                    snoozePenalty: 0,
+                    impact: 'CRITICAL',
+                    note: 'Manevi disiplin esastır.'
+                }));
+
+                if (day.id === 1) {
+                    dayTasks.push({ 
+                        id: 'sample_task_1', 
+                        title: 'Derin Çalışma Bloğu', 
+                        category: 'İş/Okul', 
+                        time: '09:00', 
+                        completed: false, 
+                        snoozed: 0, 
+                        snoozePenalty: 0,
+                        impact: 'HIGH', 
+                        note: 'En zorlu görevi sabah hallet.' 
+                    });
+                    dayTasks.sort((a, b) => a.time.localeCompare(b.time));
+                }
+                
+                routine[day.id] = dayTasks;
+            });
+            return routine;
+        };
+
+        // --- BACKGROUND WORKER CODE (BLOB) ---
+        // This runs in a separate thread, which is throttled less than the main UI thread
+        const backgroundWorkerCode = `
+        self.tasks = {};
+        self.sentNotifications = {};
+
+        self.onmessage = function(e) {
+            if (e.data.type === 'UPDATE_SCHEDULE') {
+                self.tasks = e.data.payload;
+            }
+            if (e.data.type === 'SYNC_SENT_LOG') {
+                self.sentNotifications = e.data.payload;
+            }
+        };
+
         setInterval(() => {
+            // "Tick" every 5 seconds to be more precise
             const now = new Date();
-            const time = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+            // Force strict HH:MM formatting to avoid locale issues
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const timeStr = \`\${hours}:\${minutes}\`;
+            
             const dayId = now.getDay();
-            const date = now.toISOString().split('T')[0];
-            const list = self.tasks[dayId] || [];
-            list.forEach(t => {
-                const key = date + '-' + t.id;
-                if(t.time === time && !t.completed && !self.sent[key]) {
-                    self.sent[key] = true;
-                    self.postMessage({ title: t.title, body: t.note || 'Görev Zamanı' });
-                }
-            });
-        }, 5000);`;
+            const dateStr = now.toISOString().split('T')[0];
+            
+            const todayTasks = self.tasks[dayId] || [];
 
-        // --- STATE ---
-        const STATE = {
-            bootPhase: -1, // -1: Waiting for interaction
-            view: 'FLOW',
-            xp: 0,
-            streak: 0,
-            tasks: {}, 
-            history: {}, 
-            selectedDayId: new Date().getDay(),
-            settings: { notifications: false, sound: false },
-            modals: {
-                task: { open: false, data: null },
-                snooze: { open: false, task: null, mode: 'REASON' },
-                focus: { open: false, task: null, timeLeft: 0, isRunning: false, mode: 'SETUP' },
-                summary: { open: false },
-                manual: { open: false }
-            },
-            tutorialStep: 0,
-            toast: { msg: null, type: 'neutral', action: null },
-            isResetting: false,
-            mounted: false
-        };
-
-        // --- DB ---
-        const DB = {
-            db: null,
-            async init() {
-                return new Promise((resolve, reject) => {
-                    const req = indexedDB.open('CorthonOS_DB', 1);
-                    req.onupgradeneeded = (e) => {
-                        const db = e.target.result;
-                        if (!db.objectStoreNames.contains('neural_data')) db.createObjectStore('neural_data', { keyPath: 'id' });
-                    };
-                    req.onsuccess = (e) => { this.db = e.target.result; resolve(); };
-                    req.onerror = reject;
-                });
-            },
-            async save(key, val) {
-                if(!this.db) await this.init();
-                const tx = this.db.transaction('neural_data', 'readwrite');
-                tx.objectStore('neural_data').put({ id: key, value: val });
-            },
-            async load(key) {
-                if(!this.db) await this.init();
-                return new Promise(r => {
-                    const req = this.db.transaction('neural_data', 'readonly').objectStore('neural_data').get(key);
-                    req.onsuccess = () => r(req.result ? req.result.value : null);
-                });
-            },
-            async clear() {
-                if(!this.db) await this.init();
-                const tx = this.db.transaction('neural_data', 'readwrite');
-                tx.objectStore('neural_data').clear();
-            }
-        };
-
-        // --- ACTIONS ---
-        const ACTIONS = {
-            initializeSystem: () => {
-                initAudio();
-                runBootSequence();
-            },
-            setView: (view) => { STATE.view = view; playSound('click'); render(); },
-            setDay: (id) => { STATE.selectedDayId = id; playSound('click'); render(); },
-            toggleTask: (id) => {
-                const list = STATE.tasks[STATE.selectedDayId];
-                const task = list.find(t => t.id == id);
-                if (task) {
-                    task.completed = !task.completed;
-                    const points = IMPACTS.find(i => i.id === task.impact)?.xp || 50;
-                    const today = new Date().toISOString().split('T')[0];
-                    if(!STATE.history[today]) STATE.history[today] = { categories: {}, totalTasks: 0, processed: false };
-                    if(!STATE.history[today].categories) STATE.history[today].categories = {};
-
-                    if (task.completed) {
-                        STATE.xp += points;
-                        STATE.history[today].categories[task.category] = (STATE.history[today].categories[task.category] || 0) + 1;
-                        playSound('success');
-                        toast(`⚡ +${points} XP`, 'success', { label: 'Geri Al', fn: () => ACTIONS.toggleTask(id) });
-                    } else {
-                        STATE.xp = Math.max(0, STATE.xp - points);
-                        if(STATE.history[today].categories[task.category]) {
-                            STATE.history[today].categories[task.category]--;
-                        }
-                        playSound('warning');
-                        toast(`🔻 -${points} XP`, 'danger');
-                    }
-                    save(); render();
-                }
-            },
-            openEdit: (id) => {
-                const list = STATE.tasks[STATE.selectedDayId];
-                const task = id ? list.find(t => t.id == id) : null;
-                STATE.modals.task = { open: true, data: task ? {...task} : null };
-                render();
-            },
-            saveTask: (e) => {
-                e.preventDefault();
-                const formData = new FormData(e.target);
-                const data = Object.fromEntries(formData);
-                const list = STATE.tasks[STATE.selectedDayId] || [];
+            todayTasks.forEach(task => {
+                if (task.completed) return;
                 
-                if (STATE.modals.task.data) {
-                    const idx = list.findIndex(t => t.id === STATE.modals.task.data.id);
-                    if(idx !== -1) list[idx] = { ...list[idx], ...data };
-                } else {
-                    list.push({
-                        id: Date.now().toString(),
-                        title: data.title,
-                        time: data.time || '09:00',
-                        category: data.category || 'Diğer',
-                        impact: data.impact || 'MED',
-                        note: data.note || '',
-                        completed: false,
-                        snoozed: 0,
-                        snoozePenalty: 0
+                const key = dateStr + '-' + task.id + '-' + timeStr;
+                
+                // Compare exact string HH:MM
+                if (task.time === timeStr && !self.sentNotifications[key]) {
+                    self.sentNotifications[key] = true;
+                    
+                    const title = task.category === 'NAMAZ' ? 'Vakit Girdi: ' + task.title : 'Görev Zamanı: ' + task.title;
+                    const body = task.note || "Disiplin protokolünü uygula.";
+                    
+                    self.postMessage({
+                        type: 'TRIGGER_NOTIFICATION',
+                        title: title,
+                        body: body,
+                        key: key
                     });
                 }
-                list.sort((a,b) => a.time.localeCompare(b.time));
-                STATE.tasks[STATE.selectedDayId] = list;
-                STATE.modals.task.open = false;
-                playSound('success');
-                save(); render();
-            },
-            deleteTask: () => {
-                if(!STATE.modals.task.data) return;
-                const id = STATE.modals.task.data.id;
-                STATE.tasks[STATE.selectedDayId] = STATE.tasks[STATE.selectedDayId].filter(t => t.id !== id);
-                STATE.modals.task.open = false;
-                playSound('warning');
-                save(); render();
-            },
-            closeModal: (name) => { 
-                if(STATE.modals[name]) STATE.modals[name].open = false; 
-                // Stop noise if focus modal closes
-                if(name === 'focus' && noiseGen.active) { noiseGen.stop(); STATE.settings.sound = false; }
-                render(); 
-            },
-            startFocus: (id) => {
-                const list = STATE.tasks[STATE.selectedDayId] || [];
-                const task = list.find(t => t.id == id);
-                if(task) {
-                    STATE.modals.focus = { open: true, task: {...task}, timeLeft: 25*60, isRunning: false, mode: 'SETUP' };
-                    render();
-                }
-            },
-            toggleNoise: () => {
-                const active = noiseGen.toggle();
-                STATE.settings.sound = active;
-                render();
-            },
-            exportData: () => {
-                const dataStr = JSON.stringify(STATE);
-                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-                const exportFileDefaultName = 'corthon_neural_dump_' + new Date().toISOString().slice(0,10) + '.json';
-                const linkElement = document.createElement('a');
-                linkElement.setAttribute('href', dataUri);
-                linkElement.setAttribute('download', exportFileDefaultName);
-                linkElement.click();
-                toast('Veri Dökümü (Dump) Alındı', 'success');
-            },
-            triggerImport: () => document.getElementById('import-file').click(),
-            importData: (input) => {
-                const file = input.files[0];
-                if(!file) return;
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        STATE.xp = data.xp || 0;
-                        STATE.streak = data.streak || 0;
-                        STATE.tasks = data.tasks || {};
-                        STATE.history = data.history || {};
-                        await save();
-                        playSound('boot');
-                        toast('Sistem Geri Yüklendi', 'success');
-                        setTimeout(() => location.reload(), 1500);
-                    } catch(err) {
-                        toast('Veri Hatası (Corrupted)', 'danger');
-                    }
-                };
-                reader.readAsText(file);
-            },
-            openSnooze: (taskId) => {
-                const list = STATE.tasks[STATE.selectedDayId];
-                const task = list.find(t => t.id == taskId);
-                STATE.modals.snooze = { open: true, task, mode: 'REASON' };
-                render();
-            },
-            setSnoozeMode: (mode) => {
-                STATE.modals.snooze.mode = mode;
-                render();
-            },
-            confirmSnooze: (reasonId) => {
-                const reason = SNOOZE_REASONS.find(r => r.id === reasonId);
-                const task = STATE.modals.snooze.task;
-                if(task && reason) {
-                    task.snoozed = (task.snoozed || 0) + 1;
-                    task.snoozePenalty = (task.snoozePenalty || 0) + reason.penalty;
-                    if(reason.penalty > 0) {
-                        STATE.xp = Math.max(0, STATE.xp - reason.penalty);
-                        toast(`⚠️ -${reason.penalty} XP`, 'warning');
-                        playSound('warning');
-                    } else {
-                        toast('🛡️ CEZA YOK: Merhamet Protokolü', 'success');
-                    }
-                    STATE.modals.snooze.open = false;
-                    save(); render();
-                }
-            },
-            rescheduleTask: (targetDayId) => {
-                 const task = STATE.modals.snooze.task;
-                 if(!task) return;
-                 STATE.tasks[STATE.selectedDayId] = STATE.tasks[STATE.selectedDayId].filter(t => t.id !== task.id);
-                 if(!STATE.tasks[targetDayId]) STATE.tasks[targetDayId] = [];
-                 STATE.tasks[targetDayId].push({ ...task, snoozed: 0, snoozePenalty: 0 });
-                 STATE.tasks[targetDayId].sort((a,b) => a.time.localeCompare(b.time));
-                 STATE.xp = Math.max(0, STATE.xp - 25);
-                 toast('📅 GÖREV TAŞINDI: -25 XP', 'warning');
-                 playSound('warning');
-                 STATE.modals.snooze.open = false;
-                 save(); render();
-            },
-            openManual: () => { STATE.modals.manual.open = true; render(); },
-            completeDay: () => {
-                const today = new Date().toISOString().split('T')[0];
-                const tasks = STATE.tasks[STATE.selectedDayId] || [];
-                const completed = tasks.filter(t => t.completed).length;
-                const total = tasks.length;
-                
-                if(total === 0) {
-                    if(confirm("Bugün görev yok. 'Dinlenme Günü' sayılsın mı? (+25 XP)")) {
-                        STATE.xp += 25;
-                        STATE.history[today] = { processed: true, type: 'REST', categories: {}, totalTasks: 0 };
-                        playSound('success');
-                    }
-                } else {
-                    const ratio = completed/total;
-                    const bonus = ratio >= 0.8 ? 150 : ratio >= 0.5 ? 75 : 25;
-                    const processed = STATE.history[today]?.processed;
-                    if(!processed) {
-                        STATE.xp += bonus;
-                        playSound('success');
-                        toast(`GÜN KAPANDI: +${bonus} XP`, 'success');
-                    } else { toast(`RAPOR GÜNCELLENDİ`, 'success'); }
-                    STATE.history[today] = { ...STATE.history[today], processed: true, completionRatio: ratio, totalTasks: total };
-                }
-                save(); render();
-            },
-            finishWeek: () => { STATE.modals.summary.open = true; render(); },
-            resetWeek: () => {
-                STATE.modals.summary.open = false; STATE.isResetting = true; render();
-                setTimeout(() => {
-                    Object.keys(STATE.tasks).forEach(k => STATE.tasks[k] = STATE.tasks[k].map(t => ({...t, completed: false, snoozed: 0})));
-                    STATE.streak++; STATE.xp += 500; STATE.isResetting = false;
-                    playSound('boot'); save(); render();
-                }, 1500);
-            },
-            purge: async () => {
-                if(confirm("DİKKAT: Her şey silinecek!")) { await DB.clear(); localStorage.clear(); location.reload(); }
-            },
-            nextTutorial: () => {
-                STATE.tutorialStep++;
-                if(STATE.tutorialStep > 6) {
-                    STATE.tutorialStep = 0; localStorage.setItem('tutorial_done', 'true'); playSound('success');
-                } else { playSound('click'); }
-                render();
-            },
-            restartTutorial: () => { STATE.modals.manual.open = false; STATE.tutorialStep = 1; render(); },
-            toggleSetting: (key) => {
-                STATE.settings[key] = !STATE.settings[key];
-                if(key === 'notifications' && STATE.settings[key]) Notification.requestPermission();
-                save(); render();
-            }
-        };
-
-        const toast = (msg, type='neutral', action=null) => {
-            STATE.toast = { msg, type, action };
-            render();
-            setTimeout(() => { if(STATE.toast.msg === msg) { STATE.toast = { msg: null, type: 'neutral', action: null }; render(); } }, 4000);
-        };
-
-        // --- MATH UTILS FOR RADAR ---
-        const getRadarPoints = () => {
-            const s = { ÜRETİM: 0, FİZİKSEL: 0, SOSYAL: 0 };
-            let total = 0;
-            Object.values(STATE.history).forEach(day => {
-                if (day.categories) Object.entries(day.categories).forEach(([cat, count]) => {
-                    if (MACRO_AXES['ÜRETİM'].includes(cat)) s.ÜRETİM += count;
-                    if (MACRO_AXES['FİZİKSEL'].includes(cat)) s.FİZİKSEL += count;
-                    if (MACRO_AXES['SOSYAL'].includes(cat)) s.SOSYAL += count;
-                    total += count;
-                });
             });
-            const max = Math.max(s.ÜRETİM, s.FİZİKSEL, s.SOSYAL, 10); // Scale factor
-            
-            const p1 = { x: 100, y: 100 - ((s.ÜRETİM / max) * 80) };
-            const p2 = { x: 100 + ((s.SOSYAL / max) * 80 * 0.866), y: 100 + ((s.SOSYAL / max) * 80 * 0.5) }; 
-            const p3 = { x: 100 - ((s.FİZİKSEL / max) * 80 * 0.866), y: 100 + ((s.FİZİKSEL / max) * 80 * 0.5) };
+        }, 5000); // Check every 5 seconds
+        `;
 
-            return `${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y}`;
-        };
+        // --- COMPONENTS ---
 
-        // --- RENDERERS ---
-        const R = {
-            Boot: () => {
-                if(STATE.bootPhase === -1) {
-                    // Interaction Required Phase
-                    return `
-                    <div class="fixed inset-0 z-[200] bg-[#09090b] flex flex-col items-center justify-center font-mono cursor-pointer" onclick="CORTHON.initializeSystem()">
-                        <div class="relative w-40 h-40 flex items-center justify-center mb-10 group">
-                            <div class="absolute inset-0 rounded-full border border-corthon-emerald/30 animate-spin-slow"></div>
-                            <div class="absolute inset-2 rounded-full border border-corthon-emerald/10 border-dashed animate-spin-slow" style="animation-direction: reverse;"></div>
-                            <div class="absolute inset-0 bg-corthon-emerald/5 blur-xl rounded-full animate-pulse"></div>
-                            <i data-lucide="power" class="w-16 h-16 text-corthon-emerald relative z-10 transition-transform group-hover:scale-110"></i>
-                        </div>
-                        <div class="text-corthon-emerald font-bold text-xl tracking-[0.2em] animate-pulse mb-2">SİSTEMİ BAŞLAT</div>
-                        <div class="text-xs text-corthon-emerald/50">Dokunarak kimlik doğrulaması yapın</div>
-                    </div>`;
-                }
+        const CorthonLogo = () => (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-corthon-emerald animate-pulse-slow">
+                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M15 9L15.87 6.4C15.96 6.13 16.17 5.92 16.44 5.83L19 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M15 15L15.87 17.6C15.96 17.87 16.17 18.08 16.44 18.17L19 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M9.5 9.5C9.5 9.5 10 12 14 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+        );
 
-                // Sequence Phase
-                return `
-                <div class="fixed inset-0 z-[200] bg-[#09090b] flex flex-col items-center justify-center font-mono">
-                    <div class="w-full max-w-sm px-6">
-                        <div class="flex justify-center mb-10 relative">
-                             <div class="absolute inset-0 bg-corthon-emerald/20 blur-xl rounded-full animate-ping-slow"></div>
-                             <i data-lucide="brain" class="w-16 h-16 text-corthon-emerald relative z-10 animate-float"></i>
-                        </div>
-                        <div class="space-y-2 mb-8 h-24 text-xs font-mono crt-flicker">
-                            ${STATE.bootPhase >= 0 ? '<div class="text-corthon-emerald animate-slide-up">> BAŞLATILIYOR: CORTHON_NEURAL_OS...</div>' : ''}
-                            ${STATE.bootPhase >= 1 ? '<div class="text-corthon-emerald/80 animate-slide-up">> BİO-METRİK VERİ: DOĞRULANDI [OK]</div>' : ''}
-                            ${STATE.bootPhase >= 2 ? '<div class="text-corthon-emerald/60 animate-slide-up">> NÖRAL AĞLAR: SENKRONİZE</div>' : ''}
-                            ${STATE.bootPhase >= 3 ? '<div class="text-white font-bold animate-slide-up">> HOŞ GELDİNİZ.</div>' : ''}
-                        </div>
-                        <div class="h-1 w-full bg-gray-900 rounded-full overflow-hidden">
-                            <div class="h-full bg-corthon-emerald animate-boot-bar"></div>
-                        </div>
-                    </div>
-                </div>`;
-            },
-            Greeting: () => {
-                const h = new Date().getHours();
-                const icon = h < 6 ? 'moon' : h < 18 ? 'sun' : 'sunset';
-                const text = h < 6 ? 'Gece Modu' : h < 11 ? 'Sabah Protokolü' : h < 18 ? 'Gün Ortası' : 'Akşam Özeti';
-                return `
-                <div class="mb-6 animate-fade-in">
-                    <div class="flex items-center gap-2 mb-2 text-corthon-muted font-medium text-sm">
-                        <i data-lucide="${icon}" class="w-5 h-5 text-orange-400"></i>
-                        <span>${text}</span>
-                    </div>
-                    <div class="text-sm text-gray-400 italic font-serif opacity-80 border-l-2 border-corthon-emerald pl-3">"Kontrolsüz güç, güç değildir."</div>
-                </div>`;
-            },
-            Tasks: () => {
-                const list = STATE.tasks[STATE.selectedDayId] || [];
-                if(list.length === 0) return `
-                    <div onclick="CORTHON.openEdit(null)" class="border border-dashed border-white/10 rounded-2xl p-8 text-center text-gray-500 cursor-pointer hover:bg-white/5 transition-all group">
-                        <i data-lucide="plus" class="mx-auto mb-2 opacity-50 w-8 h-8 group-hover:scale-110 transition-transform"></i>
-                        <p class="text-sm font-medium">Görev yok.</p>
-                        <p class="text-xs text-corthon-emerald mt-1">Yeni Protokol Ekle</p>
-                    </div>`;
-                
-                return `<div class="space-y-4 pb-32">
-                    <div class="flex justify-between items-end mb-2">
-                         <h2 class="text-xl font-bold text-white tracking-tight">${DAYS.find(d=>d.id===STATE.selectedDayId).name}</h2>
-                         <span class="text-xs text-gray-500 font-mono bg-white/5 px-2 py-1 rounded border border-white/5">${list.filter(t=>t.completed).length}/${list.length}</span>
-                    </div>
-                    ${list.map(t => {
-                        const style = t.completed ? 'opacity-50 grayscale border-l-gray-700' : 'border-l-corthon-emerald hover:border-white/20 hover:bg-white/5';
-                        const startFocusCall = t.completed ? '' : `CORTHON.startFocus('${t.id}')`;
-                        return `
-                        <div onclick="${startFocusCall}" class="glass-panel rounded-xl p-4 border-l-4 cursor-pointer relative group transition-all active:scale-[0.99] ${style}">
-                            <div class="flex items-start gap-4">
-                                <button onclick="event.stopPropagation(); CORTHON.toggleTask('${t.id}')" class="mt-1 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${t.completed ? 'bg-corthon-emerald border-corthon-emerald text-black' : 'border-gray-600 hover:border-corthon-emerald'}">
-                                    ${t.completed ? '<i data-lucide="check" class="w-3 h-3"></i>' : ''}
-                                </button>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 mb-1.5">
-                                        <span class="text-xs font-mono text-gray-400 bg-white/5 px-1.5 py-0.5 rounded flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> ${t.time}</span>
-                                        <span class="text-[10px] uppercase tracking-wider text-gray-500 border border-white/10 px-1.5 py-0.5 rounded font-bold">${esc(t.category)}</span>
-                                        ${t.snoozed ? `<span class="text-[10px] text-corthon-warning border border-corthon-warning/30 px-1.5 py-0.5 rounded font-bold flex items-center gap-1"><i data-lucide="hourglass" class="w-3 h-3"></i> x${t.snoozed}</span>` : ''}
-                                    </div>
-                                    <h3 class="font-semibold text-base truncate mb-1 ${t.completed ? 'line-through text-gray-500' : 'text-gray-100'}">${esc(t.title)}</h3>
-                                    ${t.note ? `<p class="text-xs text-gray-500 line-clamp-1">${esc(t.note)}</p>` : ''}
-                                </div>
-                                <div class="flex flex-col gap-1">
-                                    <button onclick="event.stopPropagation(); CORTHON.openEdit('${t.id}')" class="p-2 text-gray-500 hover:text-white bg-white/5 rounded-lg transition-colors"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                                    ${!t.completed ? `<button onclick="event.stopPropagation(); CORTHON.openSnooze('${t.id}')" class="p-2 text-corthon-warning hover:text-white bg-corthon-warning/10 rounded-lg transition-colors"><i data-lucide="history" class="w-4 h-4"></i></button>` : ''}
-                                </div>
-                            </div>
-                        </div>`;
-                    }).join('')}
-                    <div class="mt-10 mb-6 space-y-4">
-                         <button onclick="CORTHON.completeDay()" class="w-full py-4 rounded-xl bg-gradient-to-r from-gray-900 to-gray-800 border border-white/10 hover:border-corthon-emerald/50 text-white flex items-center justify-center gap-2 font-bold transition-all hover:scale-[1.01] hover:shadow-lg hover:shadow-emerald-900/20">
-                            <i data-lucide="flag" class="w-4 h-4 text-corthon-emerald"></i> GÜNÜ RAPORLA
-                         </button>
-                         ${STATE.selectedDayId === 0 ? `<button onclick="CORTHON.finishWeek()" class="w-full py-4 rounded-xl bg-corthon-emerald text-black flex items-center justify-center gap-2 font-bold shadow-lg shadow-corthon-emerald/20 hover:scale-[1.01]"><i data-lucide="refresh-cw" class="w-4 h-4 animate-spin"></i> HAFTAYI BİTİR</button>` : ''}
-                    </div>
-                </div>`;
-            },
-            Radar: () => {
-                const points = getRadarPoints();
-                return `
-                <div class="relative w-full max-w-[220px] aspect-square mx-auto my-6">
-                    <svg viewBox="0 0 200 200" class="w-full h-full">
-                        <line x1="100" y1="100" x2="100" y2="20" class="stroke-gray-800 stroke-[1]"/>
-                        <line x1="100" y1="100" x2="169.28" y2="140" class="stroke-gray-800 stroke-[1]"/>
-                        <line x1="100" y1="100" x2="30.72" y2="140" class="stroke-gray-800 stroke-[1]"/>
-                        <circle cx="100" cy="100" r="20" class="fill-none stroke-gray-800 stroke-[0.5]"/>
-                        <circle cx="100" cy="100" r="40" class="fill-none stroke-gray-800 stroke-[0.5]"/>
-                        <circle cx="100" cy="100" r="60" class="fill-none stroke-gray-800 stroke-[0.5]"/>
-                        <circle cx="100" cy="100" r="80" class="fill-none stroke-gray-700 stroke-[0.5]"/>
-                        <polygon points="${points}" class="fill-corthon-emerald/20 stroke-corthon-emerald stroke-2 radar-poly" />
-                    </svg>
-                    <div class="absolute top-0 left-1/2 -translate-x-1/2 -mt-3 text-[9px] font-bold text-gray-400 tracking-wider bg-[#09090b] px-1">ÜRETİM</div>
-                    <div class="absolute bottom-10 right-0 text-[9px] font-bold text-gray-400 tracking-wider bg-[#09090b] px-1">SOSYAL</div>
-                    <div class="absolute bottom-10 left-0 text-[9px] font-bold text-gray-400 tracking-wider bg-[#09090b] px-1">FİZİKSEL</div>
-                </div>`;
-            },
-            Heatmap: () => {
-                let html = '<div class="w-full overflow-x-auto pb-4 scrollbar-hide"><div class="flex gap-1.5 min-w-max px-2">';
-                for (let i = 29; i >= 0; i--) {
-                    const d = new Date(); d.setDate(d.getDate() - i);
-                    const iso = d.toISOString().split('T')[0];
-                    const dayName = ['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'][d.getDay()];
-                    const data = STATE.history[iso];
-                    const hasActivity = data && data.totalTasks > 0;
-                    const height = hasActivity ? Math.max(20, (data.completionRatio || 0) * 100) : 0;
-                    const color = hasActivity ? 'bg-corthon-emerald' : 'bg-white/5';
-                    html += `<div class="flex flex-col items-center gap-1 group"><div class="h-20 w-1.5 flex items-end bg-white/5 rounded-full overflow-hidden relative"><div class="w-full rounded-full transition-all duration-500 ${color}" style="height: ${height}%"></div></div><span class="text-[9px] text-gray-600 font-mono -rotate-90 mt-2">${dayName}</span></div>`;
-                }
-                html += '</div></div>';
-                return html;
-            },
-            Stats: () => {
-                const level = Math.floor(Math.sqrt(STATE.xp / XP_DIFFICULTY_SCALAR)) + 1;
-                const nextXp = Math.pow(level, 2) * XP_DIFFICULTY_SCALAR;
-                const baseXp = Math.pow(level - 1, 2) * XP_DIFFICULTY_SCALAR;
-                const pct = Math.min(100, Math.max(0, ((STATE.xp - baseXp) / (nextXp - baseXp)) * 100));
+        const PermissionModal = ({ onGrant, onSkip }) => {
+            return (
+                <div className="fixed inset-0 z-[250] bg-black/90 flex flex-col items-center justify-center p-6 animate-fade-in backdrop-blur-md">
+                    <div className="max-w-sm w-full bg-[#121214] border border-corthon-emerald/50 rounded-2xl p-6 text-center relative overflow-hidden shadow-[0_0_50px_rgba(16,185,129,0.2)]">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-corthon-emerald to-transparent animate-pulse"></div>
+                        
+                        <Bell size={48} className="mx-auto text-corthon-emerald mb-4 animate-bounce" />
+                        
+                        <h2 className="text-xl font-bold text-white mb-2">SİNYAL BAĞLANTISI</h2>
+                        <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                            Nöral protokollerin ve manevi çağrıların zamanında iletilmesi için <span className="text-corthon-emerald font-bold">bildirim izni</span> gereklidir.
+                            <br/><br/>
+                            <span className="text-xs text-gray-500">Not: En iyi performans için uygulamayı "Arka Planda" tutun, tamamen kapatmayın.</span>
+                        </p>
 
-                return `
-                <div class="animate-slide-up space-y-6">
-                     <div class="glass-panel p-6 rounded-2xl relative overflow-hidden">
-                        <div class="absolute top-0 right-0 p-6 opacity-10"><i data-lucide="zap" class="w-24 h-24"></i></div>
-                        <div class="relative z-10">
-                            <div class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">CORTHON PROTOKOLÜ</div>
-                            <div class="text-4xl font-bold text-white mb-2 font-mono">${STATE.xp} <span class="text-lg text-corthon-emerald">XP</span></div>
-                            <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden mt-4 shadow-inner">
-                                <div class="h-full bg-corthon-emerald transition-all duration-1000 ease-out shadow-[0_0_10px_#10b981]" style="width: ${pct}%"></div>
-                            </div>
-                            <div class="mt-2 text-xs font-mono text-gray-400 flex justify-between">
-                                <span>Lvl ${level}</span>
-                                <span>${Math.floor(nextXp - STATE.xp)} XP kaldı</span>
-                            </div>
-                        </div>
-                     </div>
-                     <div class="grid grid-cols-2 gap-3">
-                        <div class="glass-panel p-4 rounded-xl text-center"><i data-lucide="trending-up" class="w-5 h-5 mx-auto text-corthon-cyan mb-2"></i><div class="text-xl font-bold text-white">${STATE.streak}</div><div class="text-[10px] text-gray-500 uppercase tracking-wider">Seri</div></div>
-                        <div class="glass-panel p-4 rounded-xl text-center"><i data-lucide="check-circle-2" class="w-5 h-5 mx-auto text-corthon-emerald mb-2"></i><div class="text-xl font-bold text-white">${Object.values(STATE.history).filter(h=>h.processed).length}</div><div class="text-[10px] text-gray-500 uppercase tracking-wider">Gün Raporu</div></div>
-                     </div>
-                     <div class="glass-panel p-6 rounded-2xl">
-                        <div class="flex items-center gap-2 mb-4 border-b border-white/5 pb-2"><i data-lucide="activity" class="w-4 h-4 text-corthon-emerald"></i><h3 class="font-bold text-sm tracking-wide text-white">YAŞAM DENGESİ</h3></div>
-                        ${R.Radar()}
-                     </div>
-                     <div class="glass-panel p-6 rounded-2xl">
-                        <div class="flex items-center gap-2 mb-4 border-b border-white/5 pb-2"><i data-lucide="flame" class="w-4 h-4 text-orange-500"></i><h3 class="font-bold text-sm tracking-wide text-white">İSTİKRAR (30 Gün)</h3></div>
-                        ${R.Heatmap()}
-                     </div>
-                </div>`;
-            },
-            ModalSummary: () => {
-                return `
-                <div class="fixed inset-0 z-[150] flex items-center justify-center p-4">
-                    <div class="absolute inset-0 modal-overlay" onclick="CORTHON.closeModal('summary')"></div>
-                    <div class="relative w-full max-w-sm bg-[#121214] border border-corthon-emerald/30 rounded-2xl p-6 text-center animate-slide-up shadow-[0_0_50px_rgba(16,185,129,0.1)] modal-content flex flex-col max-h-[85vh]">
-                        <div class="flex-1 overflow-y-auto custom-scrollbar">
-                            <div class="w-16 h-16 rounded-full bg-corthon-emerald/10 flex items-center justify-center mx-auto mb-4 border border-corthon-emerald/50">
-                                <i data-lucide="award" class="w-8 h-8 text-corthon-emerald"></i>
-                            </div>
-                            <h2 class="text-2xl font-bold text-white mb-2">Haftalık Rapor</h2>
-                            <p class="text-gray-400 text-sm mb-6">Bu hafta gösterdiğin performans irade katsayını belirledi.</p>
-                            
-                            <div class="grid grid-cols-2 gap-3 mb-6">
-                                <div class="bg-white/5 rounded-xl p-3">
-                                    <div class="text-2xl font-bold text-white">${STATE.xp}</div>
-                                    <div class="text-[10px] text-gray-500 uppercase">Toplam XP</div>
-                                </div>
-                                <div class="bg-white/5 rounded-xl p-3">
-                                    <div class="text-2xl font-bold text-corthon-emerald">${STATE.streak}</div>
-                                    <div class="text-[10px] text-gray-500 uppercase">Seri Gün</div>
-                                </div>
-                            </div>
-
-                            <button onclick="CORTHON.resetWeek()" class="w-full py-4 bg-corthon-emerald text-black font-bold rounded-xl hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 mb-2">
-                                <i data-lucide="refresh-cw" class="w-4 h-4"></i> YENİ HAFTAYA BAŞLA
+                        <div className="space-y-3">
+                            <button 
+                                onClick={onGrant}
+                                className="w-full py-4 bg-corthon-emerald text-black font-bold rounded-xl hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-900/40 flex items-center justify-center gap-2"
+                            >
+                                <Zap size={18} fill="black" /> BAĞLANTIYI KUR
+                            </button>
+                            <button 
+                                onClick={onSkip}
+                                className="text-xs text-gray-500 hover:text-gray-300 underline"
+                            >
+                                Manuel Modda Devam Et
                             </button>
                         </div>
-                    </div>
-                </div>`;
-            }
-        };
-
-        const App = () => {
-            if(STATE.bootPhase < 4) return R.Boot();
-            if(STATE.isResetting) return `<div class="fixed inset-0 z-[300] bg-black/80 flex items-center justify-center"><div class="text-corthon-emerald font-mono animate-pulse">SİSTEM YENİLENİYOR...</div></div>`;
-
-            return `
-                <div class="bg-[#09090b]/90 backdrop-blur-md sticky top-0 z-30 border-b border-white/5 safe-area-top shadow-xl shadow-black/50">
-                    <div class="px-5 py-4 flex justify-between items-center">
-                        <h1 class="font-bold tracking-tight text-lg flex items-center gap-3 font-sans text-white">
-                            <i data-lucide="brain" class="text-corthon-emerald"></i> CORTHON
-                        </h1>
-                        <div class="flex items-center gap-4">
-                            <button onclick="CORTHON.openManual()" class="text-gray-500 hover:text-white transition-colors"><i data-lucide="help-circle" class="w-5 h-5"></i></button>
-                            <div class="flex flex-col items-end">
-                                <div class="text-xs font-bold text-white font-mono"><span class="text-corthon-emerald">${STATE.xp} XP</span></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="px-5 pb-0 flex gap-6 border-b border-white/5 font-sans">
-                        ${['FLOW', 'ANALYTICS', 'SETTINGS'].map(v => `
-                            <button onclick="CORTHON.setView('${v}')" class="pb-3 text-sm font-medium border-b-2 transition-colors ${STATE.view === v ? 'text-white border-corthon-emerald' : 'text-gray-500 border-transparent hover:text-gray-300'}">
-                                ${v === 'FLOW' ? 'Günlük Akış' : v === 'ANALYTICS' ? 'Performans' : 'Sistem'}
-                            </button>
-                        `).join('')}
                     </div>
                 </div>
+            );
+        };
 
-                <main class="px-5 pt-6 max-w-2xl mx-auto pb-36 safe-area-bottom">
-                    ${STATE.view === 'FLOW' ? `
-                        ${R.Greeting()}
-                        <div class="flex justify-between mb-8 overflow-x-auto pb-2 scrollbar-hide -mx-5 px-5">
-                            ${DAYS.map(d => {
-                                const sel = STATE.selectedDayId === d.id;
-                                return `<button onclick="CORTHON.setDay(${d.id})" class="flex flex-col items-center min-w-[3.5rem] py-2 rounded-xl transition-all ${sel ? 'bg-white text-black scale-105 shadow-md shadow-white/10' : 'bg-white/5 text-gray-500 hover:bg-white/10'}">
-                                    <span class="text-xs font-medium mb-1">${d.short}</span>
-                                    ${d.id === new Date().getDay() ? `<div class="w-1 h-1 rounded-full ${sel ? 'bg-black' : 'bg-corthon-emerald'}"></div>` : ''}
-                                </button>`
-                            }).join('')}
+        const TutorialOverlay = ({ step, onNext, onSkip }) => {
+            if (step === 0) return null;
+
+            const steps = [
+                { id: 1, text: "Corthon Neural OS'a hoş geldiniz. Bu bir yapılacaklar listesi değil, bir yaşam disiplini protokolüdür. Sisteme entegre olmak için talimatları izleyin.", target: "CENTER" },
+                { id: 2, text: "STATÜ PANELİ: Burası nörolojik seviyenizi gösterir. XP kazandıkça seviye atlarsınız. İstikrar (Streak) ve Puan (XP) anlık olarak işlenir.", target: "STATS" },
+                { id: 3, text: "ZAMAN NAVİGASYONU: Günler arasında geçiş yapın. Geçmiş günlerdeki performansınızı inceleyebilir, gelecek günleri planlayabilirsiniz.", target: "DAYS" },
+                { id: 4, text: "PROTOKOL GİRİŞİ: (+) Butonu ile sisteme yeni görevler (protokoller) ekleyin. İş, Spor, Maneviyat gibi kategoriler seçin.", target: "ADD_BTN" },
+                { id: 5, text: "GÜN SONU RAPORU: Gün bittiğinde bu butona basın. Sistem veriminizi hesaplar (%80+ verim bonus kazandırır) ve günü kilitler.", target: "COMPLETE_BTN" },
+                { id: 6, text: "SİSTEM AYARLARI: Performans analizi ve sistem ayarlarına buradan ulaşın. Hazırsanız başlayalım.", target: "MENU" }
+            ];
+
+            const current = steps.find(s => s.id === step);
+            if (!current) return null;
+
+            return (
+                <div className="tutorial-overlay-container flex flex-col items-center justify-center p-6 animate-fade-in" onClick={(e) => { e.stopPropagation(); onNext(); }}>
+                    <div className={`
+                        max-w-xs w-full bg-[#121214] border border-corthon-emerald shadow-[0_0_30px_rgba(16,185,129,0.2)] rounded-2xl p-6 relative z-[70] transition-all duration-500
+                        ${step === 1 ? 'scale-100' : 'scale-95 translate-y-10'}
+                        ${step === 4 ? 'absolute bottom-32 right-6' : ''}
+                        ${step === 5 ? 'absolute bottom-24 left-1/2 -translate-x-1/2' : ''}
+                        ${step === 6 ? 'absolute top-20 left-1/2 -translate-x-1/2' : ''}
+                    `}>
+                        <div className="absolute -top-3 -left-3 bg-black border border-corthon-emerald text-corthon-emerald text-[10px] font-bold px-2 py-0.5 rounded">TUTORIAL_MODE_v1</div>
+                        
+                        <div className="flex items-start gap-3 mb-4">
+                            <BotAvatar />
+                            <div>
+                                <h3 className="text-corthon-emerald font-bold text-sm tracking-wider mb-1">EĞİTİM MODÜLÜ {step}/6</h3>
+                                <p className="text-xs text-gray-300 leading-relaxed font-mono">{current.text}</p>
+                            </div>
                         </div>
-                        ${R.Tasks()}
-                    ` : STATE.view === 'ANALYTICS' ? R.Stats() : `
-                        <div class="animate-slide-up space-y-6 pb-20">
-                            <div class="glass-panel p-6 rounded-2xl space-y-6">
-                                <div class="flex items-center justify-between border-b border-white/5 pb-4">
-                                    <div class="flex items-center gap-3">
-                                        <i data-lucide="bell" class="text-gray-400"></i>
-                                        <div class="flex flex-col">
-                                            <span class="text-sm font-medium text-white">Bildirimler</span>
-                                            <span class="text-[10px] text-gray-500">Görev hatırlatıcıları</span>
-                                        </div>
+
+                        <div className="flex justify-between items-center mt-2">
+                            <button onClick={(e) => { e.stopPropagation(); onSkip(); }} className="text-[10px] text-gray-500 hover:text-white underline">Eğitimi Atla</button>
+                            <div className="flex items-center gap-2 text-[10px] text-corthon-emerald animate-pulse">
+                                <span>DEVAM ETMEK İÇİN DOKUN</span> <ChevronRight size={12}/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const BotAvatar = () => (
+            <div className="w-8 h-8 rounded-full bg-corthon-emerald/20 flex items-center justify-center border border-corthon-emerald/50 shrink-0 animate-float">
+                <Brain size={16} className="text-corthon-emerald"/>
+            </div>
+        );
+
+        const BootScreen = ({ onComplete }) => {
+            const [step, setStep] = useState(0);
+            
+            useEffect(() => {
+                const timers = [
+                    setTimeout(() => setStep(1), 500),
+                    setTimeout(() => setStep(2), 1200),
+                    setTimeout(() => setStep(3), 2000),
+                    setTimeout(() => { playSound('boot'); onComplete(); }, 2800)
+                ];
+                return () => timers.forEach(clearTimeout);
+            }, []);
+
+            return (
+                <div className="fixed inset-0 z-[200] bg-[#09090b] flex flex-col items-center justify-center p-8 font-mono">
+                    <div className="w-full max-w-sm">
+                        <div className="flex justify-center mb-8 relative">
+                             <div className="absolute inset-0 bg-corthon-emerald/20 blur-xl rounded-full animate-pulse"></div>
+                             <CorthonLogo />
+                        </div>
+                        
+                        <div className="space-y-2 mb-8 h-32 text-xs text-corthon-emerald/80">
+                            {step >= 0 && <div className="animate-slide-up">> BAŞLATILIYOR: CORTHON_NEURAL_CORE...</div>}
+                            {step >= 1 && <div className="animate-slide-up">> VERİTABANI BAĞLANTISI: [OK]</div>}
+                            {step >= 1 && <div className="animate-slide-up">> KORTİZOL SEVİYELERİ: TARANIYOR...</div>}
+                            {step >= 2 && <div className="animate-slide-up">> DOPAMİN RESEPTÖRLERİ: AKTİF</div>}
+                            {step >= 2 && <div className="animate-slide-up text-white">> SİSTEM HAZIR.</div>}
+                        </div>
+
+                        <div className="h-1 w-full bg-gray-900 rounded-full overflow-hidden">
+                            <div 
+                                className="h-full bg-corthon-emerald transition-all duration-[2000ms] ease-out"
+                                style={{ width: step === 3 ? '100%' : step === 0 ? '0%' : '60%' }}
+                            ></div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const Greeting = ({ name }) => {
+            const hour = new Date().getHours();
+            let greet = "Sistem Çevrimiçi";
+            let icon = <Sun size={20} className="text-yellow-500" />;
+            
+            if (hour < 6) { greet = "Gece Modu"; icon = <Moon size={20} className="text-purple-400" />; }
+            else if (hour < 11) { greet = "Sabah Protokolü"; icon = <Sunrise size={20} className="text-orange-400" />; }
+            else if (hour > 18) { greet = "Akşam Özeti"; icon = <Sunset size={20} className="text-indigo-400" />; }
+
+            const randomQuote = useMemo(() => MOTIVATION_QUOTES[Math.floor(Math.random() * MOTIVATION_QUOTES.length)], []);
+
+            return (
+                <div className="mb-6 animate-fade-in">
+                    <div className="flex items-center gap-2 mb-2 text-corthon-muted font-medium text-sm">
+                        {icon}
+                        <span>{greet}</span>
+                    </div>
+                    <div className="text-sm text-gray-400 italic font-serif opacity-80 border-l-2 border-corthon-emerald pl-3">
+                        "{randomQuote}"
+                    </div>
+                </div>
+            );
+        };
+
+        const Heatmap = ({ history }) => {
+            const days = useMemo(() => {
+                const result = [];
+                for (let i = 29; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(d.getDate() - i);
+                    const iso = d.toISOString().split('T')[0];
+                    const dayName = ['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'][d.getDay()];
+                    result.push({ date: iso, dayName });
+                }
+                return result;
+            }, []);
+
+            return (
+                <div className="w-full overflow-x-auto pb-4 scrollbar-hide">
+                   <div className="flex gap-1.5 min-w-max">
+                        {days.map((d, i) => {
+                            const data = history[d.date];
+                            const hasActivity = data && Object.keys(data.categories || {}).length > 0;
+                            return (
+                                <div key={i} className="flex flex-col items-center gap-1">
+                                    <div className="h-20 w-1 flex items-end bg-white/5 rounded-full overflow-hidden relative">
+                                        <div 
+                                            className={`w-full rounded-full transition-all duration-500 ${hasActivity ? 'bg-corthon-emerald' : 'bg-transparent'}`} 
+                                            style={{ height: hasActivity ? '100%' : '0%' }}
+                                        ></div>
                                     </div>
-                                    <button onclick="CORTHON.toggleSetting('notifications')" class="w-12 h-6 rounded-full relative transition-colors ${STATE.settings.notifications ? 'bg-corthon-emerald' : 'bg-gray-700'}">
-                                        <div class="absolute top-1 w-4 h-4 rounded-full bg-white transition-all shadow-md ${STATE.settings.notifications ? 'left-7' : 'left-1'}"></div>
-                                    </button>
+                                    <span className="text-[9px] text-gray-600 font-mono -rotate-90 mt-2">{d.dayName}</span>
                                 </div>
-                                
-                                <!-- Data Backup Section -->
-                                <div class="space-y-3">
-                                    <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">VERİ YÖNETİMİ</div>
-                                    <button onclick="CORTHON.exportData()" class="w-full p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl flex items-center justify-between transition-colors group">
-                                        <div class="flex items-center gap-3">
-                                            <i data-lucide="download-cloud" class="text-corthon-cyan group-hover:scale-110 transition-transform"></i>
-                                            <span class="text-sm">Memory Dump (Yedekle)</span>
-                                        </div>
-                                        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-600"></i>
+                            )
+                        })}
+                   </div>
+                   <div className="flex justify-between mt-2 px-1">
+                        <span className="text-[10px] text-gray-500">30 Gün Önce</span>
+                        <span className="text-[10px] text-corthon-emerald font-bold">BUGÜN</span>
+                   </div>
+                </div>
+            );
+        };
+
+        const RadarChart = ({ stats }) => {
+            const maxVal = Math.max(...Object.values(stats), 1);
+            
+            const p = (stats.ÜRETİM || 0) / maxVal;
+            const s = (stats.SOSYAL || 0) / maxVal;
+            const f = (stats.FİZİKSEL || 0) / maxVal;
+            const m = (stats.MANEVİYAT || 0) / maxVal;
+
+            const getCoord = (val, angle) => {
+                const r = val * 80;
+                const rad = (angle - 90) * (Math.PI / 180);
+                return {
+                    x: 100 + r * Math.cos(rad),
+                    y: 100 + r * Math.sin(rad)
+                };
+            };
+
+            const p1 = getCoord(p, 0);   
+            const p2 = getCoord(s, 90);  
+            const p3 = getCoord(f, 180); 
+            const p4 = getCoord(m, 270); 
+
+            const polyPoints = `${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y}`;
+
+            return (
+                <div className="relative w-full max-w-[220px] aspect-square mx-auto my-6">
+                    <svg viewBox="0 0 200 200" className="w-full h-full">
+                        <circle cx="100" cy="100" r="20" className="fill-none stroke-gray-800 stroke-[0.5]"/>
+                        <circle cx="100" cy="100" r="40" className="fill-none stroke-gray-800 stroke-[0.5]"/>
+                        <circle cx="100" cy="100" r="60" className="fill-none stroke-gray-800 stroke-[0.5]"/>
+                        <circle cx="100" cy="100" r="80" className="fill-none stroke-gray-700 stroke-[0.5]"/>
+                        
+                        <line x1="100" y1="20" x2="100" y2="180" className="stroke-gray-800 stroke-[0.5]"/>
+                        <line x1="20" y1="100" x2="180" y2="100" className="stroke-gray-800 stroke-[0.5]"/>
+
+                        <polygon points={polyPoints} className="fill-corthon-emerald/20 stroke-corthon-emerald stroke-2 radar-poly" />
+                        
+                        <circle cx={p1.x} cy={p1.y} r="3" className="fill-corthon-text"/>
+                        <circle cx={p2.x} cy={p2.y} r="3" className="fill-corthon-text"/>
+                        <circle cx={p3.x} cy={p3.y} r="3" className="fill-corthon-text"/>
+                        <circle cx={p4.x} cy={p4.y} r="3" className="fill-corthon-text"/>
+                    </svg>
+
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -mt-3 text-[9px] font-bold text-gray-400 tracking-wider">ÜRETİM</div>
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 -mb-3 text-[9px] font-bold text-gray-400 tracking-wider">FİZİKSEL</div>
+                    <div className="absolute top-1/2 left-0 -translate-x-1/2 -ml-6 text-[9px] font-bold text-gray-400 tracking-wider">MANEVİ</div>
+                    <div className="absolute top-1/2 right-0 -translate-x-1/2 -mr-6 text-[9px] font-bold text-gray-400 tracking-wider">SOSYAL</div>
+                </div>
+            );
+        };
+
+        const SnoozeModal = ({ isOpen, onClose, task, onConfirm, onReschedule, onUndo }) => {
+            const [mode, setMode] = useState('REASON');
+
+            if (!isOpen || !task) return null;
+
+            return (
+                <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center">
+                    <div className="absolute inset-0 modal-overlay" onClick={onClose}></div>
+                    <div className="relative w-full max-w-lg bg-[#121214] border-t sm:border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 animate-slide-up safe-area-bottom shadow-2xl">
+                        
+                        <div className="flex justify-between items-start mb-6">
+                            <div>
+                                <h3 className="font-bold text-lg text-white flex items-center gap-2">
+                                    <AlertTriangle size={20} className="text-corthon-warning"/>
+                                    İrade Sorgulaması
+                                </h3>
+                                <p className="text-xs text-gray-400 mt-1">"{task.title}" neden yapılmadı?</p>
+                            </div>
+                            <button onClick={onClose}><X size={20} className="text-gray-500 hover:text-white"/></button>
+                        </div>
+
+                        {task.snoozed > 0 && (
+                            <div className="mb-6">
+                                <button 
+                                    onClick={onUndo}
+                                    className="w-full py-3 bg-corthon-emerald/10 border border-corthon-emerald/30 text-corthon-emerald rounded-xl flex items-center justify-center gap-2 text-sm font-bold hover:bg-corthon-emerald/20 transition-all"
+                                >
+                                    <RotateCcw size={16}/> ERTELEMEYİ GERİ AL (XP İADE)
+                                </button>
+                                <div className="text-[10px] text-center text-gray-500 mt-2">Bu görevi {task.snoozed} kez erteledin.</div>
+                            </div>
+                        )}
+
+                        <div className="flex bg-white/5 p-1 rounded-xl mb-6">
+                            <button onClick={() => setMode('REASON')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${mode === 'REASON' ? 'bg-gray-800 text-white shadow' : 'text-gray-500'}`}>ERTELE (BUGÜN)</button>
+                            <button onClick={() => setMode('SCHEDULE')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${mode === 'SCHEDULE' ? 'bg-gray-800 text-white shadow' : 'text-gray-500'}`}>ÖTELE (TAŞI)</button>
+                        </div>
+
+                        {mode === 'REASON' && (
+                            <div className="grid grid-cols-2 gap-3">
+                                {SNOOZE_REASONS.map(reason => (
+                                    <button 
+                                        key={reason.id}
+                                        onClick={() => onConfirm(reason)}
+                                        className={`p-4 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 ${reason.bg} ${reason.border}`}
+                                    >
+                                        <reason.icon size={24} className={reason.color} />
+                                        <span className={`text-xs font-bold ${reason.color}`}>{reason.label}</span>
+                                        <span className="text-[10px] bg-black/40 px-2 py-0.5 rounded text-white/70">
+                                            {reason.penalty > 0 ? `-${reason.penalty} XP` : 'Ceza Yok'}
+                                        </span>
                                     </button>
-                                    <button onclick="CORTHON.triggerImport()" class="w-full p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl flex items-center justify-between transition-colors group">
-                                        <div class="flex items-center gap-3">
-                                            <i data-lucide="upload-cloud" class="text-corthon-emerald group-hover:scale-110 transition-transform"></i>
-                                            <span class="text-sm">Neural Inject (Geri Yükle)</span>
-                                        </div>
-                                        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-600"></i>
+                                ))}
+                            </div>
+                        )}
+
+                        {mode === 'SCHEDULE' && (
+                            <div className="space-y-4">
+                                <p className="text-xs text-gray-400 text-center">Görevi başka bir güne taşıyorsun. Bu bir planlama hatasıdır.</p>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {DAYS.filter(d => d.id !== 0 && d.id !== new Date().getDay()).slice(0, 6).map(d => (
+                                        <button 
+                                            key={d.id}
+                                            onClick={() => onReschedule(d.id)}
+                                            className="p-3 bg-white/5 border border-white/5 hover:border-white/20 rounded-xl text-sm text-gray-300 hover:text-white transition-all flex flex-col items-center"
+                                        >
+                                            <span className="font-bold">{d.short}</span>
+                                            <span className="text-[10px] text-gray-500 mt-1">-25 XP</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const FocusMode = ({ active, task, onClose }) => {
+            const [timeLeft, setTimeLeft] = useState(25 * 60);
+            const [isRunning, setIsRunning] = useState(false);
+            const [mode, setMode] = useState('SETUP'); 
+
+            useEffect(() => {
+                let interval = null;
+                if (isRunning && timeLeft > 0) {
+                    interval = setInterval(() => setTimeLeft(t => t - 1), 1000);
+                } else if (timeLeft === 0 && isRunning) {
+                    playSound('complete');
+                    setIsRunning(false);
+                }
+                return () => clearInterval(interval);
+            }, [isRunning, timeLeft]);
+
+            const startTimer = (mins) => {
+                setTimeLeft(mins * 60);
+                setMode('RUNNING');
+                setIsRunning(true);
+                playSound('click');
+            };
+
+            if (!active) return null;
+
+            const formatTime = (seconds) => {
+                const m = Math.floor(seconds / 60);
+                const s = seconds % 60;
+                return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            };
+
+            return (
+                <div className="fixed inset-0 z-[70] bg-[#09090b] flex flex-col items-center justify-center p-6 animate-fade-in">
+                    <button onClick={onClose} className="absolute top-6 right-6 p-2 bg-white/5 rounded-full text-gray-400 hover:text-white">
+                        <X size={24} />
+                    </button>
+
+                    <div className="max-w-md w-full text-center relative z-10">
+                        <div className="mb-10">
+                            <Brain size={48} className="mx-auto text-corthon-emerald mb-6 animate-pulse-slow" />
+                            <h2 className="text-2xl font-bold text-white mb-2">{task?.title || 'Odaklanma Modu'}</h2>
+                            <p className="text-gray-500 text-sm">Dikkat dağıtıcı unsurları ortadan kaldır.</p>
+                        </div>
+
+                        {mode === 'SETUP' ? (
+                            <div className="grid grid-cols-3 gap-4">
+                                <button onClick={() => startTimer(15)} className="p-5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-corthon-emerald transition-all group">
+                                    <div className="text-2xl font-bold mb-1 group-hover:text-corthon-emerald transition-colors">15</div>
+                                    <div className="text-[10px] uppercase tracking-wider text-gray-500">Hızlı</div>
+                                </button>
+                                <button onClick={() => startTimer(25)} className="p-5 rounded-2xl bg-corthon-emerald/10 border border-corthon-emerald/50 hover:bg-corthon-emerald/20 transition-all">
+                                    <div className="text-2xl font-bold mb-1 text-corthon-emerald">25</div>
+                                    <div className="text-[10px] uppercase tracking-wider text-corthon-emerald">Pomodoro</div>
+                                </button>
+                                <button onClick={() => startTimer(60)} className="p-5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-corthon-emerald transition-all group">
+                                    <div className="text-2xl font-bold mb-1 group-hover:text-corthon-emerald transition-colors">60</div>
+                                    <div className="text-[10px] uppercase tracking-wider text-gray-500">Derin İş</div>
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="space-y-10">
+                                <div className="text-8xl font-mono font-bold tracking-tighter tabular-nums text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500">
+                                    {formatTime(timeLeft)}
+                                </div>
+                                <div className="flex gap-4 justify-center">
+                                    <button onClick={() => setIsRunning(!isRunning)} className="px-8 py-4 rounded-full bg-white text-black font-bold flex items-center gap-2 hover:bg-gray-200 transition-colors">
+                                        {isRunning ? <><Pause size={20}/> Duraklat</> : <><Play size={20}/> Başlat</>}
                                     </button>
                                 </div>
                             </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const ManualModal = ({ isOpen, onClose, onRestartTutorial }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 modal-overlay" onClick={onClose}></div>
+                    <div className="relative w-full max-w-2xl bg-[#121214] border border-white/10 rounded-2xl overflow-hidden flex flex-col max-h-[85vh] animate-slide-up shadow-2xl">
+                        <div className="p-5 border-b border-white/5 flex justify-between items-center bg-white/5 backdrop-blur-md sticky top-0 z-10">
+                             <h2 className="text-lg font-bold text-white flex items-center gap-2"><BookOpen size={20} className="text-corthon-emerald"/> Corthon Protokolü v1.0</h2>
+                            <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full transition-colors"><X className="text-gray-500 hover:text-white" size={20}/></button>
+                        </div>
+                        <div className="p-6 overflow-y-auto space-y-8 font-sans text-sm text-gray-300 custom-scrollbar leading-relaxed">
+                            <section>
+                                <h3 className="text-corthon-emerald font-bold mb-3 flex items-center gap-2 text-base tracking-wide border-b border-white/5 pb-2"><Brain size={18}/> TEMEL FELSEFE</h3>
+                                <p className="opacity-90 mb-3">Corthon, basit bir görev yöneticisi değil, nörolojik odaklanma protokolüdür. Amacı dopamin sisteminizi "tamamlama hazzı" ile eğitmek ve disiplin sızıntılarını (erteleme) görünür kılarak utandırmaktır.</p>
+                            </section>
                             
-                            <div class="glass-panel border-red-500/30 p-6 rounded-2xl">
-                                <button onclick="CORTHON.purge()" class="w-full py-4 border border-red-500/50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all group">
-                                    <i data-lucide="trash-2" class="group-hover:animate-bounce"></i> SİSTEMİ SIFIRLA
+                            <section>
+                                <h3 className="text-yellow-500 font-bold mb-3 flex items-center gap-2 text-base tracking-wide border-b border-white/5 pb-2"><Zap size={18}/> XP ALGORİTMASI</h3>
+                                <ul className="space-y-2">
+                                    <li className="flex gap-2"><span className="text-corthon-emerald font-mono">Düşük Öncelik:</span> 50 XP</li>
+                                    <li className="flex gap-2"><span className="text-blue-400 font-mono">Orta Öncelik:</span> 75 XP</li>
+                                    <li className="flex gap-2"><span className="text-orange-400 font-mono">Yüksek Öncelik:</span> 100 XP</li>
+                                    <li className="flex gap-2"><span className="text-red-400 font-mono">Kritik:</span> 150 XP</li>
+                                    <li className="mt-2 text-xs italic opacity-70 border-l-2 border-yellow-500 pl-2">Günü %80 üzerinde verimle kapatmak +150 Bonus XP kazandırır.</li>
+                                </ul>
+                            </section>
+
+                            <section>
+                                <h3 className="text-red-500 font-bold mb-3 flex items-center gap-2 text-base tracking-wide border-b border-white/5 pb-2"><AlertTriangle size={18}/> İRADE YÖNETİMİ</h3>
+                                <p className="mb-2">Bir görevi yapmadığınızda <strong>İrade Sorgulaması</strong> devreye girer. Erteleme sebebinize göre XP cezası alırsınız:</p>
+                                <ul className="grid grid-cols-2 gap-2 text-xs">
+                                    <li className="bg-white/5 p-2 rounded border border-white/5">☕ Üşengeçlik: <span className="text-red-400">-50 XP</span></li>
+                                    <li className="bg-white/5 p-2 rounded border border-white/5">🔋 Yorgunluk: <span className="text-orange-400">-15 XP</span></li>
+                                    <li className="bg-white/5 p-2 rounded border border-white/5">💼 Yoğunluk: <span className="text-blue-400">-10 XP</span></li>
+                                    <li className="bg-white/5 p-2 rounded border border-white/5">🛑 Acil Durum: <span className="text-emerald-400">0 XP</span></li>
+                                </ul>
+                            </section>
+
+                             <section>
+                                <h3 className="text-corthon-cyan font-bold mb-3 flex items-center gap-2 text-base tracking-wide border-b border-white/5 pb-2"><RefreshCw size={18}/> ZAMAN DÖNGÜSÜ</h3>
+                                <p className="mb-2"><strong className="text-white">Günü Tamamla:</strong> O günkü performansı kilitler ve raporlar. Görevler silinmez, böylece geçmişe dönüp bakabilirsiniz.</p>
+                                <p><strong className="text-white">Haftayı Bitir:</strong> Pazar günleri veya manuel olarak tetiklenir. Tüm haftanın görevlerini ve tiklerini temizler. Yeni bir sayfa açar.</p>
+                            </section>
+
+                            <div className="pt-6 border-t border-white/10">
+                                <button 
+                                    onClick={() => { onClose(); onRestartTutorial(); }}
+                                    className="w-full py-4 bg-corthon-emerald/10 border border-corthon-emerald/50 text-corthon-emerald font-bold rounded-xl hover:bg-corthon-emerald/20 transition-all flex items-center justify-center gap-2 text-xs tracking-wider"
+                                >
+                                    <MousePointer2 size={16}/> EĞİTİM PROTOKOLÜNÜ YENİDEN BAŞLAT
                                 </button>
                             </div>
                         </div>
-                    `}
-                </main>
+                    </div>
+                </div>
+            );
+        };
 
-                ${STATE.view === 'FLOW' ? `<button onclick="CORTHON.openEdit(null)" class="fixed bottom-8 right-6 w-16 h-16 bg-white text-black rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-110 active:scale-95 transition-all z-40 safe-area-bottom"><i data-lucide="plus" class="w-8 h-8"></i></button>` : ''}
-                
-                ${STATE.toast.msg ? `
-                <div class="fixed top-24 left-4 right-4 sm:left-1/2 sm:-translate-x-1/2 max-w-md p-4 rounded-2xl font-bold text-sm shadow-2xl animate-slide-up z-[100] flex items-center justify-between gap-3 border border-white/10 backdrop-blur-xl safe-area-top ${STATE.toast.type === 'danger' ? 'bg-red-500/90 text-white' : 'bg-corthon-emerald/90 text-black'}">
-                    <span>${STATE.toast.msg}</span>
-                    ${STATE.toast.action ? `<button onclick="STATE.toast.action.fn()" class="bg-black/20 px-3 py-1 rounded-lg text-xs hover:bg-black/40 transition-colors">${STATE.toast.action.label}</button>` : ''}
-                </div>` : ''}
-
-                <!-- TASK MODAL -->
-                ${STATE.modals.task.open ? `
-                <div class="fixed inset-0 z-[110] flex items-end sm:items-center justify-center">
-                    <div class="absolute inset-0 modal-overlay" onclick="CORTHON.closeModal('task')"></div>
-                    <form onsubmit="CORTHON.saveTask(event)" class="relative w-full max-w-lg bg-[#121214] border-t sm:border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 animate-slide-up safe-area-bottom shadow-2xl modal-content flex flex-col max-h-[85vh]">
-                        <div class="flex justify-between items-center mb-6 shrink-0">
-                            <h3 class="font-bold text-lg text-white">${STATE.modals.task.data ? 'Düzenle' : 'Yeni Görev'}</h3>
-                            <button type="button" onclick="CORTHON.closeModal('task')"><i data-lucide="x" class="text-gray-500"></i></button>
+        const SummaryModal = ({ isOpen, onClose, xp, tasks, onConfirm }) => {
+            if (!isOpen) return null;
+            return (
+                 <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 modal-overlay" onClick={onClose}></div>
+                    <div className="relative w-full max-w-sm bg-[#121214] border border-white/10 rounded-2xl p-6 animate-slide-up shadow-2xl text-center">
+                        <RefreshCw size={48} className="mx-auto text-corthon-cyan mb-4 animate-spin-slow" />
+                        <h3 className="text-xl font-bold text-white mb-2">Haftalık Döngü Tamamlandı</h3>
+                        <div className="py-4 space-y-2">
+                            <div className="flex justify-between text-sm border-b border-white/5 pb-2">
+                                <span className="text-gray-400">Toplam XP Kazancı</span>
+                                <span className="text-corthon-emerald font-bold">+{xp} XP</span>
+                            </div>
+                            <div className="flex justify-between text-sm border-b border-white/5 pb-2">
+                                <span className="text-gray-400">Streak Bonusu</span>
+                                <span className="text-corthon-orange font-bold">+1 Seri</span>
+                            </div>
                         </div>
-                        <div class="space-y-5 overflow-y-auto custom-scrollbar flex-1 pb-4">
-                            <input name="title" value="${esc(STATE.modals.task.data?.title||'')}" class="w-full bg-transparent text-2xl font-bold placeholder-gray-700 outline-none text-white border-b border-transparent focus:border-corthon-emerald/50 pb-2 transition-colors" placeholder="Ne yapacaksın?" autofocus required />
-                            <div class="flex gap-3">
-                                <div class="flex-1 bg-white/5 rounded-xl p-3 border border-white/5 flex items-center gap-2 transition-colors focus-within:border-corthon-emerald/50">
-                                    <i data-lucide="clock" class="text-gray-500 w-4 h-4"></i>
-                                    <input type="time" name="time" value="${STATE.modals.task.data?.time||'09:00'}" class="bg-transparent w-full outline-none text-sm font-mono text-white"/>
+                        <p className="text-xs text-gray-500 mb-6 mt-4">Sistem yeniden başlatılacak ve tüm görevler sıfırlanacak. Onaylıyor musun?</p>
+                        <button onClick={onConfirm} className="w-full py-3 bg-corthon-cyan text-black font-bold rounded-xl hover:bg-cyan-400 transition-colors">SİSTEMİ YENİLE</button>
+                    </div>
+                </div>
+            );
+        };
+
+        const SettingsView = ({ onPurge, storageStatus, settings, onToggleSetting, onForceWeekReset }) => {
+            return (
+                <div className="animate-slide-up space-y-6 pb-20">
+                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-start gap-4">
+                        <div className="p-3 bg-red-500/20 rounded-xl text-red-500">
+                            <ShieldAlert size={24} />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-red-500 mb-1">Sistem Protokolleri</h3>
+                            <p className="text-xs text-gray-400 leading-relaxed">
+                                Bu alan kritik sistem ayarlarına erişim sağlar. Dikkatli kullanın.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="glass-panel p-6 rounded-2xl space-y-6">
+                        <div className="flex items-center gap-2 text-corthon-cyan font-bold text-sm tracking-wider uppercase mb-2">
+                            <Settings size={16} /> Manuel Müdahaleler
+                        </div>
+
+                        <button 
+                            onClick={onForceWeekReset}
+                            className="w-full py-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between px-4 hover:bg-white/10 transition-colors group"
+                        >
+                            <span className="text-sm font-medium text-gray-300">Haftalık Döngüyü Manuel Sıfırla</span>
+                            <RefreshCw size={16} className="text-corthon-cyan group-hover:rotate-180 transition-transform"/>
+                        </button>
+
+                         <div className="flex items-center justify-between mt-4">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-white/5 rounded-lg text-gray-400"><Bell size={18}/></div>
+                                <div><div className="text-sm font-medium text-white">Bildirim İzinleri</div></div>
+                            </div>
+                            <button onClick={() => onToggleSetting('notifications')} className={`w-12 h-6 rounded-full relative transition-colors ${settings.notifications ? 'bg-corthon-emerald' : 'bg-gray-700'}`}>
+                                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all shadow-md ${settings.notifications ? 'left-7' : 'left-1'}`}></div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="glass-panel border-red-500/30 p-6 rounded-2xl space-y-4">
+                        <div className="flex items-center gap-2 text-red-500 font-bold text-sm tracking-wider uppercase mb-2">
+                            <AlertTriangle size={16} /> Tehlike Bölgesi
+                        </div>
+                        <button onClick={onPurge} className="w-full py-4 border border-red-500/50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all group">
+                            <Trash size={18} className="group-hover:animate-bounce"/> SİSTEMİ TAMAMEN SIFIRLA (PURGE)
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        const TaskEditor = ({ isOpen, onClose, onSave, onDelete, initialData }) => {
+            const [title, setTitle] = useState('');
+            const [note, setNote] = useState('');
+            const [category, setCategory] = useState('Diğer');
+            const [time, setTime] = useState('09:00');
+            const [impact, setImpact] = useState('MED');
+
+            useEffect(() => {
+                if (isOpen) {
+                    setTitle(initialData?.title || '');
+                    setNote(initialData?.note || '');
+                    setCategory(initialData?.category || 'Diğer');
+                    setTime(initialData?.time || '09:00');
+                    setImpact(initialData?.impact || 'MED');
+                }
+            }, [isOpen, initialData]);
+
+            const handleSubmit = (e) => {
+                e.preventDefault(); 
+                if (title) {
+                    onSave({ title, note, category, time, impact });
+                }
+            };
+            
+            const handleDelete = (e) => {
+                e.preventDefault(); e.stopPropagation();
+                if (initialData && initialData.id) onDelete(initialData.id);
+            };
+
+            if (!isOpen) return null;
+
+            return (
+                <div className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center">
+                    <div className="absolute inset-0 modal-overlay" onClick={onClose}></div>
+                    <form onSubmit={handleSubmit} className="relative w-full max-w-lg bg-[#121214] border-t sm:border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 transform transition-transform duration-300 animate-slide-up safe-area-bottom shadow-2xl">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="font-bold text-lg text-white">{initialData ? 'Görevi Düzenle' : 'Yeni Görev'}</h3>
+                            <button type="button" onClick={onClose}><X size={20} className="text-gray-500 hover:text-white"/></button>
+                        </div>
+                        <div className="space-y-5">
+                            <div><input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-transparent text-2xl font-bold placeholder-gray-700 outline-none text-white" placeholder="Ne yapacaksın?" autoFocus /></div>
+                            <div className="flex gap-3">
+                                <div className="flex-1 bg-white/5 rounded-xl p-3 border border-white/5 focus-within:border-white/20 transition-colors flex items-center gap-2">
+                                    <Clock size={16} className="text-gray-500 ml-1"/><input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="bg-transparent w-full outline-none text-sm font-mono text-white"/>
                                 </div>
-                                <div class="flex-1 bg-white/5 rounded-xl p-3 border border-white/5">
-                                    <select name="impact" class="w-full bg-transparent outline-none text-sm text-white bg-gray-900">
-                                        ${IMPACTS.map(i => `<option value="${i.id}" ${STATE.modals.task.data?.impact===i.id?'selected':''}>${i.label}</option>`).join('')}
+                                <div className="flex-1 bg-white/5 rounded-xl p-3 border border-white/5">
+                                    <select value={impact} onChange={(e) => setImpact(e.target.value)} className="w-full bg-transparent outline-none text-sm appearance-none px-2 text-white">
+                                        {IMPACTS.map(i => <option key={i.id} value={i.id} className="bg-gray-900">{i.label} Öncelik</option>)}
                                     </select>
                                 </div>
                             </div>
-                            <div class="flex flex-wrap gap-2 py-1">
-                                ${CATEGORIES.map(c => `
-                                    <label class="cursor-pointer">
-                                        <input type="radio" name="category" value="${c}" class="peer hidden" ${STATE.modals.task.data?.category===c?'checked':''}>
-                                        <span class="text-xs px-3 py-1.5 rounded-full border border-white/10 text-gray-500 peer-checked:bg-white peer-checked:text-black peer-checked:font-medium transition-all hover:bg-white/5">${c}</span>
-                                    </label>
-                                `).join('')}
+                            <div className="flex flex-wrap gap-2 py-1">
+                                {CATEGORIES.filter(c => c !== 'NAMAZ').map(c => (
+                                    <button type="button" key={c} onClick={() => setCategory(c)} className={`text-xs px-3 py-1.5 rounded-full border transition-all ${category === c ? 'bg-white text-black border-white font-medium' : 'bg-transparent text-gray-500 border-white/10 hover:border-white/30'}`}>{c}</button>
+                                ))}
                             </div>
-                            <div class="bg-white/5 rounded-xl p-4 border border-white/5 transition-colors focus-within:border-corthon-emerald/50">
-                                <textarea name="note" placeholder="Notlar..." class="w-full bg-transparent outline-none text-sm min-h-[80px] resize-none text-gray-300 font-sans">${esc(STATE.modals.task.data?.note||'')}</textarea>
+                            <div className="bg-white/5 rounded-xl p-4 border border-white/5">
+                                <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Notlar, linkler veya alt adımlar..." className="w-full bg-transparent outline-none text-sm min-h-[80px] resize-none placeholder-gray-600 text-gray-300 font-sans leading-relaxed"/>
                             </div>
-                            <div class="pt-4 flex flex-col gap-3">
-                                <button type="submit" class="w-full p-4 bg-corthon-emerald text-black font-bold rounded-xl flex justify-center items-center gap-2 shadow-lg shadow-emerald-900/20 hover:bg-emerald-400 transition-colors"><i data-lucide="save" class="w-4 h-4"></i> Kaydet</button>
-                                ${STATE.modals.task.data ? `<button type="button" onclick="CORTHON.deleteTask()" class="w-full p-4 rounded-xl bg-red-500/10 text-red-500 font-bold flex justify-center items-center gap-2 hover:bg-red-500/20 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i> Sil</button>` : ''}
+                            <div className="pt-4 flex flex-col gap-3">
+                                <button type="submit" disabled={!title} className="w-full p-4 bg-corthon-emerald text-black font-bold rounded-xl hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 transition-colors shadow-lg shadow-emerald-900/20"><Save size={18} /> {initialData ? 'Değişiklikleri Kaydet' : 'Görevi Oluştur'}</button>
+                                {initialData && (<button type="button" onClick={handleDelete} className="w-full p-4 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 flex justify-center items-center gap-2 font-bold transition-all"><Trash2 size={18} /> Görevi Sil</button>)}
                             </div>
                         </div>
                     </form>
-                </div>` : ''}
+                </div>
+            );
+        };
 
-                <!-- SNOOZE MODAL -->
-                ${STATE.modals.snooze.open ? `
-                <div class="fixed inset-0 z-[120] flex items-end sm:items-center justify-center">
-                    <div class="absolute inset-0 modal-overlay" onclick="CORTHON.closeModal('snooze')"></div>
-                    <div class="relative w-full max-w-lg bg-[#121214] border-t sm:border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 animate-slide-up safe-area-bottom shadow-2xl modal-content flex flex-col max-h-[85vh]">
-                         <div class="flex justify-between items-start mb-6 shrink-0">
-                            <div>
-                                <h3 class="font-bold text-lg text-white flex items-center gap-2"><i data-lucide="alert-triangle" class="text-corthon-warning"></i> İrade Sorgulaması</h3>
-                                <p class="text-xs text-gray-400 mt-1">"${esc(STATE.modals.snooze.task?.title)}" neden yapılmadı?</p>
-                            </div>
-                            <button onclick="CORTHON.closeModal('snooze')"><i data-lucide="x" class="text-gray-500"></i></button>
-                        </div>
+        const App = () => {
+            const [mounted, setMounted] = useState(false);
+            const [xp, setXp] = useState(0);
+            const [streak, setStreak] = useState(0);
+            const [selectedDayId, setSelectedDayId] = useState(new Date().getDay());
+            const [tasks, setTasks] = useState(generateInitialRoutine());
+            const [history, setHistory] = useState({});
+            const [view, setView] = useState('FLOW');
+            const [modalOpen, setModalOpen] = useState(false);
+            const [manualOpen, setManualOpen] = useState(false);
+            const [summaryOpen, setSummaryOpen] = useState(false);
+            const [snoozeModal, setSnoozeModal] = useState({ open: false, task: null });
+            const [editingTask, setEditingTask] = useState(null);
+            const [focusMode, setFocusMode] = useState({ active: false, task: null });
+            const [prayerTimes, setPrayerTimes] = useState([]);
+            const [toast, setToast] = useState({ msg: null, type: 'neutral' });
+            const [storageStatus, setStorageStatus] = useState({ persisted: false, quota: 0, usage: 0 });
+            const [settings, setAppSettings] = useState({ notifications: false, sync: false });
+            const [isResetting, setIsResetting] = useState(false);
+            
+            // Tutorial State
+            const [tutorialStep, setTutorialStep] = useState(0);
+
+            // Permission Modal State
+            const [showPermissionModal, setShowPermissionModal] = useState(false);
+            
+            // Background Worker Reference
+            const workerRef = useRef(null);
+            // Track sent notifications locally to avoid duplicates in current session, and sync to worker
+            const [sentNotifications, setSentNotifications] = useState({});
+
+            // Initialize Background Worker
+            useEffect(() => {
+                // Create Worker from Blob
+                const blob = new Blob([backgroundWorkerCode], { type: "application/javascript" });
+                const worker = new Worker(URL.createObjectURL(blob));
+                workerRef.current = worker;
+
+                worker.onmessage = (e) => {
+                    if (e.data.type === 'TRIGGER_NOTIFICATION') {
+                        const { title, body, key } = e.data;
                         
-                        <div class="flex-1 overflow-y-auto custom-scrollbar">
-                            <div class="flex bg-white/5 p-1 rounded-xl mb-6">
-                                <button onclick="CORTHON.setSnoozeMode('REASON')" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all ${STATE.modals.snooze.mode === 'REASON' ? 'bg-gray-800 text-white shadow' : 'text-gray-500'}">ERTELE (BUGÜN)</button>
-                                <button onclick="CORTHON.setSnoozeMode('SCHEDULE')" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all ${STATE.modals.snooze.mode === 'SCHEDULE' ? 'bg-gray-800 text-white shadow' : 'text-gray-500'}">ÖTELE (TAŞI)</button>
-                            </div>
+                        // Double check in main thread just in case
+                        if (!sentNotifications[key]) {
+                            showNotification(title, body, key);
+                            setSentNotifications(prev => {
+                                const newVal = { ...prev, [key]: true };
+                                // Sync back to worker
+                                worker.postMessage({ type: 'SYNC_SENT_LOG', payload: newVal });
+                                return newVal;
+                            });
+                        }
+                    }
+                };
 
-                            ${STATE.modals.snooze.mode === 'REASON' ? `
-                                <div class="grid grid-cols-2 gap-3">
-                                    ${SNOOZE_REASONS.map(r => `
-                                        <button onclick="CORTHON.confirmSnooze('${r.id}')" class="p-4 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all hover:scale-[1.02] ${r.bg} ${r.border}">
-                                            <i data-lucide="${r.icon}" class="${r.color} w-6 h-6"></i>
-                                            <span class="text-xs font-bold ${r.color}">${r.label}</span>
-                                            <span class="text-[10px] bg-black/40 px-2 py-0.5 rounded text-white/70">-${r.penalty} XP</span>
-                                        </button>
-                                    `).join('')}
+                return () => worker.terminate();
+            }, []); // Run once on mount
+
+            // Sync Tasks to Worker whenever they change
+            useEffect(() => {
+                if (workerRef.current) {
+                    workerRef.current.postMessage({ type: 'UPDATE_SCHEDULE', payload: tasks });
+                }
+            }, [tasks]);
+
+            useEffect(() => {
+                const initSystem = async () => {
+                    // Load DB...
+                    try {
+                        const savedData = await neuralDB.load('corthon_core');
+                        if (savedData) {
+                            setXp(savedData.xp || 0);
+                            setStreak(savedData.streak || 0);
+                            setTasks({ ...generateInitialRoutine(), ...savedData.tasks });
+                            setHistory(savedData.history || {});
+                            // Check permission and sync settings
+                            const isPermGranted = Notification.permission === 'granted';
+                            setAppSettings({
+                                ...(savedData.settings || { notifications: false, sync: false }),
+                                notifications: isPermGranted // Force sync with actual permission
+                            });
+                        } else {
+                             const localData = localStorage.getItem('corthon_pro_v1');
+                             if(localData) {
+                                const parsed = JSON.parse(localData);
+                                setXp(parsed.xp || 0);
+                                setStreak(parsed.streak || 0);
+                                setTasks(parsed.tasks || generateInitialRoutine());
+                                setHistory(parsed.history || {});
+                                const isPermGranted = Notification.permission === 'granted';
+                                setAppSettings({
+                                    ...(parsed.settings || { notifications: false, sync: false }),
+                                    notifications: isPermGranted
+                                });
+                             }
+                        }
+                    } catch (e) {
+                        console.error("System Boot Failure:", e);
+                    }
+
+                    // Fetch Real Prayer Times for Istanbul
+                    const times = await fetchPrayerTimes();
+                    setPrayerTimes(times);
+                    
+                    // Update task times in state if they exist
+                    setTasks(prevTasks => {
+                        const newTasks = { ...prevTasks };
+                        Object.keys(newTasks).forEach(dayId => {
+                            newTasks[dayId] = newTasks[dayId].map(t => {
+                                if (t.category === 'NAMAZ' && t.id.includes('prayer_')) {
+                                    let timeStr = t.time;
+                                    // Map prayer indices to fetched data
+                                    if (t.id.includes('_0')) timeStr = times.find(x => x.name === 'İMSAK')?.time || t.time;
+                                    if (t.id.includes('_1')) timeStr = times.find(x => x.name === 'ÖĞLE')?.time || t.time;
+                                    if (t.id.includes('_2')) timeStr = times.find(x => x.name === 'İKİNDİ')?.time || t.time;
+                                    if (t.id.includes('_3')) timeStr = times.find(x => x.name === 'AKŞAM')?.time || t.time;
+                                    if (t.id.includes('_4')) timeStr = times.find(x => x.name === 'YATSI')?.time || t.time;
+                                    
+                                    return { ...t, time: timeStr };
+                                }
+                                return t;
+                            });
+                            // Re-sort day tasks by time
+                            newTasks[dayId].sort((a, b) => a.time.localeCompare(b.time));
+                        });
+                        return newTasks;
+                    });
+                    
+                    // Check Tutorial Status
+                    const hasCompletedTutorial = localStorage.getItem('corthon_tutorial_completed');
+                    if (!hasCompletedTutorial) {
+                        setTimeout(() => setTutorialStep(1), 3500); // Wait for boot animation
+                    }
+
+                    // Check Permission for Notifications
+                    if ('Notification' in window) {
+                         if (Notification.permission === 'default') {
+                             setTimeout(() => setShowPermissionModal(true), 4000);
+                         }
+                    }
+                };
+                initSystem();
+            }, []);
+
+            useEffect(() => {
+                if (!mounted) return;
+                const saveData = async () => {
+                    const coreData = { xp, streak, tasks, history, settings };
+                    await neuralDB.save('corthon_core', coreData);
+                    localStorage.setItem('corthon_pro_v1', JSON.stringify(coreData)); 
+                };
+                const timeout = setTimeout(saveData, 1000);
+                return () => clearTimeout(timeout);
+            }, [xp, streak, tasks, history, settings, mounted]);
+
+            // Helper to show actual notification
+            const showNotification = (title, body, tag) => {
+                if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+                if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+                     navigator.serviceWorker.ready.then(registration => {
+                         registration.showNotification(title, {
+                             body: body,
+                             icon: "icon-192.png",
+                             vibrate: [200, 100, 200],
+                             tag: tag,
+                             requireInteraction: true // Keep notification until user interacts
+                         });
+                     });
+                 } else {
+                     new Notification(title, {
+                         body: body,
+                         icon: "icon-192.png",
+                         requireInteraction: true
+                     });
+                 }
+                 playSound('click');
+            };
+
+            const requestNotificationAccess = () => {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        playSound('success');
+                        // Auto-enable setting
+                        setAppSettings(prev => ({ ...prev, notifications: true }));
+                        showToast("SİNYAL HATTI AÇIK: Bildirimler Aktif", "success");
+                        try {
+                             new Notification("Corthon OS", {
+                                body: "Test sinyali başarılı. Sistem izleniyor.",
+                                icon: "icon-192.png"
+                            });
+                        } catch(e) {}
+                    } else {
+                        showToast("BAĞLANTI REDDEDİLDİ: Manuel Takip Gerekli", "warning");
+                    }
+                    setShowPermissionModal(false);
+                });
+            };
+
+            const showToast = (msg, type = 'success') => {
+                setToast({ msg, type });
+                setTimeout(() => setToast({ msg: null, type: 'neutral' }), 3000);
+            };
+
+            const nextTutorialStep = () => {
+                if (tutorialStep < 6) {
+                    setTutorialStep(prev => prev + 1);
+                    playSound('click');
+                } else {
+                    finishTutorial();
+                }
+            };
+
+            const finishTutorial = () => {
+                setTutorialStep(0);
+                localStorage.setItem('corthon_tutorial_completed', 'true');
+                playSound('success');
+                showToast("SİSTEME ENTEGRE EDİLDİ", "success");
+            };
+
+            const restartTutorial = () => {
+                setManualOpen(false);
+                setTutorialStep(1);
+                playSound('boot');
+            };
+
+            // Existing Logic (Snippet for brevity)
+            const todayStr = new Date().toISOString().split('T')[0];
+            const isTodayProcessed = history[todayStr]?.processed;
+            const handleSaveTask = (taskData) => {
+                setTasks(prev => {
+                    const dayTasks = [...(prev[selectedDayId] || [])];
+                    if (editingTask) {
+                        const idx = dayTasks.findIndex(t => t.id === editingTask.id);
+                        if (idx !== -1) dayTasks[idx] = { ...dayTasks[idx], ...taskData };
+                    } else {
+                        dayTasks.push({ id: Date.now().toString(), completed: false, snoozed: 0, snoozePenalty: 0, ...taskData });
+                    }
+                    dayTasks.sort((a, b) => a.time.localeCompare(b.time));
+                    return { ...prev, [selectedDayId]: dayTasks };
+                });
+                setModalOpen(false);
+                setEditingTask(null);
+                playSound('complete');
+                if (isTodayProcessed && selectedDayId === new Date().getDay()) {
+                    showToast("⚠️ PROTOKOL DEĞİŞTİ: Raporu Güncellemelisin", "warning");
+                } else {
+                    showToast("SİSTEM: Yeni Protokol Tanımlandı", "system");
+                }
+            };
+            const openSnoozeModal = (task) => setSnoozeModal({ open: true, task });
+            const handleSnoozeConfirm = (reason) => {
+                const { task } = snoozeModal;
+                setTasks(prev => {
+                    const dayTasks = [...(prev[selectedDayId] || [])];
+                    const idx = dayTasks.findIndex(t => t.id === task.id);
+                    if (idx === -1) return prev;
+                    const oldPenalty = dayTasks[idx].snoozePenalty || 0;
+                    dayTasks[idx] = { ...dayTasks[idx], snoozed: (dayTasks[idx].snoozed || 0) + 1, snoozePenalty: oldPenalty + reason.penalty };
+                    return { ...prev, [selectedDayId]: dayTasks };
+                });
+                if (reason.penalty > 0) {
+                    setXp(x => Math.max(0, x - reason.penalty));
+                    playSound(reason.id === 'LAZY' ? 'lazy' : 'warning');
+                    showToast(`⚠️ KORTİZOL: ${reason.label} (-${reason.penalty} XP)`, "warning");
+                } else {
+                    playSound('mercy');
+                    showToast("🛡️ MERHAMET PROTOKOLÜ: Ceza Yok", "system");
+                }
+                const today = new Date().toISOString().split('T')[0];
+                setHistory(h => {
+                    const dayH = h[today] || { categories: {}, snoozes: 0, reasons: {} };
+                    const reasons = { ...dayH.reasons };
+                    reasons[reason.id] = (reasons[reason.id] || 0) + 1;
+                    return { ...h, [today]: { ...dayH, snoozes: (dayH.snoozes || 0) + 1, reasons } };
+                });
+                setSnoozeModal({ open: false, task: null });
+            };
+            const handleReschedule = (targetDayId) => {
+                 const { task } = snoozeModal;
+                 setTasks(prev => {
+                    const currentDayTasks = prev[selectedDayId].filter(t => t.id !== task.id);
+                    const targetDayTasks = [...(prev[targetDayId] || [])];
+                    targetDayTasks.push({ ...task, snoozed: 0, snoozePenalty: 0 }); 
+                    targetDayTasks.sort((a, b) => a.time.localeCompare(b.time));
+                    return { ...prev, [selectedDayId]: currentDayTasks, [targetDayId]: targetDayTasks };
+                 });
+                 setXp(x => Math.max(0, x - 25)); 
+                 playSound('warning');
+                 showToast("📅 GÖREV ÖTELENDİ: Planlama Hatası (-25 XP)", "warning");
+                 setSnoozeModal({ open: false, task: null });
+            };
+            const handleUndoSnooze = () => {
+                const { task } = snoozeModal;
+                if (!task || task.snoozed === 0) return;
+                const penaltyToRestore = task.snoozePenalty || 0;
+                setTasks(prev => {
+                    const dayTasks = [...(prev[selectedDayId] || [])];
+                    const idx = dayTasks.findIndex(t => t.id === task.id);
+                    if (idx === -1) return prev;
+                    dayTasks[idx] = { ...dayTasks[idx], snoozed: 0, snoozePenalty: 0 };
+                    return { ...prev, [selectedDayId]: dayTasks };
+                });
+                if (penaltyToRestore > 0) {
+                    setXp(x => x + penaltyToRestore);
+                    showToast(`♻️ İRADE YENİLENDİ: +${penaltyToRestore} XP İade`, "success");
+                } else {
+                    showToast("♻️ ERTELEME İPTAL EDİLDİ", "success");
+                }
+                playSound('mercy');
+                setSnoozeModal({ open: false, task: null });
+            };
+            const toggleTask = (taskId) => {
+                setTasks(prev => {
+                    const dayTasks = [...(prev[selectedDayId] || [])];
+                    const idx = dayTasks.findIndex(t => t.id === taskId);
+                    if (idx === -1) return prev;
+                    const task = dayTasks[idx];
+                    const newStatus = !task.completed;
+                    const points = IMPACTS.find(i => i.id === task.impact)?.xp || 50;
+                    const today = new Date().toISOString().split('T')[0];
+                    if (newStatus) {
+                        setXp(x => x + points);
+                        playSound('success');
+                        showToast(`⚡ DOPAMİN ENJEKTE EDİLDİ: ${task.category} (+${points} XP)`, "success");
+                        setHistory(h => {
+                            const dayH = h[today] || { categories: {} };
+                            const cats = { ...dayH.categories };
+                            cats[task.category] = (cats[task.category] || 0) + 1;
+                            return { ...h, [today]: { ...dayH, categories: cats } };
+                        });
+                    } else {
+                        setXp(x => Math.max(0, x - points));
+                        playSound('purge');
+                        showToast(`🔻 KORTİZOL UYARISI: İrade Kaybı (-${points} XP)`, "danger");
+                        setHistory(h => {
+                            const dayH = h[today] || { categories: {} };
+                            const cats = { ...dayH.categories };
+                            cats[task.category] = Math.max(0, (cats[task.category] || 0) - 1);
+                            return { ...h, [today]: { ...dayH, categories: cats } };
+                        });
+                    }
+                    dayTasks[idx] = { ...task, completed: newStatus };
+                    return { ...prev, [selectedDayId]: dayTasks };
+                });
+            };
+            const deleteTask = (taskId) => {
+                if (!taskId) return;
+                const currentDayTasks = tasks[selectedDayId] || [];
+                const taskToDelete = currentDayTasks.find(t => t.id === taskId);
+                if (taskToDelete && taskToDelete.completed) {
+                     const points = IMPACTS.find(i => i.id === taskToDelete.impact)?.xp || 50;
+                     setXp(x => Math.max(0, x - points));
+                     showToast(`⚖️ ADALET SİSTEMİ: Tamamlanan görev silindi (-${points} XP)`, "warning");
+                }
+                setTasks(prev => {
+                    const newState = { ...prev };
+                    Object.keys(newState).forEach(key => {
+                            if (Array.isArray(newState[key])) {
+                                newState[key] = newState[key].filter(t => String(t.id) !== String(taskId));
+                            }
+                    });
+                    return newState;
+                });
+                setModalOpen(false); setEditingTask(null);
+                playSound('purge'); 
+                if(!taskToDelete?.completed) showToast("☠️ VERİ İMHA EDİLDİ", "danger");
+            };
+            const handleCompleteDay = () => {
+                const currentDayIndex = new Date().getDay();
+                const adjCurrent = currentDayIndex === 0 ? 7 : currentDayIndex;
+                const adjSelected = selectedDayId === 0 ? 7 : selectedDayId;
+                if (adjSelected > adjCurrent) {
+                     playSound('warning');
+                     showToast("Gelecek henüz yazılmadı. Sadece bugünü raporlayabilirsin.", "warning");
+                     return;
+                }
+                const todayTasks = tasks[selectedDayId] || [];
+                const completed = todayTasks.filter(t => t.completed).length;
+                const total = todayTasks.length;
+                const processedData = history[todayStr];
+                const alreadyProcessed = processedData?.processed;
+                if (total === 0) { 
+                    if(confirm("Bugün görev yok. 'Dinlenme Günü' olarak işaretlensin mi? (+25 Bakım XP)")) {
+                        if (!alreadyProcessed) setXp(x => x + 25);
+                         setHistory(prev => ({
+                            ...prev,
+                            [todayStr]: { ...prev[todayStr], processed: true, completionRatio: 1, type: 'REST' }
+                        }));
+                        playSound('success');
+                        showToast("MENTAL BAKIM GÜNÜ KAYDEDİLDİ.", "success");
+                    }
+                    return; 
+                }
+                if (completed === 0) {
+                    playSound('purge');
+                    showToast("SİSTEM BAŞARISIZLIĞI: %0 Verim. XP Verilmedi.", "danger");
+                } else {
+                    const ratio = completed / total;
+                    let bonus = ratio >= 0.8 ? 150 : ratio >= 0.5 ? 75 : 25;
+                    if (alreadyProcessed) {
+                        showToast(`GÜN RAPORU GÜNCELLENDİ: %${Math.round(ratio*100)} Verim.`, "system");
+                    } else {
+                        setXp(x => x + bonus);
+                        playSound('success');
+                        showToast(`GÜN KAPANIŞI: %${Math.round(ratio*100)} Verim. +${bonus} Bonus XP`, "success");
+                    }
+                }
+                setHistory(prev => ({
+                    ...prev,
+                    [todayStr]: { 
+                        ...prev[todayStr],
+                        processed: true,
+                        completionRatio: completed / total,
+                        totalTasks: total // Store total to check for changes later
+                    }
+                }));
+            };
+            const handleCompleteWeekTrigger = () => { setSummaryOpen(true); playSound('click'); };
+            const confirmCompleteWeek = () => {
+                setSummaryOpen(false);
+                setIsResetting(true);
+                setTimeout(() => {
+                    setTasks(prev => {
+                        const newTasks = {};
+                        Object.keys(prev).forEach(dayId => {
+                            newTasks[dayId] = prev[dayId].map(t => ({
+                                ...t, completed: false, snoozed: 0, snoozePenalty: 0
+                            }));
+                        });
+                        return newTasks;
+                    });
+                    setStreak(s => s + 1);
+                    setXp(x => x + 500); 
+                    playSound('boot'); 
+                    setIsResetting(false);
+                    showToast("SİSTEM YENİDEN BAŞLATILDI. YENİ HAFTA.", "success");
+                }, 1500);
+            };
+            const handlePurgeSystem = async () => {
+                if(confirm("DİKKAT: TÜM İLERLEME SİLİNECEK.")) {
+                    await neuralDB.clearAll();
+                    localStorage.clear();
+                    playSound('purge');
+                    setXp(0);
+                    setStreak(0);
+                    setTasks(generateInitialRoutine());
+                    setHistory({});
+                    showToast("SİSTEM SIFIRLANDI", "danger");
+                    setTimeout(() => window.location.reload(), 1500);
+                }
+            };
+            const handleToggleSetting = (key) => setAppSettings(prev => ({ ...prev, [key]: !prev[key] }));
+            
+            const level = Math.floor(Math.sqrt(xp / XP_DIFFICULTY_SCALAR)) + 1;
+            const nextLevelXp = Math.pow(level, 2) * XP_DIFFICULTY_SCALAR;
+            const currentLevelBaseXp = Math.pow(level - 1, 2) * XP_DIFFICULTY_SCALAR;
+            const progressPercent = Math.min(100, Math.max(0, ((xp - currentLevelBaseXp) / (nextLevelXp - currentLevelBaseXp)) * 100));
+            const todayTasks = tasks[selectedDayId] || [];
+            const standardTasks = todayTasks.filter(t => t.category !== 'NAMAZ');
+            const prayerTasks = todayTasks.filter(t => t.category === 'NAMAZ');
+            const totalSnoozes = Object.values(history).reduce((acc, curr) => acc + (curr.snoozes || 0), 0);
+            const snoozeReasons = Object.values(history).reduce((acc, curr) => {
+                if(curr.reasons) Object.entries(curr.reasons).forEach(([r, c]) => acc[r] = (acc[r] || 0) + c);
+                return acc;
+            }, {});
+            
+            const currentDayIndex = new Date().getDay();
+            const adjCurrent = currentDayIndex === 0 ? 7 : currentDayIndex;
+            const adjSelected = selectedDayId === 0 ? 7 : selectedDayId;
+            const isFuture = adjSelected > adjCurrent;
+            const histData = history[todayStr];
+            const hasChangedSinceProcess = histData && histData.processed && (histData.totalTasks !== todayTasks.length || histData.completionRatio !== (todayTasks.filter(t=>t.completed).length / (todayTasks.length || 1)));
+
+            const stats = useMemo(() => {
+                const s = { ÜRETİM: 0, FİZİKSEL: 0, MANEVİYAT: 0, SOSYAL: 0 };
+                Object.values(history).forEach(day => {
+                    if (day.categories) Object.entries(day.categories).forEach(([cat, count]) => {
+                        if (MACRO_AXES['ÜRETİM'].includes(cat)) s.ÜRETİM += count;
+                        if (MACRO_AXES['FİZİKSEL'].includes(cat)) s.FİZİKSEL += count;
+                        if (MACRO_AXES['MANEVİYAT'].includes(cat)) s.MANEVİYAT += count;
+                        if (MACRO_AXES['SOSYAL'].includes(cat)) s.SOSYAL += count;
+                    });
+                });
+                return s;
+            }, [history]);
+
+            if (!mounted) return <BootScreen onComplete={() => setMounted(true)} />;
+
+            return (
+                <div className={`min-h-screen pb-36 safe-area-bottom transition-colors duration-500 ${isResetting ? 'opacity-50 grayscale' : ''}`}>
+                    
+                    {/* Tutorial Dark Overlay */}
+                    {tutorialStep > 0 && (
+                        <div className="fixed inset-0 z-[50] bg-black/50 backdrop-blur-[1px] transition-opacity duration-500"></div>
+                    )}
+                    
+                    <TutorialOverlay step={tutorialStep} onNext={nextTutorialStep} onSkip={finishTutorial} />
+
+                    {/* Permission Modal */}
+                    {showPermissionModal && (
+                        <PermissionModal 
+                            onGrant={requestNotificationAccess} 
+                            onSkip={() => setShowPermissionModal(false)} 
+                        />
+                    )}
+
+                    {/* Reset Overlay */}
+                    {isResetting && (
+                         <div className="fixed inset-0 z-[300] bg-black/80 flex flex-col items-center justify-center backdrop-blur-sm">
+                            <RefreshCw className="animate-spin text-corthon-emerald mb-4" size={48} />
+                            <div className="text-corthon-emerald font-mono animate-pulse">SİSTEM YENİLENİYOR...</div>
+                         </div>
+                    )}
+
+                    {/* Header */}
+                    <div className="bg-[#09090b]/90 backdrop-blur-md sticky top-0 z-30 border-b border-white/5 safe-area-top shadow-xl shadow-black/50">
+                        <div className="px-5 py-4 flex justify-between items-center">
+                            <h1 className="font-bold tracking-tight text-lg flex items-center gap-3 font-sans"><CorthonLogo /><span className="text-white">CORTHON</span></h1>
+                            <div className="flex items-center gap-4">
+                                <button onClick={() => setManualOpen(true)} className="text-gray-500 hover:text-white transition-colors"><HelpCircle size={20} /></button>
+                                <div className={`flex flex-col items-end transition-all duration-500 ${tutorialStep === 2 ? 'tutorial-highlight p-2 bg-[#09090b]' : ''}`}>
+                                    <div className="flex items-center gap-2 text-xs font-bold text-white font-mono">Lvl {level} <span className="text-corthon-emerald">{xp} XP</span></div>
+                                    <div className="w-24 h-1 bg-gray-800 rounded-full mt-1 overflow-hidden"><div className="h-full bg-corthon-emerald transition-all duration-1000 ease-out" style={{width: `${progressPercent}%`}}></div></div>
                                 </div>
-                            ` : `
-                                 <div class="space-y-4">
-                                    <p class="text-xs text-gray-400 text-center">Görevi başka bir güne taşıyorsun. Bu bir planlama hatasıdır.</p>
-                                    <div class="grid grid-cols-3 gap-2">
-                                        ${DAYS.filter(d => d.id !== 0 && d.id !== new Date().getDay()).slice(0, 6).map(d => `
-                                            <button onclick="CORTHON.rescheduleTask(${d.id})" class="p-3 bg-white/5 border border-white/5 hover:border-white/20 rounded-xl text-sm text-gray-300 hover:text-white transition-all flex flex-col items-center">
-                                                <span class="font-bold">${d.short}</span>
-                                                <span class="text-[10px] text-gray-500 mt-1">-25 XP</span>
+                            </div>
+                        </div>
+                        <div className={`px-5 pb-0 flex gap-6 border-b border-white/5 ${tutorialStep === 6 ? 'tutorial-highlight bg-[#09090b] rounded-none' : ''}`}>
+                            <button onClick={() => setView('FLOW')} className={`pb-3 text-sm font-medium border-b-2 transition-colors ${view === 'FLOW' ? 'text-white border-corthon-emerald' : 'text-gray-500 border-transparent hover:text-gray-300'}`}>Günlük Akış</button>
+                            <button onClick={() => setView('ANALYTICS')} className={`pb-3 text-sm font-medium border-b-2 transition-colors ${view === 'ANALYTICS' ? 'text-white border-corthon-emerald' : 'text-gray-500 border-transparent hover:text-gray-300'}`}>Performans</button>
+                            <button onClick={() => setView('SETTINGS')} className={`pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${view === 'SETTINGS' ? 'text-white border-corthon-emerald' : 'text-gray-500 border-transparent hover:text-gray-300'}`}>Sistem</button>
+                        </div>
+                    </div>
+
+                    <main className="px-5 pt-6 max-w-2xl mx-auto">
+                        
+                        {view === 'FLOW' && (
+                            <div className="animate-slide-up">
+                                <Greeting />
+                                <div className={`flex justify-between mb-8 overflow-x-auto pb-2 scrollbar-hide -mx-5 px-5 transition-all duration-500 ${tutorialStep === 3 ? 'tutorial-highlight py-2 bg-[#09090b]' : ''}`}>
+                                    {DAYS.map(d => {
+                                        const isSelected = d.id === selectedDayId;
+                                        const isToday = d.id === new Date().getDay();
+                                        return (
+                                            <button 
+                                                key={d.id} 
+                                                onClick={() => { setSelectedDayId(d.id); playSound('click'); }}
+                                                className={`flex flex-col items-center min-w-[3.5rem] py-2 rounded-xl transition-all ${isSelected ? 'bg-white text-black shadow-lg shadow-white/10 scale-105' : 'bg-white/5 text-gray-500 hover:bg-white/10'}`}
+                                            >
+                                                <span className="text-xs font-medium mb-1">{d.short}</span>
+                                                {isToday && <div className={`w-1 h-1 rounded-full ${isSelected ? 'bg-black' : 'bg-corthon-emerald'}`}></div>}
                                             </button>
-                                        `).join('')}
+                                        );
+                                    })}
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-end mb-2">
+                                        <h2 className="text-xl font-bold text-white tracking-tight">{DAYS.find(d => d.id === selectedDayId).name}</h2>
+                                        <span className="text-xs text-gray-500 font-mono bg-white/5 px-2 py-1 rounded">
+                                            {standardTasks.filter(t=>t.completed).length} / {standardTasks.length} Tamamlandı
+                                        </span>
+                                    </div>
+
+                                    {standardTasks.length === 0 ? (
+                                        <div onClick={() => { setEditingTask(null); setModalOpen(true); }} className="border border-dashed border-white/10 rounded-2xl p-8 text-center text-gray-500 hover:bg-white/5 hover:border-white/20 cursor-pointer transition-all">
+                                            <Plus className="mx-auto mb-2 opacity-50"/>
+                                            <p className="text-sm font-medium">Bugün için bir planın yok.</p>
+                                            <p className="text-xs mt-1 text-corthon-emerald">Yeni görev eklemek için dokun.</p>
+                                        </div>
+                                    ) : (
+                                        standardTasks.map(task => {
+                                            const impactColor = IMPACTS.find(i => i.id === task.impact)?.color || 'text-gray-400';
+                                            return (
+                                                <div 
+                                                    key={task.id}
+                                                    onClick={() => !task.completed && setFocusMode({ active: true, task })}
+                                                    className={`group glass-panel rounded-xl p-4 transition-all active:scale-[0.99] cursor-pointer border-l-4 ${task.completed ? 'opacity-50 grayscale border-l-gray-700' : 'hover:border-white/20 border-l-corthon-emerald'}`}
+                                                >
+                                                    <div className="flex items-start gap-4">
+                                                        <button 
+                                                            onClick={(e) => { e.stopPropagation(); toggleTask(task.id); }}
+                                                            className={`mt-1 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${task.completed ? 'bg-corthon-emerald border-corthon-emerald text-black' : 'border-gray-600 hover:border-corthon-emerald text-transparent'}`}
+                                                        >
+                                                            <Check size={14} strokeWidth={3} />
+                                                        </button>
+                                                        
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center gap-2 mb-1.5">
+                                                                <span className="text-xs font-mono text-gray-400 bg-white/5 px-1.5 py-0.5 rounded flex items-center gap-1"><Clock size={10}/> {task.time}</span>
+                                                                <span className="text-[10px] uppercase tracking-wider text-gray-500 border border-white/10 px-1.5 py-0.5 rounded font-bold">{task.category}</span>
+                                                                {task.snoozed > 0 && <span className="text-[10px] uppercase tracking-wider text-corthon-warning border border-corthon-warning/30 bg-corthon-warning/10 px-1.5 py-0.5 rounded font-bold flex items-center gap-1"><Hourglass size={10} /> ERTELENDİ x{task.snoozed}</span>}
+                                                            </div>
+                                                            <h3 className={`font-semibold text-base truncate mb-1 ${task.completed ? 'line-through text-gray-500' : 'text-gray-100'}`}>{task.title}</h3>
+                                                            {task.note && <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed font-sans">{task.note}</p>}
+                                                        </div>
+
+                                                        <div className="flex flex-col gap-1">
+                                                            <button onClick={(e) => { e.stopPropagation(); setEditingTask(task); setModalOpen(true); }} className="p-2 text-gray-500 hover:text-white transition-opacity bg-white/5 rounded-lg hover:bg-white/10"><Edit3 size={16} /></button>
+                                                            <button onClick={(e) => { e.stopPropagation(); openSnoozeModal(task); }} className="p-2 text-corthon-warning hover:text-white transition-opacity bg-corthon-warning/10 rounded-lg hover:bg-corthon-warning/20 border border-corthon-warning/20"><History size={16} /></button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    )}
+                                </div>
+
+                                {/* Prayer Section */}
+                                <div className="mt-8 mb-8">
+                                    <div className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2"><Moon size={12}/> Manevi Rutin</div>
+                                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                                        {prayerTimes.map((p) => (
+                                            <div key={p.name} className="flex-shrink-0 bg-white/5 border border-white/5 rounded px-3 py-2 flex flex-col items-center min-w-[70px]">
+                                                <span className="text-[9px] font-bold text-gray-400 mb-1">{p.name}</span>
+                                                <span className="text-xs font-mono text-corthon-emerald">{p.time}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {prayerTasks.length > 0 && (
+                                        <div className="mt-4 grid grid-cols-3 sm:grid-cols-6 gap-3">
+                                            {prayerTasks.map(task => (
+                                                <button key={task.id} onClick={() => toggleTask(task.id)} className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all duration-300 relative overflow-hidden group ${task.completed ? 'bg-corthon-emerald/20 border-corthon-emerald text-corthon-emerald shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'bg-white/5 border-white/5 text-gray-500 hover:bg-white/10'}`}>
+                                                    <span className="text-[10px] font-bold truncate w-full text-center tracking-wide">{task.title.replace(' Namazı', '')}</span>
+                                                    <div className="mt-2 transition-transform group-hover:scale-110">{task.completed ? <CheckCircle2 size={20} strokeWidth={2.5} /> : <div className="w-5 h-5 rounded-full border-2 border-white/20"></div>}</div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className={`mt-10 mb-6 space-y-4 transition-all duration-500 ${tutorialStep === 5 ? 'tutorial-highlight p-2 bg-[#09090b]' : ''}`}>
+                                    <button 
+                                        onClick={handleCompleteDay}
+                                        disabled={isFuture} 
+                                        className={`w-full py-4 rounded-xl bg-gradient-to-r border flex items-center justify-center gap-3 text-sm font-bold transition-all group relative overflow-hidden
+                                            ${isFuture ? 'from-gray-800 to-gray-800 border-gray-700 text-gray-500 cursor-not-allowed' : 
+                                              hasChangedSinceProcess ? 'from-yellow-900/40 to-yellow-800/40 border-yellow-500/50 text-yellow-500 hover:text-white hover:border-yellow-500' :
+                                              isTodayProcessed ? 'from-gray-900 to-gray-800 border-white/10 text-corthon-emerald/70' : 
+                                              'from-gray-900 to-gray-800 border-white/10 hover:border-corthon-emerald/50 hover:from-gray-800 text-white'}
+                                        `}
+                                    >
+                                        <Flag size={18} className={`${isTodayProcessed && !hasChangedSinceProcess ? 'text-corthon-emerald' : hasChangedSinceProcess ? 'text-yellow-500 animate-pulse' : 'text-corthon-orange group-hover:rotate-12 transition-transform'}`}/> 
+                                        {isFuture ? 'GELECEK KİLİTLİ' : hasChangedSinceProcess ? 'RAPORU GÜNCELLE (Değişiklik Var)' : isTodayProcessed ? 'RAPOR GÜNCEL' : 'GÜNÜ TAMAMLA & RAPORLA'}
+                                    </button>
+
+                                    {selectedDayId === 0 && (
+                                        <button onClick={handleCompleteWeekTrigger} className="w-full py-4 rounded-xl bg-corthon-emerald text-black flex items-center justify-center gap-3 text-sm font-bold shadow-lg shadow-corthon-emerald/20 hover:scale-[1.02] transition-transform">
+                                            <RefreshCw size={18} className="animate-pulse-slow"/> HAFTAYI BİTİR & YENİLE
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {view === 'ANALYTICS' && (
+                            <div className="animate-slide-up space-y-6">
+                                <div className="glass-panel p-6 rounded-2xl relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-6 opacity-10"><Zap size={100} /></div>
+                                    <div className="relative z-10">
+                                        <div className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">CORTHON PROTOKOLÜ</div>
+                                        <div className="text-4xl font-bold text-white mb-2 font-mono">{xp} <span className="text-lg text-corthon-emerald">XP</span></div>
+                                        <div className="inline-block px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-gray-400">Lvl {level+1} için: {Math.floor(nextLevelXp - xp)} XP kaldı</div>
                                     </div>
                                 </div>
-                            `}
-                        </div>
-                    </div>
-                </div>` : ''}
-
-                <!-- FOCUS MODAL -->
-                ${STATE.modals.focus.open ? `
-                <div class="fixed inset-0 z-[70] bg-[#09090b] flex flex-col items-center justify-center p-6 animate-fade-in">
-                    <button onclick="CORTHON.closeModal('focus')" class="absolute top-6 right-6 p-2 bg-white/5 rounded-full text-gray-400 hover:text-white transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
-                    <div class="max-w-md w-full text-center relative z-10">
-                         <div class="mb-8">
-                            <i data-lucide="brain" class="mx-auto text-corthon-emerald mb-6 w-12 h-12 animate-pulse-slow"></i>
-                            <h2 class="text-2xl font-bold text-white mb-2">${esc(STATE.modals.focus.task?.title)}</h2>
-                            <p class="text-gray-500 text-sm">Dikkat dağıtıcı unsurları ortadan kaldır.</p>
-                        </div>
-
-                        <!-- Ambience Toggle -->
-                        <div class="mb-10 flex justify-center">
-                             <button onclick="CORTHON.toggleNoise()" class="flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${STATE.settings.sound ? 'bg-white/10 border-corthon-emerald text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-transparent border-white/10 text-gray-500 hover:border-white/30'}">
-                                <i data-lucide="${STATE.settings.sound ? 'volume-2' : 'volume-x'}" class="w-4 h-4"></i>
-                                <span class="text-xs font-bold tracking-wider">AUDIO UPLINK: ${STATE.settings.sound ? 'ON' : 'OFF'}</span>
-                             </button>
-                        </div>
-
-                        ${STATE.modals.focus.mode === 'SETUP' ? `
-                             <div class="grid grid-cols-3 gap-4">
-                                <button onclick="STATE.modals.focus.timeLeft=1500; STATE.modals.focus.mode='RUNNING'; STATE.modals.focus.isRunning=true; render();" class="p-5 rounded-2xl bg-corthon-emerald/10 border border-corthon-emerald/50 hover:bg-corthon-emerald/20 transition-colors">
-                                    <div class="text-2xl font-bold mb-1 text-corthon-emerald">25</div><div class="text-[10px] uppercase text-corthon-emerald">Pomodoro</div>
-                                </button>
-                                <button onclick="STATE.modals.focus.timeLeft=3600; STATE.modals.focus.mode='RUNNING'; STATE.modals.focus.isRunning=true; render();" class="p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-white/20 transition-colors">
-                                    <div class="text-2xl font-bold mb-1 text-white">60</div><div class="text-[10px] uppercase text-gray-500">Derin İş</div>
-                                </button>
-                             </div>
-                        ` : `
-                            <div class="space-y-10">
-                                <div id="focus-timer-display" class="text-8xl font-mono font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500">
-                                    ${Math.floor(STATE.modals.focus.timeLeft/60).toString().padStart(2,'0')}:${(STATE.modals.focus.timeLeft%60).toString().padStart(2,'0')}
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                    <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center text-center"><TrendingUp size={20} className="text-corthon-cyan mb-2"/><div className="text-xl font-bold text-white">{streak}</div><div className="text-[10px] text-gray-500 uppercase tracking-wider">Seri</div></div>
+                                    <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center text-center"><CheckCircle2 size={20} className="text-corthon-emerald mb-2"/><div className="text-xl font-bold text-white">{Object.values(history).reduce((acc, curr) => acc + (curr.categories ? Object.values(curr.categories).reduce((a, b) => a + b, 0) : 0), 0)}</div><div className="text-[10px] text-gray-500 uppercase tracking-wider">Görev</div></div>
+                                    <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center text-center"><Percent size={20} className="text-corthon-orange mb-2"/><div className="text-xl font-bold text-white">{(Math.min(100, (xp / (streak * 100 || 1)) * 10)).toFixed(0)}%</div><div className="text-[10px] text-gray-500 uppercase tracking-wider">Verim</div></div>
+                                    <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center text-center border-corthon-warning/20 bg-corthon-warning/5"><History size={20} className="text-corthon-warning mb-2"/><div className="text-xl font-bold text-white">{totalSnoozes}</div><div className="text-[10px] text-corthon-warning uppercase tracking-wider">Disiplin Sızıntısı</div></div>
                                 </div>
-                                <button onclick="STATE.modals.focus.isRunning=!STATE.modals.focus.isRunning; render();" class="px-8 py-4 rounded-full bg-white text-black font-bold flex items-center gap-2 mx-auto hover:bg-gray-200 transition-colors">
-                                    <i data-lucide="${STATE.modals.focus.isRunning ? 'pause' : 'play'}"></i> ${STATE.modals.focus.isRunning ? 'Duraklat' : 'Başlat'}
-                                </button>
+                                <div className="glass-panel p-6 rounded-2xl"><div className="flex items-center gap-2 mb-4"><AlertTriangle size={18} className="text-corthon-warning"/><h3 className="font-bold text-sm tracking-wide text-white">İRADESİZLİK ANALİZİ (Sebepler)</h3></div>
+                                    <div className="space-y-3">{Object.keys(snoozeReasons).length === 0 ? <div className="text-xs text-gray-500 text-center py-4">Henüz bir sızıntı tespit edilmedi.</div> : SNOOZE_REASONS.map(reason => {const count = snoozeReasons[reason.id] || 0; if(count===0) return null; const max = Math.max(...Object.values(snoozeReasons), 1); const pct = (count/max)*100; return (<div key={reason.id} className="space-y-1"><div className="flex justify-between text-xs"><span className="text-gray-400 flex items-center gap-1"><reason.icon size={10} /> {reason.label}</span><span className="text-white font-mono">{count}</span></div><div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden"><div className={`h-full ${reason.bg.replace('/10', '')} transition-all duration-1000`} style={{width: `${pct}%`}}></div></div></div>)})}</div>
+                                </div>
+                                <div className="glass-panel p-6 rounded-2xl"><div className="flex items-center gap-2 mb-4"><Flame size={18} className="text-orange-500"/><h3 className="font-bold text-sm tracking-wide text-white">İSTİKRAR ZİNCİRİ (Son 30 Gün)</h3></div><Heatmap history={history} /></div>
+                                <div className="glass-panel p-6 rounded-2xl"><div className="flex items-center justify-between mb-4"><div className="flex items-center gap-2"><Activity size={18} className="text-corthon-emerald"/><h3 className="font-bold text-sm tracking-wide text-white">YAŞAM DENGESİ</h3></div></div><RadarChart stats={stats} /></div>
                             </div>
-                        `}
-                    </div>
-                </div>` : ''}
+                        )}
 
-                <!-- MANUAL/HELP MODAL -->
-                ${STATE.modals.manual.open ? `
-                <div class="fixed inset-0 z-[120] flex items-center justify-center p-4">
-                    <div class="absolute inset-0 modal-overlay" onclick="CORTHON.closeModal('manual')"></div>
-                    <div class="relative w-full max-w-2xl bg-[#121214] border border-white/10 rounded-2xl overflow-hidden flex flex-col max-h-[85vh] animate-slide-up shadow-2xl modal-content">
-                        <div class="p-5 border-b border-white/5 flex justify-between items-center bg-white/5 backdrop-blur-md sticky top-0 z-10 shrink-0">
-                             <h2 class="text-lg font-bold text-white flex items-center gap-2"><i data-lucide="book-open" class="text-corthon-emerald w-5 h-5"></i> Corthon Protokolü</h2>
-                            <button onclick="CORTHON.closeModal('manual')" class="p-1 hover:bg-white/10 rounded-full transition-colors"><i data-lucide="x" class="text-gray-500 hover:text-white w-5 h-5"></i></button>
-                        </div>
-                        <div class="p-6 overflow-y-auto space-y-8 font-sans text-sm text-gray-300 custom-scrollbar leading-relaxed flex-1">
-                            <section>
-                                <h3 class="text-corthon-emerald font-bold mb-3 flex items-center gap-2 text-base tracking-wide border-b border-white/5 pb-2"><i data-lucide="brain" class="w-4 h-4"></i> TEMEL FELSEFE</h3>
-                                <p class="opacity-90 mb-3">Corthon, basit bir görev yöneticisi değil, nörolojik odaklanma protokolüdür. Amacı dopamin sisteminizi "tamamlama hazzı" ile eğitmek ve disiplin sızıntılarını (erteleme) görünür kılarak utandırmaktır.</p>
-                            </section>
-                            <section>
-                                <h3 class="text-yellow-500 font-bold mb-3 flex items-center gap-2 text-base tracking-wide border-b border-white/5 pb-2"><i data-lucide="zap" class="w-4 h-4"></i> XP ALGORİTMASI</h3>
-                                <ul class="space-y-2">
-                                    <li class="flex gap-2"><span class="text-corthon-emerald font-mono">Düşük Öncelik:</span> 50 XP</li>
-                                    <li class="flex gap-2"><span class="text-blue-400 font-mono">Orta Öncelik:</span> 75 XP</li>
-                                    <li class="flex gap-2"><span class="text-orange-400 font-mono">Yüksek Öncelik:</span> 100 XP</li>
-                                    <li class="flex gap-2"><span class="text-red-400 font-mono">Kritik:</span> 150 XP</li>
-                                </ul>
-                            </section>
-                            <div class="pt-6 border-t border-white/10">
-                                <button onclick="CORTHON.restartTutorial()" class="w-full py-4 bg-corthon-emerald/10 border border-corthon-emerald/50 text-corthon-emerald font-bold rounded-xl hover:bg-corthon-emerald/20 transition-all flex items-center justify-center gap-2 text-xs tracking-wider">
-                                    <i data-lucide="mouse-pointer-2" class="w-4 h-4"></i> EĞİTİM PROTOKOLÜNÜ YENİDEN BAŞLAT
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>` : ''}
+                        {view === 'SETTINGS' && (
+                            <SettingsView 
+                                onPurge={handlePurgeSystem} 
+                                storageStatus={storageStatus}
+                                settings={settings}
+                                onToggleSetting={handleToggleSetting}
+                                onForceWeekReset={handleCompleteWeekTrigger}
+                            />
+                        )}
+                    </main>
 
-                <!-- TUTORIAL OVERLAY -->
-                ${STATE.tutorialStep > 0 ? `
-                <div class="fixed inset-0 z-[200] bg-black/50 backdrop-blur-[2px]" onclick="CORTHON.nextTutorial()">
-                    <div class="absolute bottom-24 left-1/2 -translate-x-1/2 max-w-xs w-full bg-[#121214] border border-corthon-emerald rounded-2xl p-6 shadow-[0_0_30px_rgba(16,185,129,0.2)] animate-slide-up">
-                         <div class="absolute -top-3 -left-3 bg-black border border-corthon-emerald text-corthon-emerald text-[10px] font-bold px-2 py-0.5 rounded">MODÜL ${STATE.tutorialStep}/6</div>
-                         <div class="flex gap-3 mb-4">
-                            <div class="w-8 h-8 rounded-full bg-corthon-emerald/20 flex items-center justify-center border border-corthon-emerald/50 shrink-0"><i data-lucide="brain" class="w-4 h-4 text-corthon-emerald"></i></div>
-                            <p class="text-xs text-gray-300 font-mono leading-relaxed">
-                            ${[
-                                "",
-                                "Corthon Neural OS'a hoş geldiniz. Bu bir yaşam disiplini protokolüdür.",
-                                "STATÜ PANELİ: XP kazandıkça seviye atlarsınız.",
-                                "ZAMAN: Günler arasında geçiş yapın.",
-                                "EKLE: (+) Butonu ile protokol ekleyin.",
-                                "RAPOR: Gün bittiğinde veriminizi raporlayın.",
-                                "SİSTEM: Ayarlar ve Sıfırlama."
-                            ][STATE.tutorialStep]}</p>
-                         </div>
-                         <div class="text-[10px] text-corthon-emerald text-right animate-pulse">DEVAM ETMEK İÇİN DOKUN ></div>
-                    </div>
-                </div>` : ''}
-            `;
+                    {view === 'FLOW' && (<button onClick={() => { setEditingTask(null); setModalOpen(true); playSound('click'); }} className={`fixed bottom-10 right-6 w-16 h-16 bg-white text-black rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-110 active:scale-95 transition-all z-40 ${tutorialStep === 4 ? 'tutorial-highlight' : ''}`}><Plus size={32} strokeWidth={2.5} /></button>)}
+
+                    {toast.msg && (<div className={`fixed top-24 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-auto max-w-md p-4 rounded-2xl font-bold text-sm shadow-2xl animate-slide-up z-[100] flex items-center gap-3 border border-white/10 backdrop-blur-xl ${toast.type === 'success' ? 'bg-corthon-emerald/90 text-black' : ''} ${toast.type === 'danger' ? 'bg-red-500/90 text-white' : ''} ${toast.type === 'warning' ? 'bg-corthon-warning/90 text-black' : ''} ${toast.type === 'system' ? 'bg-corthon-cyan/90 text-black' : ''}`}>{toast.type === 'success' && <Zap size={16} className="shrink-0"/>}{toast.type === 'danger' && <AlertTriangle size={16} className="shrink-0"/>}{toast.type === 'warning' && <History size={16} className="shrink-0"/>}{toast.type === 'system' && <Database size={16} className="shrink-0"/>}<span className="flex-1 leading-tight">{toast.msg}</span></div>)}
+
+                    <TaskEditor isOpen={modalOpen} onClose={() => setModalOpen(false)} onSave={handleSaveTask} onDelete={deleteTask} initialData={editingTask} />
+                    <SnoozeModal isOpen={snoozeModal.open} task={snoozeModal.task} onClose={() => setSnoozeModal({ open: false, task: null })} onConfirm={handleSnoozeConfirm} onReschedule={handleReschedule} onUndo={handleUndoSnooze} />
+                    <FocusMode active={focusMode.active} task={focusMode.task} onClose={() => setFocusMode({ active: false, task: null })} />
+                    <ManualModal isOpen={manualOpen} onClose={() => setManualOpen(false)} onRestartTutorial={restartTutorial} />
+                    <SummaryModal isOpen={summaryOpen} onClose={() => setSummaryOpen(false)} xp={xp} tasks={Object.values(history).reduce((acc, curr) => acc + (curr.categories ? Object.values(curr.categories).reduce((a, b) => a + b, 0) : 0), 0)} onConfirm={confirmCompleteWeek} />
+                </div>
+            );
         };
 
-        const render = () => {
-            const app = document.getElementById('app');
-            if(!app) return;
-            try {
-                app.innerHTML = App();
-                if(window.lucide) window.lucide.createIcons();
-            } catch(e) {
-                app.innerHTML = `<div class="p-6 text-red-500 font-mono">FATAL RENDER ERROR: ${e.message}</div>`;
-                console.error(e);
-            }
-        };
-
-        const save = async () => {
-            await DB.save('core', {
-                xp: STATE.xp,
-                streak: STATE.streak,
-                tasks: STATE.tasks,
-                history: STATE.history,
-                settings: STATE.settings
-            });
-            worker.postMessage({ type: 'UPDATE', payload: STATE.tasks });
-        };
-
-        const runBootSequence = async () => {
-            playSound('boot');
-            STATE.bootPhase = 0; render(); await new Promise(r => setTimeout(r, 600));
-            STATE.bootPhase = 1; render(); await new Promise(r => setTimeout(r, 800));
-            STATE.bootPhase = 2; render(); await new Promise(r => setTimeout(r, 800));
-            STATE.bootPhase = 3; render(); await new Promise(r => setTimeout(r, 600));
-            STATE.bootPhase = 4; render();
-            if(!localStorage.getItem('tutorial_done')) setTimeout(() => STATE.tutorialStep = 1, 1000);
-        };
-
-        window.CORTHON = ACTIONS; 
-        window.STATE = STATE; 
-
-        // Worker blob initialization
-        const blob = new Blob([bgWorkerCode], { type: 'application/javascript' });
-        const worker = new Worker(URL.createObjectURL(blob));
-        worker.onmessage = e => { if(Notification.permission==='granted') new Notification(e.data.title, { body: e.data.body }); };
-
-        (async () => {
-            try {
-                await DB.init();
-                const data = await DB.load('core');
-                if(data) {
-                    STATE.xp = data.xp || 0;
-                    STATE.streak = data.streak || 0;
-                    STATE.tasks = data.tasks || {1:[{id:'i1',title:'Derin Çalışma',category:'İş/Okul',time:'09:00',completed:false,impact:'HIGH'}]};
-                    STATE.history = data.history || {};
-                    STATE.settings = data.settings || { notifications: false, sound: false };
-                    
-                    // IF DATA EXISTS, SKIP BOOT SEQUENCE AND GO STRAIGHT TO APP
-                    // But init audio on first user interaction in the app later if needed.
-                    STATE.bootPhase = 4;
-                    render();
-                } else {
-                    // IF NO DATA, SHOW INTERACTIVE BOOT SCREEN TO CAPTURE AUDIO CONTEXT
-                    STATE.tasks = {1:[{id:'i1',title:'Derin Çalışma',category:'İş/Okul',time:'09:00',completed:false,impact:'HIGH'}]};
-                    STATE.bootPhase = -1; // Trigger "Tap to Start"
-                    render();
-                }
-                STATE.mounted = true;
-            } catch(e) { 
-                console.error(e);
-                document.getElementById('app').innerHTML = `<div class="p-6 text-red-500 font-mono">SYSTEM FAILURE: ${e.message}</div>`;
-            }
-        })();
-
-        // Focus Timer Tick
-        setInterval(() => {
-            if(STATE.modals.focus.open && STATE.modals.focus.isRunning && STATE.modals.focus.timeLeft > 0) {
-                STATE.modals.focus.timeLeft--;
-                const m = Math.floor(STATE.modals.focus.timeLeft/60).toString().padStart(2,'0');
-                const s = (STATE.modals.focus.timeLeft%60).toString().padStart(2,'0');
-                const el = document.getElementById('focus-timer-display');
-                if(el) el.innerText = `${m}:${s}`;
-                if(STATE.modals.focus.timeLeft === 0) { STATE.modals.focus.isRunning = false; playSound('success'); render(); }
-            }
-        }, 1000);
+        const container = document.getElementById('root');
+        const root = createRoot(container);
+        root.render(<App />);
     </script>
 </body>
 </html>
