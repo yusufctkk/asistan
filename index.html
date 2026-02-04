@@ -347,7 +347,8 @@
             { id: 0, name: 'Pazar', short: 'Paz' },
         ];
 
-        const CATEGORIES = ['İş/Okul', 'Spor', 'Gelişim', 'Sağlık', 'NAMAZ', 'Sosyal', 'Diğer'];
+        // REMOVED 'NAMAZ' FROM CATEGORIES
+        const CATEGORIES = ['İş/Okul', 'Spor', 'Gelişim', 'Sağlık', 'Sosyal', 'Diğer'];
         
         const SNOOZE_REASONS = [
             { id: 'LAZY', label: 'Üşengeçlik', penalty: 50, color: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/20', icon: Coffee },
@@ -356,9 +357,10 @@
             { id: 'EMERGENCY', label: 'Acil Durum', penalty: 0, color: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-400/20', icon: AlertOctagon },
         ];
 
+        // UPDATED MACRO_AXES (Removed 'NAMAZ')
         const MACRO_AXES = {
             'ÜRETİM': ['İş/Okul', 'Gelişim', 'Diğer'],
-            'MANEVİYAT': ['NAMAZ'],
+            'MANEVİYAT': [], 
             'FİZİKSEL': ['Spor', 'Sağlık'],
             'SOSYAL': ['Sosyal']
         };
@@ -370,71 +372,14 @@
             { id: 'CRITICAL', label: 'Kritik', xp: 150, color: 'text-red-400' },
         ];
 
-        // Fetch Prayer Times from API (Method 13 = Diyanet İşleri Başkanlığı, Turkey)
-        const fetchPrayerTimes = async () => {
-            const date = new Date().toISOString().split('T')[0];
-            const cacheKey = `corthon_prayer_${date}`;
-            const cached = localStorage.getItem(cacheKey);
-
-            if (cached) {
-                return JSON.parse(cached);
-            }
-
-            try {
-                // Method 13: Diyanet / Turkey
-                const response = await fetch(`https://api.aladhan.com/v1/timingsByCity?city=Istanbul&country=Turkey&method=13`);
-                const data = await response.json();
-                const timings = data.data.timings;
-
-                // Format: HH:MM
-                const formatted = [
-                    { name: 'İMSAK', time: timings.Fajr },
-                    { name: 'GÜNEŞ', time: timings.Sunrise },
-                    { name: 'ÖĞLE', time: timings.Dhuhr },
-                    { name: 'İKİNDİ', time: timings.Asr },
-                    { name: 'AKŞAM', time: timings.Maghrib },
-                    { name: 'YATSI', time: timings.Isha },
-                ];
-                
-                localStorage.setItem(cacheKey, JSON.stringify(formatted));
-                return formatted;
-            } catch (error) {
-                console.error("Prayer fetch error", error);
-                // Fallback (Approximate average times if offline and no cache)
-                return [
-                    { name: 'İMSAK', time: '05:40' },
-                    { name: 'GÜNEŞ', time: '07:10' },
-                    { name: 'ÖĞLE', time: '13:15' },
-                    { name: 'İKİNDİ', time: '16:05' },
-                    { name: 'AKŞAM', time: '18:15' },
-                    { name: 'YATSI', time: '19:40' },
-                ];
-            }
-        };
+        // REMOVED fetchPrayerTimes function
 
         const generateInitialRoutine = () => {
             const routine = {};
-            // Placeholders, will be updated by API
-            const prayerTemplates = [
-                { title: 'Sabah Namazı', time: '06:00' }, // Maps to Imsak index 0
-                { title: 'Öğle Namazı', time: '13:00' }, // Maps to Ogle index 2 (in our fetch list)
-                { title: 'İkindi Namazı', time: '16:00' }, // Maps to Ikindi index 3
-                { title: 'Akşam Namazı', time: '18:00' }, // Maps to Aksam index 4
-                { title: 'Yatsı Namazı', time: '19:30' }  // Maps to Yatsi index 5
-            ];
+            // Removed prayerTemplates generation loop
 
             DAYS.forEach(day => {
-                const dayTasks = prayerTemplates.map((p, index) => ({
-                    id: `prayer_${day.id}_${index}`,
-                    title: p.title,
-                    category: 'NAMAZ',
-                    time: p.time,
-                    completed: false,
-                    snoozed: 0,
-                    snoozePenalty: 0,
-                    impact: 'CRITICAL',
-                    note: 'Manevi disiplin esastır.'
-                }));
+                const dayTasks = [];
 
                 if (day.id === 1) {
                     dayTasks.push({ 
@@ -493,7 +438,7 @@
                 if (task.time === timeStr && !self.sentNotifications[key]) {
                     self.sentNotifications[key] = true;
                     
-                    const title = task.category === 'NAMAZ' ? 'Vakit Girdi: ' + task.title : 'Görev Zamanı: ' + task.title;
+                    const title = 'Görev Zamanı: ' + task.title;
                     const body = task.note || "Disiplin protokolünü uygula.";
                     
                     self.postMessage({
@@ -528,7 +473,7 @@
                         
                         <h2 className="text-xl font-bold text-white mb-2">SİNYAL BAĞLANTISI</h2>
                         <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-                            Nöral protokollerin ve manevi çağrıların zamanında iletilmesi için <span className="text-corthon-emerald font-bold">bildirim izni</span> gereklidir.
+                            Nöral protokollerin zamanında iletilmesi için <span className="text-corthon-emerald font-bold">bildirim izni</span> gereklidir.
                             <br/><br/>
                             <span className="text-xs text-gray-500">Not: En iyi performans için uygulamayı "Arka Planda" tutun, tamamen kapatmayın.</span>
                         </p>
@@ -559,7 +504,7 @@
                 { id: 1, text: "Corthon Neural OS'a hoş geldiniz. Bu bir yapılacaklar listesi değil, bir yaşam disiplini protokolüdür. Sisteme entegre olmak için talimatları izleyin.", target: "CENTER" },
                 { id: 2, text: "STATÜ PANELİ: Burası nörolojik seviyenizi gösterir. XP kazandıkça seviye atlarsınız. İstikrar (Streak) ve Puan (XP) anlık olarak işlenir.", target: "STATS" },
                 { id: 3, text: "ZAMAN NAVİGASYONU: Günler arasında geçiş yapın. Geçmiş günlerdeki performansınızı inceleyebilir, gelecek günleri planlayabilirsiniz.", target: "DAYS" },
-                { id: 4, text: "PROTOKOL GİRİŞİ: (+) Butonu ile sisteme yeni görevler (protokoller) ekleyin. İş, Spor, Maneviyat gibi kategoriler seçin.", target: "ADD_BTN" },
+                { id: 4, text: "PROTOKOL GİRİŞİ: (+) Butonu ile sisteme yeni görevler (protokoller) ekleyin.", target: "ADD_BTN" },
                 { id: 5, text: "GÜN SONU RAPORU: Gün bittiğinde bu butona basın. Sistem veriminizi hesaplar (%80+ verim bonus kazandırır) ve günü kilitler.", target: "COMPLETE_BTN" },
                 { id: 6, text: "SİSTEM AYARLARI: Performans analizi ve sistem ayarlarına buradan ulaşın. Hazırsanız başlayalım.", target: "MENU" }
             ];
@@ -1129,7 +1074,6 @@
             const [snoozeModal, setSnoozeModal] = useState({ open: false, task: null });
             const [editingTask, setEditingTask] = useState(null);
             const [focusMode, setFocusMode] = useState({ active: false, task: null });
-            const [prayerTimes, setPrayerTimes] = useState([]);
             const [toast, setToast] = useState({ msg: null, type: 'neutral' });
             const [storageStatus, setStorageStatus] = useState({ persisted: false, quota: 0, usage: 0 });
             const [settings, setAppSettings] = useState({ notifications: false, sync: false });
@@ -1215,33 +1159,7 @@
                         console.error("System Boot Failure:", e);
                     }
 
-                    // Fetch Real Prayer Times for Istanbul
-                    const times = await fetchPrayerTimes();
-                    setPrayerTimes(times);
-                    
-                    // Update task times in state if they exist
-                    setTasks(prevTasks => {
-                        const newTasks = { ...prevTasks };
-                        Object.keys(newTasks).forEach(dayId => {
-                            newTasks[dayId] = newTasks[dayId].map(t => {
-                                if (t.category === 'NAMAZ' && t.id.includes('prayer_')) {
-                                    let timeStr = t.time;
-                                    // Map prayer indices to fetched data
-                                    if (t.id.includes('_0')) timeStr = times.find(x => x.name === 'İMSAK')?.time || t.time;
-                                    if (t.id.includes('_1')) timeStr = times.find(x => x.name === 'ÖĞLE')?.time || t.time;
-                                    if (t.id.includes('_2')) timeStr = times.find(x => x.name === 'İKİNDİ')?.time || t.time;
-                                    if (t.id.includes('_3')) timeStr = times.find(x => x.name === 'AKŞAM')?.time || t.time;
-                                    if (t.id.includes('_4')) timeStr = times.find(x => x.name === 'YATSI')?.time || t.time;
-                                    
-                                    return { ...t, time: timeStr };
-                                }
-                                return t;
-                            });
-                            // Re-sort day tasks by time
-                            newTasks[dayId].sort((a, b) => a.time.localeCompare(b.time));
-                        });
-                        return newTasks;
-                    });
+                    // Removed fetchPrayerTimes logic from here
                     
                     // Check Tutorial Status
                     const hasCompletedTutorial = localStorage.getItem('corthon_tutorial_completed');
@@ -1575,7 +1493,6 @@
             const progressPercent = Math.min(100, Math.max(0, ((xp - currentLevelBaseXp) / (nextLevelXp - currentLevelBaseXp)) * 100));
             const todayTasks = tasks[selectedDayId] || [];
             const standardTasks = todayTasks.filter(t => t.category !== 'NAMAZ');
-            const prayerTasks = todayTasks.filter(t => t.category === 'NAMAZ');
             const totalSnoozes = Object.values(history).reduce((acc, curr) => acc + (curr.snoozes || 0), 0);
             const snoozeReasons = Object.values(history).reduce((acc, curr) => {
                 if(curr.reasons) Object.entries(curr.reasons).forEach(([r, c]) => acc[r] = (acc[r] || 0) + c);
@@ -1723,28 +1640,7 @@
                                     )}
                                 </div>
 
-                                {/* Prayer Section */}
-                                <div className="mt-8 mb-8">
-                                    <div className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2"><Moon size={12}/> Manevi Rutin</div>
-                                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                                        {prayerTimes.map((p) => (
-                                            <div key={p.name} className="flex-shrink-0 bg-white/5 border border-white/5 rounded px-3 py-2 flex flex-col items-center min-w-[70px]">
-                                                <span className="text-[9px] font-bold text-gray-400 mb-1">{p.name}</span>
-                                                <span className="text-xs font-mono text-corthon-emerald">{p.time}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    {prayerTasks.length > 0 && (
-                                        <div className="mt-4 grid grid-cols-3 sm:grid-cols-6 gap-3">
-                                            {prayerTasks.map(task => (
-                                                <button key={task.id} onClick={() => toggleTask(task.id)} className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all duration-300 relative overflow-hidden group ${task.completed ? 'bg-corthon-emerald/20 border-corthon-emerald text-corthon-emerald shadow-[0_0_15px_rgba(16,185,129,0.15)]' : 'bg-white/5 border-white/5 text-gray-500 hover:bg-white/10'}`}>
-                                                    <span className="text-[10px] font-bold truncate w-full text-center tracking-wide">{task.title.replace(' Namazı', '')}</span>
-                                                    <div className="mt-2 transition-transform group-hover:scale-110">{task.completed ? <CheckCircle2 size={20} strokeWidth={2.5} /> : <div className="w-5 h-5 rounded-full border-2 border-white/20"></div>}</div>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
+                                {/* Removed Prayer Section Grid */}
 
                                 <div className={`mt-10 mb-6 space-y-4 transition-all duration-500 ${tutorialStep === 5 ? 'tutorial-highlight p-2 bg-[#09090b]' : ''}`}>
                                     <button 
