@@ -350,10 +350,11 @@
         // REMOVED 'NAMAZ' FROM CATEGORIES
         const CATEGORIES = ['İş/Okul', 'Spor', 'Gelişim', 'Sağlık', 'Sosyal', 'Diğer'];
         
+        // INCREASED PENALTIES BY 10X
         const SNOOZE_REASONS = [
-            { id: 'LAZY', label: 'Üşengeçlik', penalty: 50, color: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/20', icon: Coffee },
-            { id: 'TIRED', label: 'Yorgunluk', penalty: 15, color: 'text-orange-400', bg: 'bg-orange-400/10', border: 'border-orange-400/20', icon: Battery },
-            { id: 'BUSY', label: 'Yoğunluk', penalty: 10, color: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20', icon: Briefcase },
+            { id: 'LAZY', label: 'Üşengeçlik', penalty: 500, color: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/20', icon: Coffee },
+            { id: 'TIRED', label: 'Yorgunluk', penalty: 150, color: 'text-orange-400', bg: 'bg-orange-400/10', border: 'border-orange-400/20', icon: Battery },
+            { id: 'BUSY', label: 'Yoğunluk', penalty: 100, color: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20', icon: Briefcase },
             { id: 'EMERGENCY', label: 'Acil Durum', penalty: 0, color: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-400/20', icon: AlertOctagon },
         ];
 
@@ -770,7 +771,7 @@
                                             className="p-3 bg-white/5 border border-white/5 hover:border-white/20 rounded-xl text-sm text-gray-300 hover:text-white transition-all flex flex-col items-center"
                                         >
                                             <span className="font-bold">{d.short}</span>
-                                            <span className="text-[10px] text-gray-500 mt-1">-25 XP</span>
+                                            <span className="text-[10px] text-gray-500 mt-1">-250 XP</span>
                                         </button>
                                     ))}
                                 </div>
@@ -885,12 +886,12 @@
                             </section>
 
                             <section>
-                                <h3 className="text-red-500 font-bold mb-3 flex items-center gap-2 text-base tracking-wide border-b border-white/5 pb-2"><AlertTriangle size={18}/> İRADE YÖNETİMİ</h3>
-                                <p className="mb-2">Bir görevi yapmadığınızda <strong>İrade Sorgulaması</strong> devreye girer. Erteleme sebebinize göre XP cezası alırsınız:</p>
+                                <h3 className="text-red-500 font-bold mb-3 flex items-center gap-2 text-base tracking-wide border-b border-white/5 pb-2"><AlertTriangle size={18}/> İRADE YÖNETİMİ (ARTIRILMIŞ)</h3>
+                                <p className="mb-2">Bir görevi yapmadığınızda <strong>İrade Sorgulaması</strong> devreye girer. Erteleme sebebinize göre AĞIR XP cezası alırsınız:</p>
                                 <ul className="grid grid-cols-2 gap-2 text-xs">
-                                    <li className="bg-white/5 p-2 rounded border border-white/5">☕ Üşengeçlik: <span className="text-red-400">-50 XP</span></li>
-                                    <li className="bg-white/5 p-2 rounded border border-white/5">🔋 Yorgunluk: <span className="text-orange-400">-15 XP</span></li>
-                                    <li className="bg-white/5 p-2 rounded border border-white/5">💼 Yoğunluk: <span className="text-blue-400">-10 XP</span></li>
+                                    <li className="bg-white/5 p-2 rounded border border-white/5">☕ Üşengeçlik: <span className="text-red-400">-500 XP</span></li>
+                                    <li className="bg-white/5 p-2 rounded border border-white/5">🔋 Yorgunluk: <span className="text-orange-400">-150 XP</span></li>
+                                    <li className="bg-white/5 p-2 rounded border border-white/5">💼 Yoğunluk: <span className="text-blue-400">-100 XP</span></li>
                                     <li className="bg-white/5 p-2 rounded border border-white/5">🛑 Acil Durum: <span className="text-emerald-400">0 XP</span></li>
                                 </ul>
                             </section>
@@ -1320,9 +1321,9 @@
                     targetDayTasks.sort((a, b) => a.time.localeCompare(b.time));
                     return { ...prev, [selectedDayId]: currentDayTasks, [targetDayId]: targetDayTasks };
                  });
-                 setXp(x => Math.max(0, x - 25)); 
+                 setXp(x => Math.max(0, x - 250)); 
                  playSound('warning');
-                 showToast("📅 GÖREV ÖTELENDİ: Planlama Hatası (-25 XP)", "warning");
+                 showToast("📅 GÖREV ÖTELENDİ: Planlama Hatası (-250 XP)", "warning");
                  setSnoozeModal({ open: false, task: null });
             };
             const handleUndoSnooze = () => {
