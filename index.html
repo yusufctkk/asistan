@@ -5,17 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>CORTHON // NEURAL OS</title>
     
+    <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#232325">
+    <meta name="theme-color" content="#09090b">
     <link rel="icon" type="image/png" href="icon-192.png">
     <link rel="apple-touch-icon" href="icon-192.png">
     
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -24,17 +27,16 @@
                 extend: {
                     colors: {
                         corthon: {
-                            bg: '#232325', 
-                            card: '#1a1a1c',
+                            bg: '#09090b', 
+                            card: '#121214',
                             border: 'rgba(255, 255, 255, 0.08)',
-                            emerald: '#c48d5a', /* Bronze primary */
-                            cyan: '#b98551',    /* Copper accent */
+                            emerald: '#10b981',
+                            cyan: '#0ea5e9', 
                             orange: '#f97316',
                             danger: '#ef4444',
                             text: '#fafafa',
                             muted: '#a1a1aa',
-                            warning: '#eab308',
-                            darkCharcoal: '#151516'
+                            warning: '#eab308' 
                         }
                     },
                     fontFamily: {
@@ -45,8 +47,8 @@
                         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'slide-up': 'slideUp 0.3s ease-out forwards',
                         'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'boot-text': 'bootText 2s steps(40, end)',
                         'float': 'float 3s ease-in-out infinite',
-                        'unlock': 'unlockAnim 0.5s ease-out forwards',
                     },
                     keyframes: {
                         slideUp: {
@@ -57,14 +59,13 @@
                             '0%': { opacity: '0' },
                             '100%': { opacity: '1' },
                         },
+                        bootText: {
+                            '0%': { width: '0%' },
+                            '100%': { width: '100%' },
+                        },
                         float: {
                             '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-5px)' },
-                        },
-                        unlockAnim: {
-                            '0%': { transform: 'scale(1)', opacity: '0.5' },
-                            '50%': { transform: 'scale(1.2)', opacity: '1', filter: 'brightness(1.5)' },
-                            '100%': { transform: 'scale(1)', opacity: '1' },
+                            '50%': { transform: 'translateY(-10px)' },
                         }
                     }
                 }
@@ -72,6 +73,7 @@
         }
     </script>
 
+    <!-- React & Babel -->
     <script type="importmap">
     {
         "imports": {
@@ -85,24 +87,23 @@
 
     <style>
         body {
-            background-color: #232325;
+            background-color: #09090b;
             color: #fafafa;
             overscroll-behavior-y: none;
             -webkit-tap-highlight-color: transparent;
-            overflow-x: hidden;
         }
         
         ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: #232325; }
-        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #c48d5a; }
+        ::-webkit-scrollbar-track { background: #09090b; }
+        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #10b981; }
 
         .glass-panel {
-            background: rgba(26, 26, 28, 0.8);
+            background: rgba(20, 20, 22, 0.6);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(196, 141, 90, 0.15);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
         .modal-overlay {
@@ -113,23 +114,23 @@
         .safe-area-top { padding-top: env(safe-area-inset-top); }
         .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
-        /* Highlight for Tutorial Fixes */
+        .radar-poly { transition: all 1s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        /* Highlight for Tutorial */
         .tutorial-highlight {
             position: relative;
             z-index: 60 !important;
-            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75), 0 0 30px 5px rgba(196, 141, 90, 0.4) !important;
-            border: 1px solid rgba(196, 141, 90, 0.8);
+            box-shadow: 0 0 30px 5px rgba(16, 185, 129, 0.25) !important;
+            border: 1px solid rgba(16, 185, 129, 0.5);
             pointer-events: auto !important;
             border-radius: 12px;
-            box-sizing: border-box;
-            max-width: 100vw;
         }
         
         .tutorial-overlay-container {
             position: fixed;
             inset: 0;
             z-index: 55;
-            pointer-events: all;
+            pointer-events: all; /* Blocks clicks elsewhere */
         }
 
         /* Input Autofill Fix */
@@ -137,12 +138,18 @@
         input:-webkit-autofill:hover, 
         input:-webkit-autofill:focus, 
         input:-webkit-autofill:active{
-            -webkit-box-shadow: 0 0 0 30px #1a1a1c inset !important;
+            -webkit-box-shadow: 0 0 0 30px #121214 inset !important;
             -webkit-text-fill-color: white !important;
         }
-        
-        /* Hardware acceleration for mobile */
-        * { transform: translateZ(0); }
+
+        /* Toggle Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #10b981;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #10b981;
+        }
     </style>
 </head>
 <body>
@@ -164,14 +171,14 @@
         import { 
             Brain, Activity, Zap, CheckCircle2, RotateCcw, 
             Lock, Clock, Flame, ChevronRight, AlertTriangle, 
-            X, Play, Pause, RefreshCw,
+            Calendar, X, Play, Pause, RefreshCw,
             Plus, Edit3, Trash2, Save, MoreHorizontal,
             HelpCircle, BarChart, LayoutDashboard, LineChart,
             Timer, Quote, AlignLeft, Sun, Moon, Sunrise, Sunset,
             BookOpen, Target, Check, Layers, Flag, Award, Terminal,
             Settings, HardDrive, Bell, Cloud, ShieldAlert, Database, Trash,
             TrendingUp, Percent, History, Hourglass, CalendarDays,
-            Coffee, Battery, Briefcase, AlertOctagon, Unlock, Sparkles, Smartphone
+            Coffee, Battery, Briefcase, AlertOctagon, ArrowRight, MousePointer2
         } from 'lucide-react';
 
         // --- DATABASE SYSTEM (INDEXEDDB) ---
@@ -186,17 +193,23 @@
             async init() {
                 return new Promise((resolve, reject) => {
                     const request = indexedDB.open(this.dbName, this.version);
+                    
                     request.onupgradeneeded = (event) => {
                         const db = event.target.result;
                         if (!db.objectStoreNames.contains(this.storeName)) {
                             db.createObjectStore(this.storeName, { keyPath: 'id' });
                         }
                     };
+
                     request.onsuccess = (event) => {
                         this.db = event.target.result;
                         resolve(this.db);
                     };
-                    request.onerror = (event) => reject(event.target.error);
+
+                    request.onerror = (event) => {
+                        console.error('Neural Database Error:', event.target.error);
+                        reject(event.target.error);
+                    };
                 });
             }
 
@@ -206,6 +219,7 @@
                     const transaction = this.db.transaction([this.storeName], 'readwrite');
                     const store = transaction.objectStore(this.storeName);
                     const request = store.put({ id: key, value: data, timestamp: Date.now() });
+                    
                     request.onsuccess = () => resolve(true);
                     request.onerror = () => reject(request.error);
                 });
@@ -217,7 +231,10 @@
                     const transaction = this.db.transaction([this.storeName], 'readonly');
                     const store = transaction.objectStore(this.storeName);
                     const request = store.get(key);
-                    request.onsuccess = () => resolve(request.result ? request.result.value : null);
+                    
+                    request.onsuccess = () => {
+                        resolve(request.result ? request.result.value : null);
+                    };
                     request.onerror = () => reject(request.error);
                 });
             }
@@ -244,6 +261,7 @@
                 const ctx = new AudioContext();
                 const now = ctx.currentTime;
 
+                // Helper to play a single tone
                 const playTone = (freq, type, startTime, duration, vol = 0.1) => {
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
@@ -263,13 +281,17 @@
                     playTone(1108.73, 'sine', now + 0.05, 0.6, 0.1); 
                     playTone(1318.51, 'sine', now + 0.10, 0.8, 0.1); 
                 } 
-                else if (type === 'click') { playTone(1200, 'sine', now, 0.05, 0.02); } 
+                else if (type === 'click') {
+                    playTone(1200, 'sine', now, 0.05, 0.02);
+                } 
                 else if (type === 'boot') {
+                    // Start up sound
                     playTone(220, 'square', now, 0.1, 0.05);
                     playTone(440, 'square', now + 0.1, 0.1, 0.05);
                     playTone(880, 'square', now + 0.2, 0.3, 0.05);
                 }
                 else if (type === 'purge' || type === 'lazy') {
+                    // Deep Bass Drop
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
                     osc.type = 'triangle';
@@ -295,11 +317,9 @@
                     osc.start(now);
                     osc.stop(now + 0.2);
                 }
-                else if (type === 'mercy') { playTone(440, 'sine', now, 0.5, 0.05); }
-                else if (type === 'unlock') {
-                    playTone(1046.50, 'sine', now, 0.2, 0.05);
-                    playTone(1318.51, 'sine', now + 0.1, 0.4, 0.1);
-                    playTone(1567.98, 'sine', now + 0.2, 0.6, 0.1);
+                else if (type === 'mercy') {
+                     // Soft sine
+                    playTone(440, 'sine', now, 0.5, 0.05);
                 }
             } catch (e) { console.error(e); }
         };
@@ -307,33 +327,14 @@
         // --- CONSTANTS & CONFIG ---
         const XP_DIFFICULTY_SCALAR = 3500; 
 
-        // Unvan Sistemi (Tech Noir / Neuro-Perception Ontology tabanlı)
-        const TITLES = [
-            { level: 1, name: "Apatik Gözlemci" },
-            { level: 5, name: "Reaktif Algı" },
-            { level: 10, name: "Proaktif Ajan" },
-            { level: 15, name: "Siber-İrade Korsanı" },
-            { level: 25, name: "Nöro-Mimar" },
-            { level: 40, name: "Sinestezik Üstat" },
-            { level: 60, name: "Corthon Prime" }
-        ];
-
-        const getTitle = (level) => {
-            let currentTitle = TITLES[0].name;
-            for(let i=0; i<TITLES.length; i++){
-                if(level >= TITLES[i].level) currentTitle = TITLES[i].name;
-            }
-            return currentTitle;
-        };
-
         const MOTIVATION_QUOTES = [
-            "Kaos, sadece anlaşılmamış bir düzendir.",
+            "Kontrolsüz güç, güç değildir.",
             "Yönetemediğin şeyi ölçemezsin.",
             "Bugün ektiğin tohumlar, yarınki gölgeni oluşturur.",
-            "Dopamin bir ödül değil, bir yakıttır. Doğru yere harca.",
+            "Zorluklar, başarının bedelidir.",
             "Mükemmellik bir eylem değil, bir alışkanlıktır.",
-            "İrade, beynin mimarisidir.",
-            "Sistem, kaosun tek ilacıdır."
+            "Acı geçicidir, vazgeçmenin pişmanlığı sonsuzdur.",
+            "Sistem, kaosun ilacıdır."
         ];
 
         const DAYS = [
@@ -346,67 +347,63 @@
             { id: 0, name: 'Pazar', short: 'Paz' },
         ];
 
-        const CATEGORIES = ['İş/Proje', 'Spor', 'Gelişim', 'Sağlık', 'Sosyal', 'Tasarım', 'Diğer'];
+        // REMOVED 'NAMAZ' FROM CATEGORIES
+        const CATEGORIES = ['İş/Okul', 'Spor', 'Gelişim', 'Sağlık', 'Sosyal', 'Diğer'];
         
+        // INCREASED PENALTIES BY 10X
         const SNOOZE_REASONS = [
             { id: 'LAZY', label: 'Üşengeçlik', penalty: 500, color: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/20', icon: Coffee },
             { id: 'TIRED', label: 'Yorgunluk', penalty: 150, color: 'text-orange-400', bg: 'bg-orange-400/10', border: 'border-orange-400/20', icon: Battery },
             { id: 'BUSY', label: 'Yoğunluk', penalty: 100, color: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20', icon: Briefcase },
-            { id: 'EMERGENCY', label: 'Acil Durum', penalty: 0, color: 'text-corthon-cyan', bg: 'bg-corthon-cyan/10', border: 'border-corthon-cyan/20', icon: AlertOctagon },
+            { id: 'EMERGENCY', label: 'Acil Durum', penalty: 0, color: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-400/20', icon: AlertOctagon },
         ];
 
+        // UPDATED MACRO_AXES (Removed 'NAMAZ')
         const MACRO_AXES = {
-            'ÜRETİM': ['İş/Proje', 'Gelişim', 'Tasarım'],
+            'ÜRETİM': ['İş/Okul', 'Gelişim', 'Diğer'],
+            'MANEVİYAT': [], 
             'FİZİKSEL': ['Spor', 'Sağlık'],
-            'SOSYAL': ['Sosyal'],
-            'DİĞER': ['Diğer']
+            'SOSYAL': ['Sosyal']
         };
 
-        // Görev Tipleri (Zorunlu, Standart, Zevk/Ödül)
-        const TASK_TYPES = [
-            { id: 'CHALLENGE', label: 'Zorunlu (Kortizol)', xp: 150, color: 'text-red-400', desc: 'Zor ama gerekli.' },
-            { id: 'NEUTRAL', label: 'Standart İşlem', xp: 75, color: 'text-gray-300', desc: 'Günlük rutin.' },
-            { id: 'REWARD', label: 'Zevk (Dopamin)', xp: 50, color: 'text-corthon-cyan', desc: 'Sadece hak edildiğinde açılır.' },
+        const IMPACTS = [
+            { id: 'LOW', label: 'Düşük', xp: 50, color: 'text-gray-400' },
+            { id: 'MED', label: 'Orta', xp: 75, color: 'text-blue-400' },
+            { id: 'HIGH', label: 'Yüksek', xp: 100, color: 'text-orange-400' },
+            { id: 'CRITICAL', label: 'Kritik', xp: 150, color: 'text-red-400' },
         ];
 
-        const DAILY_XP_UNLOCK_THRESHOLD = 300; // Zevk görevlerini açmak için o gün toplanması gereken minimum XP
+        // REMOVED fetchPrayerTimes function
 
         const generateInitialRoutine = () => {
             const routine = {};
+            // Removed prayerTemplates generation loop
+
             DAYS.forEach(day => {
                 const dayTasks = [];
+
                 if (day.id === 1) {
                     dayTasks.push({ 
                         id: 'sample_task_1', 
                         title: 'Derin Çalışma Bloğu', 
-                        category: 'İş/Proje', 
-                        timeBound: true,
+                        category: 'İş/Okul', 
                         time: '09:00', 
                         completed: false, 
                         snoozed: 0, 
                         snoozePenalty: 0,
-                        type: 'CHALLENGE', 
+                        impact: 'HIGH', 
                         note: 'En zorlu görevi sabah hallet.' 
                     });
-                    dayTasks.push({ 
-                        id: 'sample_task_2', 
-                        title: 'Marvel Sezon İzle', 
-                        category: 'Diğer', 
-                        timeBound: false,
-                        time: '', 
-                        completed: false, 
-                        snoozed: 0, 
-                        snoozePenalty: 0,
-                        type: 'REWARD', 
-                        note: 'Önce zorunlu görevleri tamamla ve kilidi aç.' 
-                    });
+                    dayTasks.sort((a, b) => a.time.localeCompare(b.time));
                 }
+                
                 routine[day.id] = dayTasks;
             });
             return routine;
         };
 
         // --- BACKGROUND WORKER CODE (BLOB) ---
+        // This runs in a separate thread, which is throttled less than the main UI thread
         const backgroundWorkerCode = `
         self.tasks = {};
         self.sentNotifications = {};
@@ -421,7 +418,9 @@
         };
 
         setInterval(() => {
+            // "Tick" every 5 seconds to be more precise
             const now = new Date();
+            // Force strict HH:MM formatting to avoid locale issues
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const timeStr = \`\${hours}:\${minutes}\`;
@@ -432,61 +431,58 @@
             const todayTasks = self.tasks[dayId] || [];
 
             todayTasks.forEach(task => {
-                if (task.completed || !task.timeBound) return;
+                if (task.completed) return;
                 
                 const key = dateStr + '-' + task.id + '-' + timeStr;
                 
+                // Compare exact string HH:MM
                 if (task.time === timeStr && !self.sentNotifications[key]) {
                     self.sentNotifications[key] = true;
+                    
+                    const title = 'Görev Zamanı: ' + task.title;
+                    const body = task.note || "Disiplin protokolünü uygula.";
+                    
                     self.postMessage({
                         type: 'TRIGGER_NOTIFICATION',
-                        title: 'Protokol Zamanı: ' + task.title,
-                        body: task.note || "Harekete geç.",
+                        title: title,
+                        body: body,
                         key: key
                     });
                 }
             });
-        }, 10000); // Check every 10 seconds to save battery
+        }, 5000); // Check every 5 seconds
         `;
 
         // --- COMPONENTS ---
 
         const CorthonLogo = () => (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-corthon-cyan animate-pulse-slow">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-corthon-emerald animate-pulse-slow">
                 <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                <path d="M15 9L15.87 6.4C15.96 6.13 16.17 5.92 16.44 5.83L19 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M15 15L15.87 17.6C15.96 17.87 16.17 18.08 16.44 18.17L19 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M9.5 9.5C9.5 9.5 10 12 14 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
         );
 
-        const PermissionModal = ({ onGrant, onSkip, isIOS }) => {
+        const PermissionModal = ({ onGrant, onSkip }) => {
             return (
                 <div className="fixed inset-0 z-[250] bg-black/90 flex flex-col items-center justify-center p-6 animate-fade-in backdrop-blur-md">
-                    <div className="max-w-sm w-full bg-[#1a1a1c] border border-corthon-cyan/50 rounded-2xl p-6 text-center relative overflow-hidden shadow-[0_0_50px_rgba(185,133,81,0.2)]">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-corthon-cyan to-transparent animate-pulse"></div>
+                    <div className="max-w-sm w-full bg-[#121214] border border-corthon-emerald/50 rounded-2xl p-6 text-center relative overflow-hidden shadow-[0_0_50px_rgba(16,185,129,0.2)]">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-corthon-emerald to-transparent animate-pulse"></div>
                         
-                        <Bell size={48} className="mx-auto text-corthon-cyan mb-4 animate-bounce" />
+                        <Bell size={48} className="mx-auto text-corthon-emerald mb-4 animate-bounce" />
                         
                         <h2 className="text-xl font-bold text-white mb-2">SİNYAL BAĞLANTISI</h2>
-                        <p className="text-gray-400 text-sm mb-4 leading-relaxed">
-                            Zamanı gelen protokollerin hatırlatılması için <span className="text-corthon-cyan font-bold">bildirim izni</span> gereklidir.
+                        <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                            Nöral protokollerin zamanında iletilmesi için <span className="text-corthon-emerald font-bold">bildirim izni</span> gereklidir.
+                            <br/><br/>
+                            <span className="text-xs text-gray-500">Not: En iyi performans için uygulamayı "Arka Planda" tutun, tamamen kapatmayın.</span>
                         </p>
 
-                        {isIOS && (
-                            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 mb-6 text-left">
-                                <div className="flex items-center gap-2 text-red-400 font-bold text-xs mb-1">
-                                    <Smartphone size={14}/> iOS Kullanıcısı Uyarısı
-                                </div>
-                                <p className="text-[10px] text-gray-300">
-                                    iPhone'da bildirim alabilmek için önce alt menüden <strong>"Ana Ekrana Ekle" (Add to Home Screen)</strong> yapmalı ve uygulamayı oradan açmalısın.
-                                </p>
-                            </div>
-                        )}
-
-                        <div className="space-y-3 mt-4">
+                        <div className="space-y-3">
                             <button 
                                 onClick={onGrant}
-                                className="w-full py-4 bg-corthon-emerald text-black font-bold rounded-xl hover:bg-opacity-90 transition-all shadow-lg shadow-corthon-emerald/30 flex items-center justify-center gap-2"
+                                className="w-full py-4 bg-corthon-emerald text-black font-bold rounded-xl hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-900/40 flex items-center justify-center gap-2"
                             >
                                 <Zap size={18} fill="black" /> BAĞLANTIYI KUR
                             </button>
@@ -506,12 +502,12 @@
             if (step === 0) return null;
 
             const steps = [
-                { id: 1, text: "Corthon Neural OS'a hoş geldin. Bu bir to-do listesi değil; nörolojik döngünü yöneten, dikkatini hizada tutan bir irade motorudur.", target: "CENTER" },
-                { id: 2, text: "STATÜ & UNVAN: Sadece seviye atlamazsın, siber-ontolojik unvanlar kazanırsın. Bakır çubuk dopamin döngünü temsil eder.", target: "STATS" },
-                { id: 3, text: "GÜN NAVİGASYONU: Zaman körlüğünü önlemek için günleri net bir akışta gör. Gelecek sadece planlanır, geçmiş ise raporlanır.", target: "DAYS" },
-                { id: 4, text: "PROTOKOL GİRİŞİ: (+)'ya bas. Artık görevleri 'Zamansız' yapabilir veya onlara 'Ödül' kilidi koyabilirsin.", target: "ADD_BTN" },
-                { id: 5, text: "GÜN SONU KİLİDİ: Gerçekleşen eylemlerle günü mühürle. %80+ verim ciddi XP bonusu verir.", target: "COMPLETE_BTN" },
-                { id: 6, text: "PERFORMANS PANELİ: Disiplin sızıntılarını (neden ertelediğini) yüzüne vuran analitik ekranı.", target: "MENU" }
+                { id: 1, text: "Corthon Neural OS'a hoş geldiniz. Bu bir yapılacaklar listesi değil, bir yaşam disiplini protokolüdür. Sisteme entegre olmak için talimatları izleyin.", target: "CENTER" },
+                { id: 2, text: "STATÜ PANELİ: Burası nörolojik seviyenizi gösterir. XP kazandıkça seviye atlarsınız. İstikrar (Streak) ve Puan (XP) anlık olarak işlenir.", target: "STATS" },
+                { id: 3, text: "ZAMAN NAVİGASYONU: Günler arasında geçiş yapın. Geçmiş günlerdeki performansınızı inceleyebilir, gelecek günleri planlayabilirsiniz.", target: "DAYS" },
+                { id: 4, text: "PROTOKOL GİRİŞİ: (+) Butonu ile sisteme yeni görevler (protokoller) ekleyin.", target: "ADD_BTN" },
+                { id: 5, text: "GÜN SONU RAPORU: Gün bittiğinde bu butona basın. Sistem veriminizi hesaplar (%80+ verim bonus kazandırır) ve günü kilitler.", target: "COMPLETE_BTN" },
+                { id: 6, text: "SİSTEM AYARLARI: Performans analizi ve sistem ayarlarına buradan ulaşın. Hazırsanız başlayalım.", target: "MENU" }
             ];
 
             const current = steps.find(s => s.id === step);
@@ -520,34 +516,38 @@
             return (
                 <div className="tutorial-overlay-container flex flex-col items-center justify-center p-6 animate-fade-in" onClick={(e) => { e.stopPropagation(); onNext(); }}>
                     <div className={`
-                        max-w-xs w-full bg-[#1a1a1c] border border-corthon-cyan shadow-[0_0_30px_rgba(185,133,81,0.2)] rounded-2xl p-6 relative z-[70] transition-all duration-500
+                        max-w-xs w-full bg-[#121214] border border-corthon-emerald shadow-[0_0_30px_rgba(16,185,129,0.2)] rounded-2xl p-6 relative z-[70] transition-all duration-500
                         ${step === 1 ? 'scale-100' : 'scale-95 translate-y-10'}
                         ${step === 4 ? 'absolute bottom-32 right-6' : ''}
                         ${step === 5 ? 'absolute bottom-24 left-1/2 -translate-x-1/2' : ''}
                         ${step === 6 ? 'absolute top-20 left-1/2 -translate-x-1/2' : ''}
                     `}>
-                        <div className="absolute -top-3 -left-3 bg-[#232325] border border-corthon-cyan text-corthon-cyan text-[10px] font-bold px-2 py-0.5 rounded">TUTORIAL_MODE_v2</div>
+                        <div className="absolute -top-3 -left-3 bg-black border border-corthon-emerald text-corthon-emerald text-[10px] font-bold px-2 py-0.5 rounded">TUTORIAL_MODE_v1</div>
                         
                         <div className="flex items-start gap-3 mb-4">
-                            <div className="w-8 h-8 rounded-full bg-corthon-cyan/20 flex items-center justify-center border border-corthon-cyan/50 shrink-0 animate-float">
-                                <Terminal size={14} className="text-corthon-cyan"/>
-                            </div>
+                            <BotAvatar />
                             <div>
-                                <h3 className="text-corthon-cyan font-bold text-sm tracking-wider mb-1">EĞİTİM PROTOKOLÜ {step}/6</h3>
+                                <h3 className="text-corthon-emerald font-bold text-sm tracking-wider mb-1">EĞİTİM MODÜLÜ {step}/6</h3>
                                 <p className="text-xs text-gray-300 leading-relaxed font-mono">{current.text}</p>
                             </div>
                         </div>
 
                         <div className="flex justify-between items-center mt-2">
-                            <button onClick={(e) => { e.stopPropagation(); onSkip(); }} className="text-[10px] text-gray-500 hover:text-white underline">Atla</button>
-                            <div className="flex items-center gap-2 text-[10px] text-corthon-cyan animate-pulse">
-                                <span>DEVAM ET</span> <ChevronRight size={12}/>
+                            <button onClick={(e) => { e.stopPropagation(); onSkip(); }} className="text-[10px] text-gray-500 hover:text-white underline">Eğitimi Atla</button>
+                            <div className="flex items-center gap-2 text-[10px] text-corthon-emerald animate-pulse">
+                                <span>DEVAM ETMEK İÇİN DOKUN</span> <ChevronRight size={12}/>
                             </div>
                         </div>
                     </div>
                 </div>
             );
         };
+
+        const BotAvatar = () => (
+            <div className="w-8 h-8 rounded-full bg-corthon-emerald/20 flex items-center justify-center border border-corthon-emerald/50 shrink-0 animate-float">
+                <Brain size={16} className="text-corthon-emerald"/>
+            </div>
+        );
 
         const BootScreen = ({ onComplete }) => {
             const [step, setStep] = useState(0);
@@ -563,24 +563,24 @@
             }, []);
 
             return (
-                <div className="fixed inset-0 z-[200] bg-[#232325] flex flex-col items-center justify-center p-8 font-mono">
+                <div className="fixed inset-0 z-[200] bg-[#09090b] flex flex-col items-center justify-center p-8 font-mono">
                     <div className="w-full max-w-sm">
                         <div className="flex justify-center mb-8 relative">
-                             <div className="absolute inset-0 bg-corthon-cyan/20 blur-xl rounded-full animate-pulse"></div>
+                             <div className="absolute inset-0 bg-corthon-emerald/20 blur-xl rounded-full animate-pulse"></div>
                              <CorthonLogo />
                         </div>
                         
-                        <div className="space-y-2 mb-8 h-32 text-xs text-corthon-cyan/80">
+                        <div className="space-y-2 mb-8 h-32 text-xs text-corthon-emerald/80">
                             {step >= 0 && <div className="animate-slide-up">> BAŞLATILIYOR: CORTHON_NEURAL_CORE...</div>}
                             {step >= 1 && <div className="animate-slide-up">> VERİTABANI BAĞLANTISI: [OK]</div>}
-                            {step >= 1 && <div className="animate-slide-up">> SİNESTEZİK ARAYÜZ YÜKLENİYOR...</div>}
+                            {step >= 1 && <div className="animate-slide-up">> KORTİZOL SEVİYELERİ: TARANIYOR...</div>}
                             {step >= 2 && <div className="animate-slide-up">> DOPAMİN RESEPTÖRLERİ: AKTİF</div>}
-                            {step >= 2 && <div className="animate-slide-up text-white font-bold">> SİSTEM HAZIR.</div>}
+                            {step >= 2 && <div className="animate-slide-up text-white">> SİSTEM HAZIR.</div>}
                         </div>
 
-                        <div className="h-1 w-full bg-[#151516] rounded-full overflow-hidden">
+                        <div className="h-1 w-full bg-gray-900 rounded-full overflow-hidden">
                             <div 
-                                className="h-full bg-corthon-emerald transition-all duration-[2000ms] ease-out shadow-[0_0_10px_rgba(196,141,90,0.5)]"
+                                className="h-full bg-corthon-emerald transition-all duration-[2000ms] ease-out"
                                 style={{ width: step === 3 ? '100%' : step === 0 ? '0%' : '60%' }}
                             ></div>
                         </div>
@@ -594,9 +594,9 @@
             let greet = "Sistem Çevrimiçi";
             let icon = <Sun size={20} className="text-yellow-500" />;
             
-            if (hour < 6) { greet = "Siber Gece"; icon = <Moon size={20} className="text-purple-400" />; }
+            if (hour < 6) { greet = "Gece Modu"; icon = <Moon size={20} className="text-purple-400" />; }
             else if (hour < 11) { greet = "Sabah Protokolü"; icon = <Sunrise size={20} className="text-orange-400" />; }
-            else if (hour > 18) { greet = "Akşam Özeti"; icon = <Sunset size={20} className="text-corthon-cyan" />; }
+            else if (hour > 18) { greet = "Akşam Özeti"; icon = <Sunset size={20} className="text-indigo-400" />; }
 
             const randomQuote = useMemo(() => MOTIVATION_QUOTES[Math.floor(Math.random() * MOTIVATION_QUOTES.length)], []);
 
@@ -606,9 +606,100 @@
                         {icon}
                         <span>{greet}</span>
                     </div>
-                    <div className="text-sm text-gray-400 italic font-serif opacity-80 border-l-2 border-corthon-cyan pl-3">
+                    <div className="text-sm text-gray-400 italic font-serif opacity-80 border-l-2 border-corthon-emerald pl-3">
                         "{randomQuote}"
                     </div>
+                </div>
+            );
+        };
+
+        const Heatmap = ({ history }) => {
+            const days = useMemo(() => {
+                const result = [];
+                for (let i = 29; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(d.getDate() - i);
+                    const iso = d.toISOString().split('T')[0];
+                    const dayName = ['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'][d.getDay()];
+                    result.push({ date: iso, dayName });
+                }
+                return result;
+            }, []);
+
+            return (
+                <div className="w-full overflow-x-auto pb-4 scrollbar-hide">
+                   <div className="flex gap-1.5 min-w-max">
+                        {days.map((d, i) => {
+                            const data = history[d.date];
+                            const hasActivity = data && Object.keys(data.categories || {}).length > 0;
+                            return (
+                                <div key={i} className="flex flex-col items-center gap-1">
+                                    <div className="h-20 w-1 flex items-end bg-white/5 rounded-full overflow-hidden relative">
+                                        <div 
+                                            className={`w-full rounded-full transition-all duration-500 ${hasActivity ? 'bg-corthon-emerald' : 'bg-transparent'}`} 
+                                            style={{ height: hasActivity ? '100%' : '0%' }}
+                                        ></div>
+                                    </div>
+                                    <span className="text-[9px] text-gray-600 font-mono -rotate-90 mt-2">{d.dayName}</span>
+                                </div>
+                            )
+                        })}
+                   </div>
+                   <div className="flex justify-between mt-2 px-1">
+                        <span className="text-[10px] text-gray-500">30 Gün Önce</span>
+                        <span className="text-[10px] text-corthon-emerald font-bold">BUGÜN</span>
+                   </div>
+                </div>
+            );
+        };
+
+        const RadarChart = ({ stats }) => {
+            const maxVal = Math.max(...Object.values(stats), 1);
+            
+            const p = (stats.ÜRETİM || 0) / maxVal;
+            const s = (stats.SOSYAL || 0) / maxVal;
+            const f = (stats.FİZİKSEL || 0) / maxVal;
+            const m = (stats.MANEVİYAT || 0) / maxVal;
+
+            const getCoord = (val, angle) => {
+                const r = val * 80;
+                const rad = (angle - 90) * (Math.PI / 180);
+                return {
+                    x: 100 + r * Math.cos(rad),
+                    y: 100 + r * Math.sin(rad)
+                };
+            };
+
+            const p1 = getCoord(p, 0);   
+            const p2 = getCoord(s, 90);  
+            const p3 = getCoord(f, 180); 
+            const p4 = getCoord(m, 270); 
+
+            const polyPoints = `${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y}`;
+
+            return (
+                <div className="relative w-full max-w-[220px] aspect-square mx-auto my-6">
+                    <svg viewBox="0 0 200 200" className="w-full h-full">
+                        <circle cx="100" cy="100" r="20" className="fill-none stroke-gray-800 stroke-[0.5]"/>
+                        <circle cx="100" cy="100" r="40" className="fill-none stroke-gray-800 stroke-[0.5]"/>
+                        <circle cx="100" cy="100" r="60" className="fill-none stroke-gray-800 stroke-[0.5]"/>
+                        <circle cx="100" cy="100" r="80" className="fill-none stroke-gray-700 stroke-[0.5]"/>
+                        
+                        <line x1="100" y1="20" x2="100" y2="180" className="stroke-gray-800 stroke-[0.5]"/>
+                        <line x1="20" y1="100" x2="180" y2="100" className="stroke-gray-800 stroke-[0.5]"/>
+
+                        <polygon points={polyPoints} className="fill-corthon-emerald/20 stroke-corthon-emerald stroke-2 radar-poly" />
+                        
+                        <circle cx={p1.x} cy={p1.y} r="3" className="fill-corthon-text"/>
+                        <circle cx={p2.x} cy={p2.y} r="3" className="fill-corthon-text"/>
+                        <circle cx={p3.x} cy={p3.y} r="3" className="fill-corthon-text"/>
+                        <circle cx={p4.x} cy={p4.y} r="3" className="fill-corthon-text"/>
+                    </svg>
+
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -mt-3 text-[9px] font-bold text-gray-400 tracking-wider">ÜRETİM</div>
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 -mb-3 text-[9px] font-bold text-gray-400 tracking-wider">FİZİKSEL</div>
+                    <div className="absolute top-1/2 left-0 -translate-x-1/2 -ml-6 text-[9px] font-bold text-gray-400 tracking-wider">MANEVİ</div>
+                    <div className="absolute top-1/2 right-0 -translate-x-1/2 -mr-6 text-[9px] font-bold text-gray-400 tracking-wider">SOSYAL</div>
                 </div>
             );
         };
@@ -621,7 +712,7 @@
             return (
                 <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center">
                     <div className="absolute inset-0 modal-overlay" onClick={onClose}></div>
-                    <div className="relative w-full max-w-lg bg-[#1a1a1c] border-t sm:border border-corthon-cyan/20 rounded-t-2xl sm:rounded-2xl p-6 animate-slide-up safe-area-bottom shadow-2xl">
+                    <div className="relative w-full max-w-lg bg-[#121214] border-t sm:border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 animate-slide-up safe-area-bottom shadow-2xl">
                         
                         <div className="flex justify-between items-start mb-6">
                             <div>
@@ -629,7 +720,7 @@
                                     <AlertTriangle size={20} className="text-corthon-warning"/>
                                     İrade Sorgulaması
                                 </h3>
-                                <p className="text-xs text-gray-400 mt-1 font-mono">"{task.title}" neden yapılmadı?</p>
+                                <p className="text-xs text-gray-400 mt-1">"{task.title}" neden yapılmadı?</p>
                             </div>
                             <button onClick={onClose}><X size={20} className="text-gray-500 hover:text-white"/></button>
                         </div>
@@ -638,17 +729,17 @@
                             <div className="mb-6">
                                 <button 
                                     onClick={onUndo}
-                                    className="w-full py-4 bg-corthon-cyan/20 border-2 border-corthon-cyan text-corthon-cyan rounded-xl flex items-center justify-center gap-2 text-sm font-bold hover:bg-corthon-cyan/30 transition-all shadow-[0_0_15px_rgba(185,133,81,0.2)]"
+                                    className="w-full py-3 bg-corthon-emerald/10 border border-corthon-emerald/30 text-corthon-emerald rounded-xl flex items-center justify-center gap-2 text-sm font-bold hover:bg-corthon-emerald/20 transition-all"
                                 >
-                                    <RotateCcw size={18}/> GERİ AL VE XP'Yİ KURTAR
+                                    <RotateCcw size={16}/> ERTELEMEYİ GERİ AL (XP İADE)
                                 </button>
-                                <div className="text-[10px] text-center text-gray-500 mt-2 uppercase tracking-wide">Bu görev {task.snoozed} kez ötelendi.</div>
+                                <div className="text-[10px] text-center text-gray-500 mt-2">Bu görevi {task.snoozed} kez erteledin.</div>
                             </div>
                         )}
 
-                        <div className="flex bg-[#151516] p-1 rounded-xl mb-6">
-                            <button onClick={() => setMode('REASON')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${mode === 'REASON' ? 'bg-[#232325] text-white shadow' : 'text-gray-500'}`}>ERTELE (BUGÜN)</button>
-                            <button onClick={() => setMode('SCHEDULE')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${mode === 'SCHEDULE' ? 'bg-[#232325] text-white shadow' : 'text-gray-500'}`}>ÖTELE (TAŞI)</button>
+                        <div className="flex bg-white/5 p-1 rounded-xl mb-6">
+                            <button onClick={() => setMode('REASON')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${mode === 'REASON' ? 'bg-gray-800 text-white shadow' : 'text-gray-500'}`}>ERTELE (BUGÜN)</button>
+                            <button onClick={() => setMode('SCHEDULE')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${mode === 'SCHEDULE' ? 'bg-gray-800 text-white shadow' : 'text-gray-500'}`}>ÖTELE (TAŞI)</button>
                         </div>
 
                         {mode === 'REASON' && (
@@ -661,7 +752,7 @@
                                     >
                                         <reason.icon size={24} className={reason.color} />
                                         <span className={`text-xs font-bold ${reason.color}`}>{reason.label}</span>
-                                        <span className="text-[10px] bg-black/40 px-2 py-0.5 rounded text-white/70 font-mono">
+                                        <span className="text-[10px] bg-black/40 px-2 py-0.5 rounded text-white/70">
                                             {reason.penalty > 0 ? `-${reason.penalty} XP` : 'Ceza Yok'}
                                         </span>
                                     </button>
@@ -671,15 +762,16 @@
 
                         {mode === 'SCHEDULE' && (
                             <div className="space-y-4">
-                                <p className="text-xs text-gray-400 text-center">Görevi başka bir güne taşıyorsun. Bu bir planlama hatasıdır ve -250 XP bedeli vardır.</p>
+                                <p className="text-xs text-gray-400 text-center">Görevi başka bir güne taşıyorsun. Bu bir planlama hatasıdır.</p>
                                 <div className="grid grid-cols-3 gap-2">
                                     {DAYS.filter(d => d.id !== 0 && d.id !== new Date().getDay()).slice(0, 6).map(d => (
                                         <button 
                                             key={d.id}
                                             onClick={() => onReschedule(d.id)}
-                                            className="p-3 bg-[#151516] border border-white/5 hover:border-corthon-cyan/50 hover:bg-corthon-cyan/5 rounded-xl text-sm text-gray-300 hover:text-white transition-all flex flex-col items-center group"
+                                            className="p-3 bg-white/5 border border-white/5 hover:border-white/20 rounded-xl text-sm text-gray-300 hover:text-white transition-all flex flex-col items-center"
                                         >
-                                            <span className="font-bold group-hover:text-corthon-cyan transition-colors">{d.short}</span>
+                                            <span className="font-bold">{d.short}</span>
+                                            <span className="text-[10px] text-gray-500 mt-1">-250 XP</span>
                                         </button>
                                     ))}
                                 </div>
@@ -690,29 +782,237 @@
             );
         };
 
+        const FocusMode = ({ active, task, onClose }) => {
+            const [timeLeft, setTimeLeft] = useState(25 * 60);
+            const [isRunning, setIsRunning] = useState(false);
+            const [mode, setMode] = useState('SETUP'); 
+
+            useEffect(() => {
+                let interval = null;
+                if (isRunning && timeLeft > 0) {
+                    interval = setInterval(() => setTimeLeft(t => t - 1), 1000);
+                } else if (timeLeft === 0 && isRunning) {
+                    playSound('complete');
+                    setIsRunning(false);
+                }
+                return () => clearInterval(interval);
+            }, [isRunning, timeLeft]);
+
+            const startTimer = (mins) => {
+                setTimeLeft(mins * 60);
+                setMode('RUNNING');
+                setIsRunning(true);
+                playSound('click');
+            };
+
+            if (!active) return null;
+
+            const formatTime = (seconds) => {
+                const m = Math.floor(seconds / 60);
+                const s = seconds % 60;
+                return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            };
+
+            return (
+                <div className="fixed inset-0 z-[70] bg-[#09090b] flex flex-col items-center justify-center p-6 animate-fade-in">
+                    <button onClick={onClose} className="absolute top-6 right-6 p-2 bg-white/5 rounded-full text-gray-400 hover:text-white">
+                        <X size={24} />
+                    </button>
+
+                    <div className="max-w-md w-full text-center relative z-10">
+                        <div className="mb-10">
+                            <Brain size={48} className="mx-auto text-corthon-emerald mb-6 animate-pulse-slow" />
+                            <h2 className="text-2xl font-bold text-white mb-2">{task?.title || 'Odaklanma Modu'}</h2>
+                            <p className="text-gray-500 text-sm">Dikkat dağıtıcı unsurları ortadan kaldır.</p>
+                        </div>
+
+                        {mode === 'SETUP' ? (
+                            <div className="grid grid-cols-3 gap-4">
+                                <button onClick={() => startTimer(15)} className="p-5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-corthon-emerald transition-all group">
+                                    <div className="text-2xl font-bold mb-1 group-hover:text-corthon-emerald transition-colors">15</div>
+                                    <div className="text-[10px] uppercase tracking-wider text-gray-500">Hızlı</div>
+                                </button>
+                                <button onClick={() => startTimer(25)} className="p-5 rounded-2xl bg-corthon-emerald/10 border border-corthon-emerald/50 hover:bg-corthon-emerald/20 transition-all">
+                                    <div className="text-2xl font-bold mb-1 text-corthon-emerald">25</div>
+                                    <div className="text-[10px] uppercase tracking-wider text-corthon-emerald">Pomodoro</div>
+                                </button>
+                                <button onClick={() => startTimer(60)} className="p-5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-corthon-emerald transition-all group">
+                                    <div className="text-2xl font-bold mb-1 group-hover:text-corthon-emerald transition-colors">60</div>
+                                    <div className="text-[10px] uppercase tracking-wider text-gray-500">Derin İş</div>
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="space-y-10">
+                                <div className="text-8xl font-mono font-bold tracking-tighter tabular-nums text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500">
+                                    {formatTime(timeLeft)}
+                                </div>
+                                <div className="flex gap-4 justify-center">
+                                    <button onClick={() => setIsRunning(!isRunning)} className="px-8 py-4 rounded-full bg-white text-black font-bold flex items-center gap-2 hover:bg-gray-200 transition-colors">
+                                        {isRunning ? <><Pause size={20}/> Duraklat</> : <><Play size={20}/> Başlat</>}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const ManualModal = ({ isOpen, onClose, onRestartTutorial }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 modal-overlay" onClick={onClose}></div>
+                    <div className="relative w-full max-w-2xl bg-[#121214] border border-white/10 rounded-2xl overflow-hidden flex flex-col max-h-[85vh] animate-slide-up shadow-2xl">
+                        <div className="p-5 border-b border-white/5 flex justify-between items-center bg-white/5 backdrop-blur-md sticky top-0 z-10">
+                             <h2 className="text-lg font-bold text-white flex items-center gap-2"><BookOpen size={20} className="text-corthon-emerald"/> Corthon Protokolü v1.0</h2>
+                            <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-full transition-colors"><X className="text-gray-500 hover:text-white" size={20}/></button>
+                        </div>
+                        <div className="p-6 overflow-y-auto space-y-8 font-sans text-sm text-gray-300 custom-scrollbar leading-relaxed">
+                            <section>
+                                <h3 className="text-corthon-emerald font-bold mb-3 flex items-center gap-2 text-base tracking-wide border-b border-white/5 pb-2"><Brain size={18}/> TEMEL FELSEFE</h3>
+                                <p className="opacity-90 mb-3">Corthon, basit bir görev yöneticisi değil, nörolojik odaklanma protokolüdür. Amacı dopamin sisteminizi "tamamlama hazzı" ile eğitmek ve disiplin sızıntılarını (erteleme) görünür kılarak utandırmaktır.</p>
+                            </section>
+                            
+                            <section>
+                                <h3 className="text-yellow-500 font-bold mb-3 flex items-center gap-2 text-base tracking-wide border-b border-white/5 pb-2"><Zap size={18}/> XP ALGORİTMASI</h3>
+                                <ul className="space-y-2">
+                                    <li className="flex gap-2"><span className="text-corthon-emerald font-mono">Düşük Öncelik:</span> 50 XP</li>
+                                    <li className="flex gap-2"><span className="text-blue-400 font-mono">Orta Öncelik:</span> 75 XP</li>
+                                    <li className="flex gap-2"><span className="text-orange-400 font-mono">Yüksek Öncelik:</span> 100 XP</li>
+                                    <li className="flex gap-2"><span className="text-red-400 font-mono">Kritik:</span> 150 XP</li>
+                                    <li className="mt-2 text-xs italic opacity-70 border-l-2 border-yellow-500 pl-2">Günü %80 üzerinde verimle kapatmak +150 Bonus XP kazandırır.</li>
+                                </ul>
+                            </section>
+
+                            <section>
+                                <h3 className="text-red-500 font-bold mb-3 flex items-center gap-2 text-base tracking-wide border-b border-white/5 pb-2"><AlertTriangle size={18}/> İRADE YÖNETİMİ (ARTIRILMIŞ)</h3>
+                                <p className="mb-2">Bir görevi yapmadığınızda <strong>İrade Sorgulaması</strong> devreye girer. Erteleme sebebinize göre AĞIR XP cezası alırsınız:</p>
+                                <ul className="grid grid-cols-2 gap-2 text-xs">
+                                    <li className="bg-white/5 p-2 rounded border border-white/5">☕ Üşengeçlik: <span className="text-red-400">-500 XP</span></li>
+                                    <li className="bg-white/5 p-2 rounded border border-white/5">🔋 Yorgunluk: <span className="text-orange-400">-150 XP</span></li>
+                                    <li className="bg-white/5 p-2 rounded border border-white/5">💼 Yoğunluk: <span className="text-blue-400">-100 XP</span></li>
+                                    <li className="bg-white/5 p-2 rounded border border-white/5">🛑 Acil Durum: <span className="text-emerald-400">0 XP</span></li>
+                                </ul>
+                            </section>
+
+                             <section>
+                                <h3 className="text-corthon-cyan font-bold mb-3 flex items-center gap-2 text-base tracking-wide border-b border-white/5 pb-2"><RefreshCw size={18}/> ZAMAN DÖNGÜSÜ</h3>
+                                <p className="mb-2"><strong className="text-white">Günü Tamamla:</strong> O günkü performansı kilitler ve raporlar. Görevler silinmez, böylece geçmişe dönüp bakabilirsiniz.</p>
+                                <p><strong className="text-white">Haftayı Bitir:</strong> Pazar günleri veya manuel olarak tetiklenir. Tüm haftanın görevlerini ve tiklerini temizler. Yeni bir sayfa açar.</p>
+                            </section>
+
+                            <div className="pt-6 border-t border-white/10">
+                                <button 
+                                    onClick={() => { onClose(); onRestartTutorial(); }}
+                                    className="w-full py-4 bg-corthon-emerald/10 border border-corthon-emerald/50 text-corthon-emerald font-bold rounded-xl hover:bg-corthon-emerald/20 transition-all flex items-center justify-center gap-2 text-xs tracking-wider"
+                                >
+                                    <MousePointer2 size={16}/> EĞİTİM PROTOKOLÜNÜ YENİDEN BAŞLAT
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const SummaryModal = ({ isOpen, onClose, xp, tasks, onConfirm }) => {
+            if (!isOpen) return null;
+            return (
+                 <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 modal-overlay" onClick={onClose}></div>
+                    <div className="relative w-full max-w-sm bg-[#121214] border border-white/10 rounded-2xl p-6 animate-slide-up shadow-2xl text-center">
+                        <RefreshCw size={48} className="mx-auto text-corthon-cyan mb-4 animate-spin-slow" />
+                        <h3 className="text-xl font-bold text-white mb-2">Haftalık Döngü Tamamlandı</h3>
+                        <div className="py-4 space-y-2">
+                            <div className="flex justify-between text-sm border-b border-white/5 pb-2">
+                                <span className="text-gray-400">Toplam XP Kazancı</span>
+                                <span className="text-corthon-emerald font-bold">+{xp} XP</span>
+                            </div>
+                            <div className="flex justify-between text-sm border-b border-white/5 pb-2">
+                                <span className="text-gray-400">Streak Bonusu</span>
+                                <span className="text-corthon-orange font-bold">+1 Seri</span>
+                            </div>
+                        </div>
+                        <p className="text-xs text-gray-500 mb-6 mt-4">Sistem yeniden başlatılacak ve tüm görevler sıfırlanacak. Onaylıyor musun?</p>
+                        <button onClick={onConfirm} className="w-full py-3 bg-corthon-cyan text-black font-bold rounded-xl hover:bg-cyan-400 transition-colors">SİSTEMİ YENİLE</button>
+                    </div>
+                </div>
+            );
+        };
+
+        const SettingsView = ({ onPurge, storageStatus, settings, onToggleSetting, onForceWeekReset }) => {
+            return (
+                <div className="animate-slide-up space-y-6 pb-20">
+                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-start gap-4">
+                        <div className="p-3 bg-red-500/20 rounded-xl text-red-500">
+                            <ShieldAlert size={24} />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-red-500 mb-1">Sistem Protokolleri</h3>
+                            <p className="text-xs text-gray-400 leading-relaxed">
+                                Bu alan kritik sistem ayarlarına erişim sağlar. Dikkatli kullanın.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="glass-panel p-6 rounded-2xl space-y-6">
+                        <div className="flex items-center gap-2 text-corthon-cyan font-bold text-sm tracking-wider uppercase mb-2">
+                            <Settings size={16} /> Manuel Müdahaleler
+                        </div>
+
+                        <button 
+                            onClick={onForceWeekReset}
+                            className="w-full py-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between px-4 hover:bg-white/10 transition-colors group"
+                        >
+                            <span className="text-sm font-medium text-gray-300">Haftalık Döngüyü Manuel Sıfırla</span>
+                            <RefreshCw size={16} className="text-corthon-cyan group-hover:rotate-180 transition-transform"/>
+                        </button>
+
+                         <div className="flex items-center justify-between mt-4">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-white/5 rounded-lg text-gray-400"><Bell size={18}/></div>
+                                <div><div className="text-sm font-medium text-white">Bildirim İzinleri</div></div>
+                            </div>
+                            <button onClick={() => onToggleSetting('notifications')} className={`w-12 h-6 rounded-full relative transition-colors ${settings.notifications ? 'bg-corthon-emerald' : 'bg-gray-700'}`}>
+                                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all shadow-md ${settings.notifications ? 'left-7' : 'left-1'}`}></div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="glass-panel border-red-500/30 p-6 rounded-2xl space-y-4">
+                        <div className="flex items-center gap-2 text-red-500 font-bold text-sm tracking-wider uppercase mb-2">
+                            <AlertTriangle size={16} /> Tehlike Bölgesi
+                        </div>
+                        <button onClick={onPurge} className="w-full py-4 border border-red-500/50 text-red-500 hover:bg-red-500 hover:text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all group">
+                            <Trash size={18} className="group-hover:animate-bounce"/> SİSTEMİ TAMAMEN SIFIRLA (PURGE)
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
         const TaskEditor = ({ isOpen, onClose, onSave, onDelete, initialData }) => {
             const [title, setTitle] = useState('');
             const [note, setNote] = useState('');
-            const [category, setCategory] = useState('İş/Proje');
-            const [timeBound, setTimeBound] = useState(true);
+            const [category, setCategory] = useState('Diğer');
             const [time, setTime] = useState('09:00');
-            const [type, setType] = useState('NEUTRAL');
+            const [impact, setImpact] = useState('MED');
 
             useEffect(() => {
                 if (isOpen) {
                     setTitle(initialData?.title || '');
                     setNote(initialData?.note || '');
-                    setCategory(initialData?.category || 'İş/Proje');
-                    setTimeBound(initialData?.timeBound !== undefined ? initialData.timeBound : true);
+                    setCategory(initialData?.category || 'Diğer');
                     setTime(initialData?.time || '09:00');
-                    setType(initialData?.type || 'NEUTRAL');
+                    setImpact(initialData?.impact || 'MED');
                 }
             }, [isOpen, initialData]);
 
             const handleSubmit = (e) => {
                 e.preventDefault(); 
                 if (title) {
-                    onSave({ title, note, category, timeBound, time: timeBound ? time : '', type });
+                    onSave({ title, note, category, time, impact });
                 }
             };
             
@@ -726,68 +1026,34 @@
             return (
                 <div className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center">
                     <div className="absolute inset-0 modal-overlay" onClick={onClose}></div>
-                    <form onSubmit={handleSubmit} className="relative w-full max-w-lg bg-[#1a1a1c] border-t sm:border border-corthon-cyan/20 rounded-t-2xl sm:rounded-2xl p-6 transform transition-transform duration-300 animate-slide-up safe-area-bottom shadow-2xl">
+                    <form onSubmit={handleSubmit} className="relative w-full max-w-lg bg-[#121214] border-t sm:border border-white/10 rounded-t-2xl sm:rounded-2xl p-6 transform transition-transform duration-300 animate-slide-up safe-area-bottom shadow-2xl">
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="font-bold text-lg text-white">{initialData ? 'Protokolü Düzenle' : 'Yeni Protokol'}</h3>
+                            <h3 className="font-bold text-lg text-white">{initialData ? 'Görevi Düzenle' : 'Yeni Görev'}</h3>
                             <button type="button" onClick={onClose}><X size={20} className="text-gray-500 hover:text-white"/></button>
                         </div>
                         <div className="space-y-5">
-                            <div><input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-transparent text-2xl font-bold placeholder-gray-600 outline-none text-white border-b border-transparent focus:border-corthon-cyan transition-colors pb-2" placeholder="Ne başaracaksın?" autoFocus /></div>
-                            
-                            {/* Type Selector */}
-                            <div className="grid grid-cols-3 gap-2">
-                                {TASK_TYPES.map(t => (
-                                    <button 
-                                        type="button" 
-                                        key={t.id} 
-                                        onClick={() => setType(t.id)}
-                                        className={`p-3 rounded-xl border flex flex-col items-center justify-center text-center transition-all ${type === t.id ? `bg-[#232325] border-${t.color.split('-')[1]}-500 shadow-inner` : 'bg-transparent border-white/5 hover:bg-white/5'}`}
-                                    >
-                                        <span className={`text-[11px] font-bold ${t.color}`}>{t.label}</span>
-                                        <span className="text-[9px] text-gray-500 mt-1 hidden sm:block">{t.desc}</span>
-                                    </button>
-                                ))}
+                            <div><input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-transparent text-2xl font-bold placeholder-gray-700 outline-none text-white" placeholder="Ne yapacaksın?" autoFocus /></div>
+                            <div className="flex gap-3">
+                                <div className="flex-1 bg-white/5 rounded-xl p-3 border border-white/5 focus-within:border-white/20 transition-colors flex items-center gap-2">
+                                    <Clock size={16} className="text-gray-500 ml-1"/><input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="bg-transparent w-full outline-none text-sm font-mono text-white"/>
+                                </div>
+                                <div className="flex-1 bg-white/5 rounded-xl p-3 border border-white/5">
+                                    <select value={impact} onChange={(e) => setImpact(e.target.value)} className="w-full bg-transparent outline-none text-sm appearance-none px-2 text-white">
+                                        {IMPACTS.map(i => <option key={i.id} value={i.id} className="bg-gray-900">{i.label} Öncelik</option>)}
+                                    </select>
+                                </div>
                             </div>
-
-                            <div className="flex gap-3 items-center bg-[#151516] p-2 rounded-xl border border-white/5">
-                                <label className="flex items-center gap-2 cursor-pointer flex-1 pl-2">
-                                    <div className="relative">
-                                        <input type="checkbox" className="sr-only toggle-checkbox" checked={timeBound} onChange={() => setTimeBound(!timeBound)} />
-                                        <div className={`block w-10 h-6 rounded-full transition-colors ${timeBound ? 'bg-corthon-cyan' : 'bg-gray-700'}`}></div>
-                                        <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${timeBound ? 'translate-x-4' : 'translate-x-0'}`}></div>
-                                    </div>
-                                    <span className="text-sm text-gray-300 font-medium">Zamana Bağlı</span>
-                                </label>
-                                
-                                {timeBound ? (
-                                    <div className="bg-[#232325] rounded-lg p-2 flex items-center gap-2 border border-white/10">
-                                        <Clock size={16} className="text-corthon-cyan"/>
-                                        <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="bg-transparent w-full outline-none text-sm font-mono text-white"/>
-                                    </div>
-                                ) : (
-                                    <div className="bg-[#232325] rounded-lg p-2 px-4 flex items-center gap-2 border border-white/10 text-gray-500 text-sm">
-                                        <Sparkles size={16}/> Zamansız
-                                    </div>
-                                )}
-                            </div>
-
                             <div className="flex flex-wrap gap-2 py-1">
-                                {CATEGORIES.map(c => (
-                                    <button type="button" key={c} onClick={() => setCategory(c)} className={`text-xs px-3 py-1.5 rounded-full border transition-all ${category === c ? 'bg-corthon-cyan text-black border-corthon-cyan font-bold' : 'bg-[#151516] text-gray-400 border-white/5 hover:border-white/20'}`}>{c}</button>
+                                {CATEGORIES.filter(c => c !== 'NAMAZ').map(c => (
+                                    <button type="button" key={c} onClick={() => setCategory(c)} className={`text-xs px-3 py-1.5 rounded-full border transition-all ${category === c ? 'bg-white text-black border-white font-medium' : 'bg-transparent text-gray-500 border-white/10 hover:border-white/30'}`}>{c}</button>
                                 ))}
                             </div>
-                            <div className="bg-[#151516] rounded-xl p-4 border border-white/5 focus-within:border-corthon-cyan transition-colors">
-                                <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Notlar, alt adımlar veya tasarım fikirleri..." className="w-full bg-transparent outline-none text-sm min-h-[80px] resize-none placeholder-gray-600 text-gray-300 font-sans leading-relaxed"/>
+                            <div className="bg-white/5 rounded-xl p-4 border border-white/5">
+                                <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Notlar, linkler veya alt adımlar..." className="w-full bg-transparent outline-none text-sm min-h-[80px] resize-none placeholder-gray-600 text-gray-300 font-sans leading-relaxed"/>
                             </div>
                             <div className="pt-4 flex flex-col gap-3">
-                                <button type="submit" disabled={!title} className="w-full p-4 bg-corthon-emerald text-black font-bold rounded-xl hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 transition-all shadow-lg shadow-corthon-emerald/20">
-                                    <Save size={18} /> {initialData ? 'Değişiklikleri Kaydet' : 'Protokolü Entegre Et'}
-                                </button>
-                                {initialData && (
-                                    <button type="button" onClick={handleDelete} className="w-full p-4 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/20 flex justify-center items-center gap-2 font-bold transition-all group">
-                                        <Trash2 size={18} className="group-hover:animate-bounce"/> Görevi Sil
-                                    </button>
-                                )}
+                                <button type="submit" disabled={!title} className="w-full p-4 bg-corthon-emerald text-black font-bold rounded-xl hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 transition-colors shadow-lg shadow-emerald-900/20"><Save size={18} /> {initialData ? 'Değişiklikleri Kaydet' : 'Görevi Oluştur'}</button>
+                                {initialData && (<button type="button" onClick={handleDelete} className="w-full p-4 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 flex justify-center items-center gap-2 font-bold transition-all"><Trash2 size={18} /> Görevi Sil</button>)}
                             </div>
                         </div>
                     </form>
@@ -804,20 +1070,30 @@
             const [history, setHistory] = useState({});
             const [view, setView] = useState('FLOW');
             const [modalOpen, setModalOpen] = useState(false);
+            const [manualOpen, setManualOpen] = useState(false);
+            const [summaryOpen, setSummaryOpen] = useState(false);
             const [snoozeModal, setSnoozeModal] = useState({ open: false, task: null });
             const [editingTask, setEditingTask] = useState(null);
-            const [toast, setToast] = useState({ msg: null, type: 'neutral', action: null });
+            const [focusMode, setFocusMode] = useState({ active: false, task: null });
+            const [toast, setToast] = useState({ msg: null, type: 'neutral' });
+            const [storageStatus, setStorageStatus] = useState({ persisted: false, quota: 0, usage: 0 });
+            const [settings, setAppSettings] = useState({ notifications: false, sync: false });
+            const [isResetting, setIsResetting] = useState(false);
             
-            // Tutorial & Modals
+            // Tutorial State
             const [tutorialStep, setTutorialStep] = useState(0);
+
+            // Permission Modal State
             const [showPermissionModal, setShowPermissionModal] = useState(false);
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             
+            // Background Worker Reference
             const workerRef = useRef(null);
+            // Track sent notifications locally to avoid duplicates in current session, and sync to worker
             const [sentNotifications, setSentNotifications] = useState({});
 
-            // Initialization & Service Worker
+            // Initialize Background Worker
             useEffect(() => {
+                // Create Worker from Blob
                 const blob = new Blob([backgroundWorkerCode], { type: "application/javascript" });
                 const worker = new Worker(URL.createObjectURL(blob));
                 workerRef.current = worker;
@@ -825,10 +1101,13 @@
                 worker.onmessage = (e) => {
                     if (e.data.type === 'TRIGGER_NOTIFICATION') {
                         const { title, body, key } = e.data;
+                        
+                        // Double check in main thread just in case
                         if (!sentNotifications[key]) {
                             showNotification(title, body, key);
                             setSentNotifications(prev => {
                                 const newVal = { ...prev, [key]: true };
+                                // Sync back to worker
                                 worker.postMessage({ type: 'SYNC_SENT_LOG', payload: newVal });
                                 return newVal;
                             });
@@ -837,14 +1116,18 @@
                 };
 
                 return () => worker.terminate();
-            }, []);
+            }, []); // Run once on mount
 
+            // Sync Tasks to Worker whenever they change
             useEffect(() => {
-                if (workerRef.current) workerRef.current.postMessage({ type: 'UPDATE_SCHEDULE', payload: tasks });
+                if (workerRef.current) {
+                    workerRef.current.postMessage({ type: 'UPDATE_SCHEDULE', payload: tasks });
+                }
             }, [tasks]);
 
             useEffect(() => {
                 const initSystem = async () => {
+                    // Load DB...
                     try {
                         const savedData = await neuralDB.load('corthon_core');
                         if (savedData) {
@@ -852,23 +1135,44 @@
                             setStreak(savedData.streak || 0);
                             setTasks({ ...generateInitialRoutine(), ...savedData.tasks });
                             setHistory(savedData.history || {});
+                            // Check permission and sync settings
+                            const isPermGranted = Notification.permission === 'granted';
+                            setAppSettings({
+                                ...(savedData.settings || { notifications: false, sync: false }),
+                                notifications: isPermGranted // Force sync with actual permission
+                            });
                         } else {
-                            const localData = localStorage.getItem('corthon_pro_v2');
-                            if(localData) {
+                             const localData = localStorage.getItem('corthon_pro_v1');
+                             if(localData) {
                                 const parsed = JSON.parse(localData);
                                 setXp(parsed.xp || 0);
                                 setStreak(parsed.streak || 0);
                                 setTasks(parsed.tasks || generateInitialRoutine());
                                 setHistory(parsed.history || {});
-                            }
+                                const isPermGranted = Notification.permission === 'granted';
+                                setAppSettings({
+                                    ...(parsed.settings || { notifications: false, sync: false }),
+                                    notifications: isPermGranted
+                                });
+                             }
                         }
-                    } catch (e) { console.error("Boot Failure:", e); }
+                    } catch (e) {
+                        console.error("System Boot Failure:", e);
+                    }
 
-                    const hasCompletedTutorial = localStorage.getItem('corthon_tut_v2');
-                    if (!hasCompletedTutorial) setTimeout(() => setTutorialStep(1), 3500);
+                    // Removed fetchPrayerTimes logic from here
+                    
+                    // Check Tutorial Status
+                    const hasCompletedTutorial = localStorage.getItem('corthon_tutorial_completed');
+                    if (!hasCompletedTutorial) {
+                        setTimeout(() => setTutorialStep(1), 3500); // Wait for boot animation
+                    }
 
-                    if ('Notification' in window && Notification.permission === 'default') {
-                         setTimeout(() => setShowPermissionModal(true), 4500);
+                    // Check Permission for Notifications
+                    if ('Notification' in window) {
+                         if (Notification.permission === 'default') {
+                             setTimeout(() => setShowPermissionModal(true), 4000);
+                         }
                     }
                 };
                 initSystem();
@@ -877,22 +1181,34 @@
             useEffect(() => {
                 if (!mounted) return;
                 const saveData = async () => {
-                    const coreData = { xp, streak, tasks, history };
+                    const coreData = { xp, streak, tasks, history, settings };
                     await neuralDB.save('corthon_core', coreData);
-                    localStorage.setItem('corthon_pro_v2', JSON.stringify(coreData)); 
+                    localStorage.setItem('corthon_pro_v1', JSON.stringify(coreData)); 
                 };
                 const timeout = setTimeout(saveData, 1000);
                 return () => clearTimeout(timeout);
-            }, [xp, streak, tasks, history, mounted]);
+            }, [xp, streak, tasks, history, settings, mounted]);
 
+            // Helper to show actual notification
             const showNotification = (title, body, tag) => {
                 if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
                 if (navigator.serviceWorker && navigator.serviceWorker.ready) {
-                     navigator.serviceWorker.ready.then(reg => {
-                         reg.showNotification(title, { body, icon: "icon-192.png", vibrate: [200, 100, 200], tag });
+                     navigator.serviceWorker.ready.then(registration => {
+                         registration.showNotification(title, {
+                             body: body,
+                             icon: "icon-192.png",
+                             vibrate: [200, 100, 200],
+                             tag: tag,
+                             requireInteraction: true // Keep notification until user interacts
+                         });
                      });
                  } else {
-                     new Notification(title, { body, icon: "icon-192.png" });
+                     new Notification(title, {
+                         body: body,
+                         icon: "icon-192.png",
+                         requireInteraction: true
+                     });
                  }
                  playSound('click');
             };
@@ -901,49 +1217,52 @@
                 Notification.requestPermission().then(permission => {
                     if (permission === 'granted') {
                         playSound('success');
-                        showToast("SİNYAL HATTI AÇIK", "success");
+                        // Auto-enable setting
+                        setAppSettings(prev => ({ ...prev, notifications: true }));
+                        showToast("SİNYAL HATTI AÇIK: Bildirimler Aktif", "success");
+                        try {
+                             new Notification("Corthon OS", {
+                                body: "Test sinyali başarılı. Sistem izleniyor.",
+                                icon: "icon-192.png"
+                            });
+                        } catch(e) {}
                     } else {
-                        showToast("BAĞLANTI REDDEDİLDİ", "warning");
+                        showToast("BAĞLANTI REDDEDİLDİ: Manuel Takip Gerekli", "warning");
                     }
                     setShowPermissionModal(false);
                 });
             };
 
-            const showToast = (msg, type = 'success', action = null) => {
-                setToast({ msg, type, action });
-                setTimeout(() => setToast({ msg: null, type: 'neutral', action: null }), 4000);
+            const showToast = (msg, type = 'success') => {
+                setToast({ msg, type });
+                setTimeout(() => setToast({ msg: null, type: 'neutral' }), 3000);
             };
 
             const nextTutorialStep = () => {
-                if (tutorialStep < 6) { setTutorialStep(prev => prev + 1); playSound('click'); } 
-                else { finishTutorial(); }
+                if (tutorialStep < 6) {
+                    setTutorialStep(prev => prev + 1);
+                    playSound('click');
+                } else {
+                    finishTutorial();
+                }
             };
 
             const finishTutorial = () => {
                 setTutorialStep(0);
-                localStorage.setItem('corthon_tut_v2', 'true');
+                localStorage.setItem('corthon_tutorial_completed', 'true');
                 playSound('success');
+                showToast("SİSTEME ENTEGRE EDİLDİ", "success");
             };
 
+            const restartTutorial = () => {
+                setManualOpen(false);
+                setTutorialStep(1);
+                playSound('boot');
+            };
+
+            // Existing Logic (Snippet for brevity)
             const todayStr = new Date().toISOString().split('T')[0];
-            
-            // Calculate today's *earned* XP for Reward Unlocks
-            const todaysEarnedXP = useMemo(() => {
-                const histData = history[todayStr];
-                if (!histData || !histData.categories) return 0;
-                // Roughly estimate earned XP from completed tasks today
-                let earned = 0;
-                const tasksToday = tasks[new Date().getDay()] || [];
-                tasksToday.forEach(t => {
-                    if (t.completed && t.type !== 'REWARD') {
-                        earned += TASK_TYPES.find(x => x.id === t.type)?.xp || 75;
-                    }
-                });
-                return earned;
-            }, [tasks, history, todayStr]);
-
-            const isRewardUnlocked = todaysEarnedXP >= DAILY_XP_UNLOCK_THRESHOLD;
-
+            const isTodayProcessed = history[todayStr]?.processed;
             const handleSaveTask = (taskData) => {
                 setTasks(prev => {
                     const dayTasks = [...(prev[selectedDayId] || [])];
@@ -953,149 +1272,307 @@
                     } else {
                         dayTasks.push({ id: Date.now().toString(), completed: false, snoozed: 0, snoozePenalty: 0, ...taskData });
                     }
-                    // Sort: TimeBound first (sorted by time), then non-timeBound
-                    dayTasks.sort((a, b) => {
-                        if (a.timeBound && !b.timeBound) return -1;
-                        if (!a.timeBound && b.timeBound) return 1;
-                        if (a.timeBound && b.timeBound) return a.time.localeCompare(b.time);
-                        return 0;
-                    });
+                    dayTasks.sort((a, b) => a.time.localeCompare(b.time));
                     return { ...prev, [selectedDayId]: dayTasks };
                 });
-                setModalOpen(false); setEditingTask(null); playSound('complete');
+                setModalOpen(false);
+                setEditingTask(null);
+                playSound('complete');
+                if (isTodayProcessed && selectedDayId === new Date().getDay()) {
+                    showToast("⚠️ PROTOKOL DEĞİŞTİ: Raporu Güncellemelisin", "warning");
+                } else {
+                    showToast("SİSTEM: Yeni Protokol Tanımlandı", "system");
+                }
             };
-
             const openSnoozeModal = (task) => setSnoozeModal({ open: true, task });
-            
             const handleSnoozeConfirm = (reason) => {
                 const { task } = snoozeModal;
                 setTasks(prev => {
                     const dayTasks = [...(prev[selectedDayId] || [])];
                     const idx = dayTasks.findIndex(t => t.id === task.id);
                     if (idx === -1) return prev;
-                    dayTasks[idx] = { ...dayTasks[idx], snoozed: (dayTasks[idx].snoozed || 0) + 1, snoozePenalty: (dayTasks[idx].snoozePenalty || 0) + reason.penalty };
+                    const oldPenalty = dayTasks[idx].snoozePenalty || 0;
+                    dayTasks[idx] = { ...dayTasks[idx], snoozed: (dayTasks[idx].snoozed || 0) + 1, snoozePenalty: oldPenalty + reason.penalty };
                     return { ...prev, [selectedDayId]: dayTasks };
                 });
                 if (reason.penalty > 0) {
                     setXp(x => Math.max(0, x - reason.penalty));
                     playSound(reason.id === 'LAZY' ? 'lazy' : 'warning');
-                    
-                    // Geri Al action in Toast
-                    showToast(`KORTİZOL SIZINTISI: -${reason.penalty} XP`, "warning", {
-                        label: 'GERİ AL',
-                        onClick: () => undoSnoozeDirectly(task.id, selectedDayId, reason.penalty)
-                    });
-                } else { playSound('mercy'); showToast("MERHAMET PROTOKOLÜ: Ceza Yok", "system"); }
+                    showToast(`⚠️ KORTİZOL: ${reason.label} (-${reason.penalty} XP)`, "warning");
+                } else {
+                    playSound('mercy');
+                    showToast("🛡️ MERHAMET PROTOKOLÜ: Ceza Yok", "system");
+                }
+                const today = new Date().toISOString().split('T')[0];
+                setHistory(h => {
+                    const dayH = h[today] || { categories: {}, snoozes: 0, reasons: {} };
+                    const reasons = { ...dayH.reasons };
+                    reasons[reason.id] = (reasons[reason.id] || 0) + 1;
+                    return { ...h, [today]: { ...dayH, snoozes: (dayH.snoozes || 0) + 1, reasons } };
+                });
                 setSnoozeModal({ open: false, task: null });
             };
-
-            const undoSnoozeDirectly = (taskId, dayId, penaltyToRestore) => {
-                setTasks(prev => {
-                    const dayTasks = [...(prev[dayId] || [])];
-                    const idx = dayTasks.findIndex(t => t.id === taskId);
-                    if (idx !== -1) {
-                        dayTasks[idx].snoozed = Math.max(0, dayTasks[idx].snoozed - 1);
-                        dayTasks[idx].snoozePenalty = Math.max(0, dayTasks[idx].snoozePenalty - penaltyToRestore);
-                    }
-                    return { ...prev, [dayId]: dayTasks };
-                });
-                setXp(x => x + penaltyToRestore);
-                playSound('success');
-                showToast("İRADE KURTARILDI", "success");
-            };
-
             const handleReschedule = (targetDayId) => {
                  const { task } = snoozeModal;
                  setTasks(prev => {
                     const currentDayTasks = prev[selectedDayId].filter(t => t.id !== task.id);
                     const targetDayTasks = [...(prev[targetDayId] || [])];
                     targetDayTasks.push({ ...task, snoozed: 0, snoozePenalty: 0 }); 
+                    targetDayTasks.sort((a, b) => a.time.localeCompare(b.time));
                     return { ...prev, [selectedDayId]: currentDayTasks, [targetDayId]: targetDayTasks };
                  });
-                 setXp(x => Math.max(0, x - 250)); playSound('warning');
-                 showToast("PLANLAMA HATASI (-250 XP)", "warning");
+                 setXp(x => Math.max(0, x - 250)); 
+                 playSound('warning');
+                 showToast("📅 GÖREV ÖTELENDİ: Planlama Hatası (-250 XP)", "warning");
                  setSnoozeModal({ open: false, task: null });
             };
-
+            const handleUndoSnooze = () => {
+                const { task } = snoozeModal;
+                if (!task || task.snoozed === 0) return;
+                const penaltyToRestore = task.snoozePenalty || 0;
+                setTasks(prev => {
+                    const dayTasks = [...(prev[selectedDayId] || [])];
+                    const idx = dayTasks.findIndex(t => t.id === task.id);
+                    if (idx === -1) return prev;
+                    dayTasks[idx] = { ...dayTasks[idx], snoozed: 0, snoozePenalty: 0 };
+                    return { ...prev, [selectedDayId]: dayTasks };
+                });
+                if (penaltyToRestore > 0) {
+                    setXp(x => x + penaltyToRestore);
+                    showToast(`♻️ İRADE YENİLENDİ: +${penaltyToRestore} XP İade`, "success");
+                } else {
+                    showToast("♻️ ERTELEME İPTAL EDİLDİ", "success");
+                }
+                playSound('mercy');
+                setSnoozeModal({ open: false, task: null });
+            };
             const toggleTask = (taskId) => {
                 setTasks(prev => {
                     const dayTasks = [...(prev[selectedDayId] || [])];
                     const idx = dayTasks.findIndex(t => t.id === taskId);
                     if (idx === -1) return prev;
                     const task = dayTasks[idx];
-
-                    // Kilit kontrolü
-                    if (task.type === 'REWARD' && !task.completed && !isRewardUnlocked) {
-                        playSound('warning');
-                        showToast("DOPAMİN KİLİDİ: Önce zorunlu işleri hallet.", "warning");
-                        return prev; // State'i değiştirme
-                    }
-
                     const newStatus = !task.completed;
-                    const points = TASK_TYPES.find(i => i.id === task.type)?.xp || 50;
-                    
+                    const points = IMPACTS.find(i => i.id === task.impact)?.xp || 50;
+                    const today = new Date().toISOString().split('T')[0];
                     if (newStatus) {
                         setXp(x => x + points);
-                        if(task.type === 'REWARD') playSound('unlock'); else playSound('success');
-                        showToast(`DOPAMİN ENJEKTE EDİLDİ (+${points} XP)`, "success");
+                        playSound('success');
+                        showToast(`⚡ DOPAMİN ENJEKTE EDİLDİ: ${task.category} (+${points} XP)`, "success");
+                        setHistory(h => {
+                            const dayH = h[today] || { categories: {} };
+                            const cats = { ...dayH.categories };
+                            cats[task.category] = (cats[task.category] || 0) + 1;
+                            return { ...h, [today]: { ...dayH, categories: cats } };
+                        });
                     } else {
                         setXp(x => Math.max(0, x - points));
                         playSound('purge');
-                        showToast(`GERİ ALINDI (-${points} XP)`, "danger");
+                        showToast(`🔻 KORTİZOL UYARISI: İrade Kaybı (-${points} XP)`, "danger");
+                        setHistory(h => {
+                            const dayH = h[today] || { categories: {} };
+                            const cats = { ...dayH.categories };
+                            cats[task.category] = Math.max(0, (cats[task.category] || 0) - 1);
+                            return { ...h, [today]: { ...dayH, categories: cats } };
+                        });
                     }
                     dayTasks[idx] = { ...task, completed: newStatus };
                     return { ...prev, [selectedDayId]: dayTasks };
                 });
             };
-
             const deleteTask = (taskId) => {
+                if (!taskId) return;
+                const currentDayTasks = tasks[selectedDayId] || [];
+                const taskToDelete = currentDayTasks.find(t => t.id === taskId);
+                if (taskToDelete && taskToDelete.completed) {
+                     const points = IMPACTS.find(i => i.id === taskToDelete.impact)?.xp || 50;
+                     setXp(x => Math.max(0, x - points));
+                     showToast(`⚖️ ADALET SİSTEMİ: Tamamlanan görev silindi (-${points} XP)`, "warning");
+                }
                 setTasks(prev => {
                     const newState = { ...prev };
                     Object.keys(newState).forEach(key => {
-                        newState[key] = newState[key].filter(t => String(t.id) !== String(taskId));
+                            if (Array.isArray(newState[key])) {
+                                newState[key] = newState[key].filter(t => String(t.id) !== String(taskId));
+                            }
                     });
                     return newState;
                 });
-                setModalOpen(false); setEditingTask(null); playSound('purge'); 
-                showToast("VERİ İMHA EDİLDİ", "danger");
+                setModalOpen(false); setEditingTask(null);
+                playSound('purge'); 
+                if(!taskToDelete?.completed) showToast("☠️ VERİ İMHA EDİLDİ", "danger");
             };
-
+            const handleCompleteDay = () => {
+                const currentDayIndex = new Date().getDay();
+                const adjCurrent = currentDayIndex === 0 ? 7 : currentDayIndex;
+                const adjSelected = selectedDayId === 0 ? 7 : selectedDayId;
+                if (adjSelected > adjCurrent) {
+                     playSound('warning');
+                     showToast("Gelecek henüz yazılmadı. Sadece bugünü raporlayabilirsin.", "warning");
+                     return;
+                }
+                const todayTasks = tasks[selectedDayId] || [];
+                const completed = todayTasks.filter(t => t.completed).length;
+                const total = todayTasks.length;
+                const processedData = history[todayStr];
+                const alreadyProcessed = processedData?.processed;
+                if (total === 0) { 
+                    if(confirm("Bugün görev yok. 'Dinlenme Günü' olarak işaretlensin mi? (+25 Bakım XP)")) {
+                        if (!alreadyProcessed) setXp(x => x + 25);
+                         setHistory(prev => ({
+                            ...prev,
+                            [todayStr]: { ...prev[todayStr], processed: true, completionRatio: 1, type: 'REST' }
+                        }));
+                        playSound('success');
+                        showToast("MENTAL BAKIM GÜNÜ KAYDEDİLDİ.", "success");
+                    }
+                    return; 
+                }
+                if (completed === 0) {
+                    playSound('purge');
+                    showToast("SİSTEM BAŞARISIZLIĞI: %0 Verim. XP Verilmedi.", "danger");
+                } else {
+                    const ratio = completed / total;
+                    let bonus = ratio >= 0.8 ? 150 : ratio >= 0.5 ? 75 : 25;
+                    if (alreadyProcessed) {
+                        showToast(`GÜN RAPORU GÜNCELLENDİ: %${Math.round(ratio*100)} Verim.`, "system");
+                    } else {
+                        setXp(x => x + bonus);
+                        playSound('success');
+                        showToast(`GÜN KAPANIŞI: %${Math.round(ratio*100)} Verim. +${bonus} Bonus XP`, "success");
+                    }
+                }
+                setHistory(prev => ({
+                    ...prev,
+                    [todayStr]: { 
+                        ...prev[todayStr],
+                        processed: true,
+                        completionRatio: completed / total,
+                        totalTasks: total // Store total to check for changes later
+                    }
+                }));
+            };
+            const handleCompleteWeekTrigger = () => { setSummaryOpen(true); playSound('click'); };
+            const confirmCompleteWeek = () => {
+                setSummaryOpen(false);
+                setIsResetting(true);
+                setTimeout(() => {
+                    setTasks(prev => {
+                        const newTasks = {};
+                        Object.keys(prev).forEach(dayId => {
+                            newTasks[dayId] = prev[dayId].map(t => ({
+                                ...t, completed: false, snoozed: 0, snoozePenalty: 0
+                            }));
+                        });
+                        return newTasks;
+                    });
+                    setStreak(s => s + 1);
+                    setXp(x => x + 500); 
+                    playSound('boot'); 
+                    setIsResetting(false);
+                    showToast("SİSTEM YENİDEN BAŞLATILDI. YENİ HAFTA.", "success");
+                }, 1500);
+            };
+            const handlePurgeSystem = async () => {
+                if(confirm("DİKKAT: TÜM İLERLEME SİLİNECEK.")) {
+                    await neuralDB.clearAll();
+                    localStorage.clear();
+                    playSound('purge');
+                    setXp(0);
+                    setStreak(0);
+                    setTasks(generateInitialRoutine());
+                    setHistory({});
+                    showToast("SİSTEM SIFIRLANDI", "danger");
+                    setTimeout(() => window.location.reload(), 1500);
+                }
+            };
+            const handleToggleSetting = (key) => setAppSettings(prev => ({ ...prev, [key]: !prev[key] }));
+            
             const level = Math.floor(Math.sqrt(xp / XP_DIFFICULTY_SCALAR)) + 1;
             const nextLevelXp = Math.pow(level, 2) * XP_DIFFICULTY_SCALAR;
             const currentLevelBaseXp = Math.pow(level - 1, 2) * XP_DIFFICULTY_SCALAR;
             const progressPercent = Math.min(100, Math.max(0, ((xp - currentLevelBaseXp) / (nextLevelXp - currentLevelBaseXp)) * 100));
-            
-            const userTitle = getTitle(level);
             const todayTasks = tasks[selectedDayId] || [];
+            const standardTasks = todayTasks.filter(t => t.category !== 'NAMAZ');
+            const totalSnoozes = Object.values(history).reduce((acc, curr) => acc + (curr.snoozes || 0), 0);
+            const snoozeReasons = Object.values(history).reduce((acc, curr) => {
+                if(curr.reasons) Object.entries(curr.reasons).forEach(([r, c]) => acc[r] = (acc[r] || 0) + c);
+                return acc;
+            }, {});
+            
+            const currentDayIndex = new Date().getDay();
+            const adjCurrent = currentDayIndex === 0 ? 7 : currentDayIndex;
+            const adjSelected = selectedDayId === 0 ? 7 : selectedDayId;
+            const isFuture = adjSelected > adjCurrent;
+            const histData = history[todayStr];
+            const hasChangedSinceProcess = histData && histData.processed && (histData.totalTasks !== todayTasks.length || histData.completionRatio !== (todayTasks.filter(t=>t.completed).length / (todayTasks.length || 1)));
+
+            const stats = useMemo(() => {
+                const s = { ÜRETİM: 0, FİZİKSEL: 0, MANEVİYAT: 0, SOSYAL: 0 };
+                Object.values(history).forEach(day => {
+                    if (day.categories) Object.entries(day.categories).forEach(([cat, count]) => {
+                        if (MACRO_AXES['ÜRETİM'].includes(cat)) s.ÜRETİM += count;
+                        if (MACRO_AXES['FİZİKSEL'].includes(cat)) s.FİZİKSEL += count;
+                        if (MACRO_AXES['MANEVİYAT'].includes(cat)) s.MANEVİYAT += count;
+                        if (MACRO_AXES['SOSYAL'].includes(cat)) s.SOSYAL += count;
+                    });
+                });
+                return s;
+            }, [history]);
 
             if (!mounted) return <BootScreen onComplete={() => setMounted(true)} />;
 
             return (
-                <div className="min-h-screen pb-36 safe-area-bottom">
-                    {tutorialStep > 0 && <div className="fixed inset-0 z-[50] bg-black/60 backdrop-blur-sm transition-opacity duration-500"></div>}
+                <div className={`min-h-screen pb-36 safe-area-bottom transition-colors duration-500 ${isResetting ? 'opacity-50 grayscale' : ''}`}>
+                    
+                    {/* Tutorial Dark Overlay */}
+                    {tutorialStep > 0 && (
+                        <div className="fixed inset-0 z-[50] bg-black/50 backdrop-blur-[1px] transition-opacity duration-500"></div>
+                    )}
+                    
                     <TutorialOverlay step={tutorialStep} onNext={nextTutorialStep} onSkip={finishTutorial} />
-                    {showPermissionModal && <PermissionModal onGrant={requestNotificationAccess} onSkip={() => setShowPermissionModal(false)} isIOS={isIOS} />}
 
-                    {/* App Header */}
-                    <div className="bg-[#1a1a1c]/95 backdrop-blur-xl sticky top-0 z-30 border-b border-white/5 safe-area-top shadow-xl shadow-black/80">
+                    {/* Permission Modal */}
+                    {showPermissionModal && (
+                        <PermissionModal 
+                            onGrant={requestNotificationAccess} 
+                            onSkip={() => setShowPermissionModal(false)} 
+                        />
+                    )}
+
+                    {/* Reset Overlay */}
+                    {isResetting && (
+                         <div className="fixed inset-0 z-[300] bg-black/80 flex flex-col items-center justify-center backdrop-blur-sm">
+                            <RefreshCw className="animate-spin text-corthon-emerald mb-4" size={48} />
+                            <div className="text-corthon-emerald font-mono animate-pulse">SİSTEM YENİLENİYOR...</div>
+                         </div>
+                    )}
+
+                    {/* Header */}
+                    <div className="bg-[#09090b]/90 backdrop-blur-md sticky top-0 z-30 border-b border-white/5 safe-area-top shadow-xl shadow-black/50">
                         <div className="px-5 py-4 flex justify-between items-center">
-                            <h1 className="font-bold tracking-tight text-lg flex items-center gap-3 font-sans"><CorthonLogo /><span className="text-white tracking-widest">CORTHON</span></h1>
+                            <h1 className="font-bold tracking-tight text-lg flex items-center gap-3 font-sans"><CorthonLogo /><span className="text-white">CORTHON</span></h1>
                             <div className="flex items-center gap-4">
-                                <div className={`flex flex-col items-end transition-all duration-500 ${tutorialStep === 2 ? 'tutorial-highlight p-2 bg-[#232325]' : ''}`}>
-                                    <div className="flex items-center gap-2 text-[10px] uppercase font-bold text-gray-400 font-mono tracking-widest">{userTitle}</div>
-                                    <div className="flex items-center gap-2 text-xs font-bold text-white font-mono mt-0.5">LVL {level} <span className="text-corthon-cyan">{xp} XP</span></div>
-                                    <div className="w-24 h-1.5 bg-[#151516] rounded-full mt-1.5 overflow-hidden border border-white/5"><div className="h-full bg-gradient-to-r from-corthon-cyan to-corthon-emerald transition-all duration-1000 ease-out" style={{width: `${progressPercent}%`}}></div></div>
+                                <button onClick={() => setManualOpen(true)} className="text-gray-500 hover:text-white transition-colors"><HelpCircle size={20} /></button>
+                                <div className={`flex flex-col items-end transition-all duration-500 ${tutorialStep === 2 ? 'tutorial-highlight p-2 bg-[#09090b]' : ''}`}>
+                                    <div className="flex items-center gap-2 text-xs font-bold text-white font-mono">Lvl {level} <span className="text-corthon-emerald">{xp} XP</span></div>
+                                    <div className="w-24 h-1 bg-gray-800 rounded-full mt-1 overflow-hidden"><div className="h-full bg-corthon-emerald transition-all duration-1000 ease-out" style={{width: `${progressPercent}%`}}></div></div>
                                 </div>
                             </div>
+                        </div>
+                        <div className={`px-5 pb-0 flex gap-6 border-b border-white/5 ${tutorialStep === 6 ? 'tutorial-highlight bg-[#09090b] rounded-none' : ''}`}>
+                            <button onClick={() => setView('FLOW')} className={`pb-3 text-sm font-medium border-b-2 transition-colors ${view === 'FLOW' ? 'text-white border-corthon-emerald' : 'text-gray-500 border-transparent hover:text-gray-300'}`}>Günlük Akış</button>
+                            <button onClick={() => setView('ANALYTICS')} className={`pb-3 text-sm font-medium border-b-2 transition-colors ${view === 'ANALYTICS' ? 'text-white border-corthon-emerald' : 'text-gray-500 border-transparent hover:text-gray-300'}`}>Performans</button>
+                            <button onClick={() => setView('SETTINGS')} className={`pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${view === 'SETTINGS' ? 'text-white border-corthon-emerald' : 'text-gray-500 border-transparent hover:text-gray-300'}`}>Sistem</button>
                         </div>
                     </div>
 
                     <main className="px-5 pt-6 max-w-2xl mx-auto">
+                        
                         {view === 'FLOW' && (
                             <div className="animate-slide-up">
                                 <Greeting />
-                                
-                                <div className={`flex justify-between mb-8 overflow-x-auto pb-2 scrollbar-hide -mx-5 px-5 transition-all duration-500 ${tutorialStep === 3 ? 'tutorial-highlight py-2 bg-[#1a1a1c]' : ''}`}>
+                                <div className={`flex justify-between mb-8 overflow-x-auto pb-2 scrollbar-hide -mx-5 px-5 transition-all duration-500 ${tutorialStep === 3 ? 'tutorial-highlight py-2 bg-[#09090b]' : ''}`}>
                                     {DAYS.map(d => {
                                         const isSelected = d.id === selectedDayId;
                                         const isToday = d.id === new Date().getDay();
@@ -1103,80 +1580,59 @@
                                             <button 
                                                 key={d.id} 
                                                 onClick={() => { setSelectedDayId(d.id); playSound('click'); }}
-                                                className={`flex flex-col items-center min-w-[3.5rem] py-2 rounded-xl transition-all ${isSelected ? 'bg-[#151516] text-white shadow-[0_0_15px_rgba(185,133,81,0.15)] border border-corthon-cyan/30 scale-105' : 'bg-transparent text-gray-500 hover:bg-white/5 border border-transparent'}`}
+                                                className={`flex flex-col items-center min-w-[3.5rem] py-2 rounded-xl transition-all ${isSelected ? 'bg-white text-black shadow-lg shadow-white/10 scale-105' : 'bg-white/5 text-gray-500 hover:bg-white/10'}`}
                                             >
-                                                <span className={`text-xs font-bold mb-1 ${isSelected ? 'text-corthon-cyan' : ''}`}>{d.short}</span>
-                                                {isToday && <div className={`w-1 h-1 rounded-full ${isSelected ? 'bg-corthon-cyan shadow-[0_0_5px_#b98551]' : 'bg-gray-600'}`}></div>}
+                                                <span className="text-xs font-medium mb-1">{d.short}</span>
+                                                {isToday && <div className={`w-1 h-1 rounded-full ${isSelected ? 'bg-black' : 'bg-corthon-emerald'}`}></div>}
                                             </button>
                                         );
                                     })}
                                 </div>
 
                                 <div className="space-y-4">
-                                    <div className="flex justify-between items-end mb-4 border-b border-white/5 pb-2">
-                                        <h2 className="text-lg font-bold text-gray-300 tracking-wide uppercase">{DAYS.find(d => d.id === selectedDayId).name} PROTOKOLÜ</h2>
-                                        <span className="text-xs text-corthon-cyan font-mono font-bold">
-                                            {todayTasks.filter(t=>t.completed).length} / {todayTasks.length}
+                                    <div className="flex justify-between items-end mb-2">
+                                        <h2 className="text-xl font-bold text-white tracking-tight">{DAYS.find(d => d.id === selectedDayId).name}</h2>
+                                        <span className="text-xs text-gray-500 font-mono bg-white/5 px-2 py-1 rounded">
+                                            {standardTasks.filter(t=>t.completed).length} / {standardTasks.length} Tamamlandı
                                         </span>
                                     </div>
 
-                                    {todayTasks.length === 0 ? (
-                                        <div onClick={() => { setEditingTask(null); setModalOpen(true); }} className="border border-dashed border-white/10 rounded-2xl p-10 text-center text-gray-500 hover:bg-[#1a1a1c] hover:border-corthon-cyan/30 cursor-pointer transition-all group">
-                                            <Terminal className="mx-auto mb-3 opacity-30 group-hover:opacity-100 group-hover:text-corthon-cyan transition-all" size={32}/>
-                                            <p className="text-sm font-medium tracking-wide">Protokol boş.</p>
-                                            <p className="text-xs mt-1 text-gray-600">Sisteme görev tanımlamak için tıkla.</p>
+                                    {standardTasks.length === 0 ? (
+                                        <div onClick={() => { setEditingTask(null); setModalOpen(true); }} className="border border-dashed border-white/10 rounded-2xl p-8 text-center text-gray-500 hover:bg-white/5 hover:border-white/20 cursor-pointer transition-all">
+                                            <Plus className="mx-auto mb-2 opacity-50"/>
+                                            <p className="text-sm font-medium">Bugün için bir planın yok.</p>
+                                            <p className="text-xs mt-1 text-corthon-emerald">Yeni görev eklemek için dokun.</p>
                                         </div>
                                     ) : (
-                                        todayTasks.map(task => {
-                                            const typeInfo = TASK_TYPES.find(i => i.id === task.type);
-                                            const isReward = task.type === 'REWARD';
-                                            const locked = isReward && !isRewardUnlocked && !task.completed;
-
+                                        standardTasks.map(task => {
+                                            const impactColor = IMPACTS.find(i => i.id === task.impact)?.color || 'text-gray-400';
                                             return (
                                                 <div 
                                                     key={task.id}
-                                                    onClick={() => !task.completed && toggleTask(task.id)}
-                                                    className={`group glass-panel rounded-xl p-4 transition-all cursor-pointer border-l-4 
-                                                        ${task.completed ? 'opacity-40 grayscale border-l-gray-800' : 
-                                                        locked ? 'border-l-gray-600 bg-[#151516]/50' : 
-                                                        `hover:border-corthon-cyan hover:shadow-[0_0_20px_rgba(185,133,81,0.1)] border-l-${typeInfo.color.split('-')[1]}-500`}`}
+                                                    onClick={() => !task.completed && setFocusMode({ active: true, task })}
+                                                    className={`group glass-panel rounded-xl p-4 transition-all active:scale-[0.99] cursor-pointer border-l-4 ${task.completed ? 'opacity-50 grayscale border-l-gray-700' : 'hover:border-white/20 border-l-corthon-emerald'}`}
                                                 >
                                                     <div className="flex items-start gap-4">
                                                         <button 
                                                             onClick={(e) => { e.stopPropagation(); toggleTask(task.id); }}
-                                                            className={`mt-1 w-6 h-6 rounded border-2 flex items-center justify-center transition-colors 
-                                                                ${task.completed ? 'bg-corthon-cyan border-corthon-cyan text-black' : 
-                                                                locked ? 'border-gray-700 bg-gray-900 text-gray-600' :
-                                                                'border-gray-500 hover:border-corthon-cyan text-transparent'}`}
+                                                            className={`mt-1 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${task.completed ? 'bg-corthon-emerald border-corthon-emerald text-black' : 'border-gray-600 hover:border-corthon-emerald text-transparent'}`}
                                                         >
-                                                            {locked ? <Lock size={12}/> : <Check size={14} strokeWidth={3} />}
+                                                            <Check size={14} strokeWidth={3} />
                                                         </button>
                                                         
                                                         <div className="flex-1 min-w-0">
-                                                            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                                                                {task.timeBound ? (
-                                                                    <span className="text-[10px] font-mono text-gray-400 bg-black/50 px-1.5 py-0.5 rounded border border-white/5 flex items-center gap-1"><Clock size={10}/> {task.time}</span>
-                                                                ) : (
-                                                                    <span className="text-[10px] font-mono text-gray-500 px-1 flex items-center gap-1"><Sparkles size={10}/></span>
-                                                                )}
-                                                                <span className="text-[9px] uppercase tracking-wider text-gray-400 font-bold">{task.category}</span>
-                                                                
-                                                                {isReward && (
-                                                                    <span className={`text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded font-bold border flex items-center gap-1
-                                                                        ${locked ? 'border-gray-700 text-gray-600' : 'border-corthon-cyan/50 text-corthon-cyan bg-corthon-cyan/10 animate-pulse'}`}>
-                                                                        <Unlock size={10}/> DOPAMİN ÖDÜLÜ
-                                                                    </span>
-                                                                )}
-                                                                
-                                                                {task.snoozed > 0 && <span className="text-[9px] uppercase tracking-wider text-corthon-orange border border-corthon-orange/30 bg-corthon-orange/10 px-1.5 py-0.5 rounded font-bold flex items-center gap-1"><Hourglass size={10} /> ERTELENDİ x{task.snoozed}</span>}
+                                                            <div className="flex items-center gap-2 mb-1.5">
+                                                                <span className="text-xs font-mono text-gray-400 bg-white/5 px-1.5 py-0.5 rounded flex items-center gap-1"><Clock size={10}/> {task.time}</span>
+                                                                <span className="text-[10px] uppercase tracking-wider text-gray-500 border border-white/10 px-1.5 py-0.5 rounded font-bold">{task.category}</span>
+                                                                {task.snoozed > 0 && <span className="text-[10px] uppercase tracking-wider text-corthon-warning border border-corthon-warning/30 bg-corthon-warning/10 px-1.5 py-0.5 rounded font-bold flex items-center gap-1"><Hourglass size={10} /> ERTELENDİ x{task.snoozed}</span>}
                                                             </div>
-                                                            <h3 className={`font-bold text-base truncate mb-1 ${task.completed ? 'line-through text-gray-600' : locked ? 'text-gray-500' : 'text-gray-100'}`}>{task.title}</h3>
-                                                            {task.note && <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed font-sans mt-1">{task.note}</p>}
+                                                            <h3 className={`font-semibold text-base truncate mb-1 ${task.completed ? 'line-through text-gray-500' : 'text-gray-100'}`}>{task.title}</h3>
+                                                            {task.note && <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed font-sans">{task.note}</p>}
                                                         </div>
 
                                                         <div className="flex flex-col gap-1">
-                                                            <button onClick={(e) => { e.stopPropagation(); setEditingTask(task); setModalOpen(true); }} className="p-2 text-gray-600 hover:text-white transition-colors bg-[#151516] rounded-lg hover:bg-white/10"><Edit3 size={14} /></button>
-                                                            {!locked && <button onClick={(e) => { e.stopPropagation(); openSnoozeModal(task); }} className="p-2 text-corthon-warning hover:text-white transition-colors bg-corthon-warning/5 rounded-lg hover:bg-corthon-warning/20 border border-corthon-warning/10"><History size={14} /></button>}
+                                                            <button onClick={(e) => { e.stopPropagation(); setEditingTask(task); setModalOpen(true); }} className="p-2 text-gray-500 hover:text-white transition-opacity bg-white/5 rounded-lg hover:bg-white/10"><Edit3 size={16} /></button>
+                                                            <button onClick={(e) => { e.stopPropagation(); openSnoozeModal(task); }} className="p-2 text-corthon-warning hover:text-white transition-opacity bg-corthon-warning/10 rounded-lg hover:bg-corthon-warning/20 border border-corthon-warning/20"><History size={16} /></button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1184,47 +1640,77 @@
                                         })
                                     )}
                                 </div>
+
+                                {/* Removed Prayer Section Grid */}
+
+                                <div className={`mt-10 mb-6 space-y-4 transition-all duration-500 ${tutorialStep === 5 ? 'tutorial-highlight p-2 bg-[#09090b]' : ''}`}>
+                                    <button 
+                                        onClick={handleCompleteDay}
+                                        disabled={isFuture} 
+                                        className={`w-full py-4 rounded-xl bg-gradient-to-r border flex items-center justify-center gap-3 text-sm font-bold transition-all group relative overflow-hidden
+                                            ${isFuture ? 'from-gray-800 to-gray-800 border-gray-700 text-gray-500 cursor-not-allowed' : 
+                                              hasChangedSinceProcess ? 'from-yellow-900/40 to-yellow-800/40 border-yellow-500/50 text-yellow-500 hover:text-white hover:border-yellow-500' :
+                                              isTodayProcessed ? 'from-gray-900 to-gray-800 border-white/10 text-corthon-emerald/70' : 
+                                              'from-gray-900 to-gray-800 border-white/10 hover:border-corthon-emerald/50 hover:from-gray-800 text-white'}
+                                        `}
+                                    >
+                                        <Flag size={18} className={`${isTodayProcessed && !hasChangedSinceProcess ? 'text-corthon-emerald' : hasChangedSinceProcess ? 'text-yellow-500 animate-pulse' : 'text-corthon-orange group-hover:rotate-12 transition-transform'}`}/> 
+                                        {isFuture ? 'GELECEK KİLİTLİ' : hasChangedSinceProcess ? 'RAPORU GÜNCELLE (Değişiklik Var)' : isTodayProcessed ? 'RAPOR GÜNCEL' : 'GÜNÜ TAMAMLA & RAPORLA'}
+                                    </button>
+
+                                    {selectedDayId === 0 && (
+                                        <button onClick={handleCompleteWeekTrigger} className="w-full py-4 rounded-xl bg-corthon-emerald text-black flex items-center justify-center gap-3 text-sm font-bold shadow-lg shadow-corthon-emerald/20 hover:scale-[1.02] transition-transform">
+                                            <RefreshCw size={18} className="animate-pulse-slow"/> HAFTAYI BİTİR & YENİLE
+                                        </button>
+                                    )}
+                                </div>
                             </div>
+                        )}
+
+                        {view === 'ANALYTICS' && (
+                            <div className="animate-slide-up space-y-6">
+                                <div className="glass-panel p-6 rounded-2xl relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-6 opacity-10"><Zap size={100} /></div>
+                                    <div className="relative z-10">
+                                        <div className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">CORTHON PROTOKOLÜ</div>
+                                        <div className="text-4xl font-bold text-white mb-2 font-mono">{xp} <span className="text-lg text-corthon-emerald">XP</span></div>
+                                        <div className="inline-block px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-gray-400">Lvl {level+1} için: {Math.floor(nextLevelXp - xp)} XP kaldı</div>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                    <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center text-center"><TrendingUp size={20} className="text-corthon-cyan mb-2"/><div className="text-xl font-bold text-white">{streak}</div><div className="text-[10px] text-gray-500 uppercase tracking-wider">Seri</div></div>
+                                    <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center text-center"><CheckCircle2 size={20} className="text-corthon-emerald mb-2"/><div className="text-xl font-bold text-white">{Object.values(history).reduce((acc, curr) => acc + (curr.categories ? Object.values(curr.categories).reduce((a, b) => a + b, 0) : 0), 0)}</div><div className="text-[10px] text-gray-500 uppercase tracking-wider">Görev</div></div>
+                                    <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center text-center"><Percent size={20} className="text-corthon-orange mb-2"/><div className="text-xl font-bold text-white">{(Math.min(100, (xp / (streak * 100 || 1)) * 10)).toFixed(0)}%</div><div className="text-[10px] text-gray-500 uppercase tracking-wider">Verim</div></div>
+                                    <div className="glass-panel p-4 rounded-xl flex flex-col items-center justify-center text-center border-corthon-warning/20 bg-corthon-warning/5"><History size={20} className="text-corthon-warning mb-2"/><div className="text-xl font-bold text-white">{totalSnoozes}</div><div className="text-[10px] text-corthon-warning uppercase tracking-wider">Disiplin Sızıntısı</div></div>
+                                </div>
+                                <div className="glass-panel p-6 rounded-2xl"><div className="flex items-center gap-2 mb-4"><AlertTriangle size={18} className="text-corthon-warning"/><h3 className="font-bold text-sm tracking-wide text-white">İRADESİZLİK ANALİZİ (Sebepler)</h3></div>
+                                    <div className="space-y-3">{Object.keys(snoozeReasons).length === 0 ? <div className="text-xs text-gray-500 text-center py-4">Henüz bir sızıntı tespit edilmedi.</div> : SNOOZE_REASONS.map(reason => {const count = snoozeReasons[reason.id] || 0; if(count===0) return null; const max = Math.max(...Object.values(snoozeReasons), 1); const pct = (count/max)*100; return (<div key={reason.id} className="space-y-1"><div className="flex justify-between text-xs"><span className="text-gray-400 flex items-center gap-1"><reason.icon size={10} /> {reason.label}</span><span className="text-white font-mono">{count}</span></div><div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden"><div className={`h-full ${reason.bg.replace('/10', '')} transition-all duration-1000`} style={{width: `${pct}%`}}></div></div></div>)})}</div>
+                                </div>
+                                <div className="glass-panel p-6 rounded-2xl"><div className="flex items-center gap-2 mb-4"><Flame size={18} className="text-orange-500"/><h3 className="font-bold text-sm tracking-wide text-white">İSTİKRAR ZİNCİRİ (Son 30 Gün)</h3></div><Heatmap history={history} /></div>
+                                <div className="glass-panel p-6 rounded-2xl"><div className="flex items-center justify-between mb-4"><div className="flex items-center gap-2"><Activity size={18} className="text-corthon-emerald"/><h3 className="font-bold text-sm tracking-wide text-white">YAŞAM DENGESİ</h3></div></div><RadarChart stats={stats} /></div>
+                            </div>
+                        )}
+
+                        {view === 'SETTINGS' && (
+                            <SettingsView 
+                                onPurge={handlePurgeSystem} 
+                                storageStatus={storageStatus}
+                                settings={settings}
+                                onToggleSetting={handleToggleSetting}
+                                onForceWeekReset={handleCompleteWeekTrigger}
+                            />
                         )}
                     </main>
 
-                    {/* Floating Add Button */}
-                    {view === 'FLOW' && (
-                        <button 
-                            onClick={() => { setEditingTask(null); setModalOpen(true); playSound('click'); }} 
-                            className={`fixed bottom-8 right-6 w-14 h-14 bg-corthon-cyan text-black rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(185,133,81,0.4)] hover:scale-105 active:scale-95 transition-all z-40 ${tutorialStep === 4 ? 'tutorial-highlight' : ''}`}
-                        >
-                            <Plus size={28} strokeWidth={2.5} />
-                        </button>
-                    )}
+                    {view === 'FLOW' && (<button onClick={() => { setEditingTask(null); setModalOpen(true); playSound('click'); }} className={`fixed bottom-10 right-6 w-16 h-16 bg-white text-black rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-110 active:scale-95 transition-all z-40 ${tutorialStep === 4 ? 'tutorial-highlight' : ''}`}><Plus size={32} strokeWidth={2.5} /></button>)}
 
-                    {/* Enhanced Toast with Action (Undo) */}
-                    {toast.msg && (
-                        <div className={`fixed top-safe mt-4 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-auto max-w-md p-4 rounded-xl font-bold text-sm shadow-2xl animate-slide-up z-[100] flex items-center gap-3 border backdrop-blur-xl
-                            ${toast.type === 'success' ? 'bg-corthon-emerald/90 text-black border-corthon-emerald' : ''} 
-                            ${toast.type === 'danger' ? 'bg-red-500/90 text-white border-red-400' : ''} 
-                            ${toast.type === 'warning' ? 'bg-corthon-warning/90 text-black border-yellow-400' : ''} 
-                            ${toast.type === 'system' ? 'bg-[#1a1a1c]/95 text-white border-white/20' : ''}`}
-                        >
-                            {toast.type === 'success' && <Zap size={18} className="shrink-0"/>}
-                            {toast.type === 'danger' && <AlertTriangle size={18} className="shrink-0"/>}
-                            {toast.type === 'warning' && <History size={18} className="shrink-0"/>}
-                            {toast.type === 'system' && <Database size={18} className="shrink-0 text-corthon-cyan"/>}
-                            <span className="flex-1 leading-tight tracking-wide">{toast.msg}</span>
-                            
-                            {toast.action && (
-                                <button 
-                                    onClick={toast.action.onClick}
-                                    className="ml-2 px-3 py-1.5 bg-black/20 hover:bg-black/40 rounded border border-black/10 text-xs tracking-wider transition-colors"
-                                >
-                                    {toast.action.label}
-                                </button>
-                            )}
-                        </div>
-                    )}
+                    {toast.msg && (<div className={`fixed top-24 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-auto max-w-md p-4 rounded-2xl font-bold text-sm shadow-2xl animate-slide-up z-[100] flex items-center gap-3 border border-white/10 backdrop-blur-xl ${toast.type === 'success' ? 'bg-corthon-emerald/90 text-black' : ''} ${toast.type === 'danger' ? 'bg-red-500/90 text-white' : ''} ${toast.type === 'warning' ? 'bg-corthon-warning/90 text-black' : ''} ${toast.type === 'system' ? 'bg-corthon-cyan/90 text-black' : ''}`}>{toast.type === 'success' && <Zap size={16} className="shrink-0"/>}{toast.type === 'danger' && <AlertTriangle size={16} className="shrink-0"/>}{toast.type === 'warning' && <History size={16} className="shrink-0"/>}{toast.type === 'system' && <Database size={16} className="shrink-0"/>}<span className="flex-1 leading-tight">{toast.msg}</span></div>)}
 
                     <TaskEditor isOpen={modalOpen} onClose={() => setModalOpen(false)} onSave={handleSaveTask} onDelete={deleteTask} initialData={editingTask} />
-                    <SnoozeModal isOpen={snoozeModal.open} task={snoozeModal.task} onClose={() => setSnoozeModal({ open: false, task: null })} onConfirm={handleSnoozeConfirm} onReschedule={handleReschedule} onUndo={() => undoSnoozeDirectly(snoozeModal.task.id, selectedDayId, snoozeModal.task.snoozePenalty)} />
+                    <SnoozeModal isOpen={snoozeModal.open} task={snoozeModal.task} onClose={() => setSnoozeModal({ open: false, task: null })} onConfirm={handleSnoozeConfirm} onReschedule={handleReschedule} onUndo={handleUndoSnooze} />
+                    <FocusMode active={focusMode.active} task={focusMode.task} onClose={() => setFocusMode({ active: false, task: null })} />
+                    <ManualModal isOpen={manualOpen} onClose={() => setManualOpen(false)} onRestartTutorial={restartTutorial} />
+                    <SummaryModal isOpen={summaryOpen} onClose={() => setSummaryOpen(false)} xp={xp} tasks={Object.values(history).reduce((acc, curr) => acc + (curr.categories ? Object.values(curr.categories).reduce((a, b) => a + b, 0) : 0), 0)} onConfirm={confirmCompleteWeek} />
                 </div>
             );
         };
